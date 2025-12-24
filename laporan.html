@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Laporan - SIMPEG PPPK">
+  <title>Laporan - SIMPEG PPPK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Mobile Close Button -->
+      <button class="sidebar-close" onclick="App.closeMobileSidebar()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </div>
+        <div class="sidebar-brand">
+          <h1>SIMPEG</h1>
+          <span>PPPK Management</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav"></nav>
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div class="user-info">
+            <div class="user-name">Administrator</div>
+            <div class="user-role">Admin</div>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-left">
+          <button class="toggle-sidebar" id="toggleSidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="page-title">
+            <h2>Laporan</h2>
+            <p>Generate laporan absensi dan kepegawaian</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- Report Types -->
+      <div class="d-grid gap-5" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+
+        <!-- Laporan Absensi -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Laporan Absensi</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Periode</label>
+              <input type="month" class="form-control" id="absensiMonth">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pegawai</label>
+              <select class="form-control" id="absensiPegawai">
+                <option value="">Semua Pegawai</option>
+              </select>
+            </div>
+            <button class="btn btn-primary w-100" onclick="generateAbsensiReport()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              Generate Laporan
+            </button>
+          </div>
+        </div>
+
+        <!-- Laporan Kepegawaian -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Laporan Kepegawaian</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Jenis Laporan</label>
+              <select class="form-control" id="kepegawaianType">
+                <option value="all">Semua Pegawai</option>
+                <option value="unit">Per Unit Kerja</option>
+                <option value="jabatan">Per Jabatan</option>
+              </select>
+            </div>
+            <div class="form-group" id="unitKerjaFilter">
+              <label class="form-label">Unit Kerja</label>
+              <select class="form-control" id="kepegawaianUnit">
+                <option value="">Semua Unit Kerja</option>
+              </select>
+            </div>
+            <button class="btn btn-primary w-100" onclick="generateKepegawaianReport()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              Generate Laporan
+            </button>
+          </div>
+        </div>
+
+        <!-- Laporan Cuti -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Laporan Cuti</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Periode</label>
+              <input type="month" class="form-control" id="cutiMonth">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" id="cutiStatus">
+                <option value="">Semua Status</option>
+                <option value="pending">Menunggu</option>
+                <option value="approved">Disetujui</option>
+                <option value="rejected">Ditolak</option>
+              </select>
+            </div>
+            <button class="btn btn-primary w-100" onclick="generateCutiReport()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              Generate Laporan
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Preview -->
+      <div class="card mt-5" id="reportPreview" style="display: none;">
+        <div class="card-header">
+          <h3 class="card-title" id="reportTitle">Hasil Laporan</h3>
+          <button class="btn btn-sm btn-outline" onclick="printReport()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
+            Cetak
+          </button>
+        </div>
+        <div class="card-body" id="reportContent">
+          <!-- Report content will be rendered here -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Require admin or pimpinan
+    if (!Auth.requireRole(['admin', 'pimpinan'])) {
+      // Redirected
+    }
+
+    // Initialize
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    document.getElementById('absensiMonth').value = currentMonth;
+    document.getElementById('cutiMonth').value = currentMonth;
+
+    // Load dropdowns
+    function loadDropdowns() {
+      const pegawai = Data.getPegawai();
+      const unitKerja = Data.getUnitKerja();
+
+      document.getElementById('absensiPegawai').innerHTML = '<option value="">Semua Pegawai</option>' +
+        pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
+
+      document.getElementById('kepegawaianUnit').innerHTML = '<option value="">Semua Unit Kerja</option>' +
+        unitKerja.map(u => `<option value="${u.id}">${u.nama}</option>`).join('');
+    }
+
+    // Toggle unit kerja filter based on report type
+    document.getElementById('kepegawaianType').addEventListener('change', function () {
+      const unitFilter = document.getElementById('unitKerjaFilter');
+      unitFilter.style.display = this.value === 'unit' ? 'block' : 'none';
+    });
+
+    // Generate Absensi Report
+    function generateAbsensiReport() {
+      const month = document.getElementById('absensiMonth').value;
+      const pegawaiId = document.getElementById('absensiPegawai').value;
+
+      let absensi = Data.getAbsensiWithPegawai();
+
+      // Apply filters
+      if (month) {
+        absensi = absensi.filter(a => a.tanggal.startsWith(month));
+      }
+      if (pegawaiId) {
+        absensi = absensi.filter(a => a.pegawaiId == pegawaiId);
+      }
+
+      // Sort by date
+      absensi.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+      // Calculate summary
+      const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
+      const terlambat = absensi.filter(a => a.status === 'terlambat').length;
+
+      const monthName = new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+      const html = `
+        <div class="mb-4">
+          <h4>Laporan Absensi - ${monthName}</h4>
+          <div class="d-flex gap-4 mt-3">
+            <div class="badge badge-success">Tepat Waktu: ${tepatWaktu}</div>
+            <div class="badge badge-warning">Terlambat: ${terlambat}</div>
+            <div class="badge badge-primary">Total: ${absensi.length}</div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Pegawai</th>
+                <th>Jam Masuk</th>
+                <th>Jam Keluar</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${absensi.length > 0 ? absensi.map((a, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${App.formatDate(a.tanggal)}</td>
+                  <td>${a.pegawai?.nama || '-'}</td>
+                  <td>${a.jamMasuk || '-'}</td>
+                  <td>${a.jamKeluar || '-'}</td>
+                  <td>${App.getStatusBadge(a.status)}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      showReport('Laporan Absensi', html);
+    }
+
+    // Generate Kepegawaian Report
+    function generateKepegawaianReport() {
+      const type = document.getElementById('kepegawaianType').value;
+      const unitId = document.getElementById('kepegawaianUnit').value;
+
+      let pegawai = Data.getPegawaiWithRelations();
+
+      // Apply filter
+      if (type === 'unit' && unitId) {
+        pegawai = pegawai.filter(p => p.unitKerjaId == unitId);
+      }
+
+      // Group by if needed
+      let html = '';
+
+      if (type === 'unit') {
+        const grouped = {};
+        pegawai.forEach(p => {
+          const key = p.unitKerja?.nama || 'Tidak Ada Unit';
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(p);
+        });
+
+        html = Object.entries(grouped).map(([unit, list]) => `
+          <div class="mb-4">
+            <h4>${unit} (${list.length} pegawai)</h4>
+            ${generatePegawaiTable(list)}
+          </div>
+        `).join('<hr class="my-4">');
+      } else if (type === 'jabatan') {
+        const grouped = {};
+        pegawai.forEach(p => {
+          const key = p.jabatan?.nama || 'Tidak Ada Jabatan';
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(p);
+        });
+
+        html = Object.entries(grouped).map(([jabatan, list]) => `
+          <div class="mb-4">
+            <h4>${jabatan} (${list.length} pegawai)</h4>
+            ${generatePegawaiTable(list)}
+          </div>
+        `).join('<hr class="my-4">');
+      } else {
+        html = `
+          <div class="mb-4">
+            <h4>Daftar Semua Pegawai (${pegawai.length} pegawai)</h4>
+            ${generatePegawaiTable(pegawai)}
+          </div>
+        `;
+      }
+
+      showReport('Laporan Kepegawaian', html);
+    }
+
+    // Helper to generate pegawai table
+    function generatePegawaiTable(list) {
+      return `
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>NIP</th>
+                <th>Nama</th>
+                <th>Jabatan</th>
+                <th>Unit Kerja</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.length > 0 ? list.map((p, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${p.nip}</td>
+                  <td>${p.nama}</td>
+                  <td>${p.jabatan?.nama || '-'}</td>
+                  <td>${p.unitKerja?.nama || '-'}</td>
+                  <td>${App.getStatusBadge(p.status)}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // Generate Cuti Report
+    function generateCutiReport() {
+      const month = document.getElementById('cutiMonth').value;
+      const status = document.getElementById('cutiStatus').value;
+
+      let cuti = Data.getCutiWithPegawai();
+
+      // Apply filters
+      if (month) {
+        cuti = cuti.filter(c => c.tanggalMulai.startsWith(month) || c.tanggalSelesai.startsWith(month));
+      }
+      if (status) {
+        cuti = cuti.filter(c => c.status === status);
+      }
+
+      // Sort by date
+      cuti.sort((a, b) => new Date(a.tanggalMulai) - new Date(b.tanggalMulai));
+
+      // Calculate summary
+      const pending = cuti.filter(c => c.status === 'pending').length;
+      const approved = cuti.filter(c => c.status === 'approved').length;
+      const rejected = cuti.filter(c => c.status === 'rejected').length;
+
+      const monthName = month ? new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : 'Semua Periode';
+
+      const html = `
+        <div class="mb-4">
+          <h4>Laporan Cuti - ${monthName}</h4>
+          <div class="d-flex gap-4 mt-3">
+            <div class="badge badge-warning">Pending: ${pending}</div>
+            <div class="badge badge-success">Disetujui: ${approved}</div>
+            <div class="badge badge-danger">Ditolak: ${rejected}</div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Pegawai</th>
+                <th>Jenis Cuti</th>
+                <th>Tanggal</th>
+                <th>Hari</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cuti.length > 0 ? cuti.map((c, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${c.pegawai?.nama || '-'}</td>
+                  <td>${c.jenisCuti}</td>
+                  <td>${App.formatDate(c.tanggalMulai)} - ${App.formatDate(c.tanggalSelesai)}</td>
+                  <td>${c.jumlahHari}</td>
+                  <td>${App.getStatusBadge(c.status)}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      showReport('Laporan Cuti', html);
+    }
+
+    // Show report
+    function showReport(title, content) {
+      document.getElementById('reportTitle').textContent = title;
+      document.getElementById('reportContent').innerHTML = content;
+      document.getElementById('reportPreview').style.display = 'block';
+      document.getElementById('reportPreview').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Print report
+    function printReport() {
+      const content = document.getElementById('reportContent').innerHTML;
+      const title = document.getElementById('reportTitle').textContent;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${title} - SIMPEG PPPK</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; }
+            h4 { margin-bottom: 10px; }
+            .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px; }
+            .badge-success { background: #d4edda; color: #155724; }
+            .badge-warning { background: #fff3cd; color: #856404; }
+            .badge-danger { background: #f8d7da; color: #721c24; }
+            .badge-primary { background: #cce5ff; color: #004085; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <h2>SIMPEG PPPK</h2>
+          <h3>${title}</h3>
+          <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}</p>
+          <hr>
+          ${content}
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // Initialize
+    loadDropdowns();
+  </script>
+</body>
+
+</html>

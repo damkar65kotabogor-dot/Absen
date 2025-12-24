@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Data Pegawai - SIMPEG PPPK">
+    <title>Data Pegawai - SIMPEG PPPK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Mobile Close Button -->
+            <button class="sidebar-close" onclick="App.closeMobileSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </div>
+                <div class="sidebar-brand">
+                    <h1>SIMPEG</h1>
+                    <span>PPPK Management</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav"></nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" id="toggleSidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <div class="page-title">
+                        <h2>Data Pegawai</h2>
+                        <p>Kelola data pegawai PPPK</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Tambah Pegawai
+                    </button>
+                </div>
+            </header>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex gap-4 flex-wrap align-center">
+                        <div class="form-group m-0" style="flex: 1; min-width: 200px;">
+                            <input type="text" class="form-control" id="searchInput"
+                                placeholder="Cari nama atau NIP...">
+                        </div>
+                        <div class="form-group m-0" style="min-width: 180px;">
+                            <select class="form-control" id="filterUnit">
+                                <option value="">Semua Unit Kerja</option>
+                            </select>
+                        </div>
+                        <div class="form-group m-0" style="min-width: 150px;">
+                            <select class="form-control" id="filterStatus">
+                                <option value="">Semua Status</option>
+                                <option value="aktif">Aktif</option>
+                                <option value="nonaktif">Nonaktif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>NIP</th>
+                                    <th>Nama</th>
+                                    <th>Jabatan</th>
+                                    <th>Unit Kerja</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pegawaiTable">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="pegawaiModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Pegawai</h3>
+                <button class="modal-close" onclick="App.closeModal('pegawaiModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="pegawaiForm">
+                <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                    <input type="hidden" id="pegawaiId">
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">NIP *</label>
+                            <input type="text" class="form-control" id="nip" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nama Lengkap *</label>
+                            <input type="text" class="form-control" id="nama" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Telepon</label>
+                            <input type="tel" class="form-control" id="telepon">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamat" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Tempat Lahir</label>
+                            <input type="text" class="form-control" id="tempatLahir">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Lahir</label>
+                            <input type="date" class="form-control" id="tanggalLahir">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Jenis Kelamin</label>
+                            <select class="form-control" id="jenisKelamin">
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Agama</label>
+                            <select class="form-control" id="agama">
+                                <option value="Islam">Islam</option>
+                                <option value="Kristen">Kristen</option>
+                                <option value="Katolik">Katolik</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Buddha">Buddha</option>
+                                <option value="Konghucu">Konghucu</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Jabatan *</label>
+                            <select class="form-control" id="jabatanId" required>
+                                <option value="">Pilih Jabatan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit Kerja *</label>
+                            <select class="form-control" id="unitKerjaId" required>
+                                <option value="">Pilih Unit Kerja</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Status Nikah</label>
+                            <select class="form-control" id="statusNikah">
+                                <option value="Belum Menikah">Belum Menikah</option>
+                                <option value="Menikah">Menikah</option>
+                                <option value="Cerai">Cerai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Masuk</label>
+                            <input type="date" class="form-control" id="tanggalMasuk">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" id="status">
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="App.closeModal('pegawaiModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Detail Pegawai</h3>
+                <button class="modal-close" onclick="App.closeModal('viewModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="viewContent">
+                <!-- Rendered by JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="App.closeModal('viewModal')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Require admin or pimpinan
+        if (!Auth.requireRole(['admin', 'pimpinan'])) {
+            // Redirected
+        }
+
+        const user = Auth.getCurrentUser();
+
+        // Load dropdown options
+        function loadOptions() {
+            const jabatan = Data.getJabatan();
+            const unitKerja = Data.getUnitKerja();
+
+            document.getElementById('jabatanId').innerHTML = '<option value="">Pilih Jabatan</option>' +
+                jabatan.map(j => `<option value="${j.id}">${j.nama}</option>`).join('');
+
+            document.getElementById('unitKerjaId').innerHTML = '<option value="">Pilih Unit Kerja</option>' +
+                unitKerja.map(u => `<option value="${u.id}">${u.nama}</option>`).join('');
+
+            document.getElementById('filterUnit').innerHTML = '<option value="">Semua Unit Kerja</option>' +
+                unitKerja.map(u => `<option value="${u.id}">${u.nama}</option>`).join('');
+        }
+
+        // Load pegawai data
+        function loadPegawai() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filterUnit = document.getElementById('filterUnit').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            let pegawai = Data.getPegawaiWithRelations();
+
+            // Apply filters
+            if (search) {
+                pegawai = pegawai.filter(p =>
+                    p.nama.toLowerCase().includes(search) ||
+                    p.nip.toLowerCase().includes(search)
+                );
+            }
+            if (filterUnit) {
+                pegawai = pegawai.filter(p => p.unitKerjaId == filterUnit);
+            }
+            if (filterStatus) {
+                pegawai = pegawai.filter(p => p.status === filterStatus);
+            }
+
+            const html = pegawai.length > 0 ? pegawai.map(p => `
+        <tr>
+          <td>${p.nip}</td>
+          <td>${p.nama}</td>
+          <td>${p.jabatan?.nama || '-'}</td>
+          <td>${p.unitKerja?.nama || '-'}</td>
+          <td>${App.getStatusBadge(p.status)}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-outline btn-icon" onclick="viewPegawai(${p.id})" title="Lihat">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+            ${user.role === 'admin' ? `
+            <button class="btn btn-sm btn-outline btn-icon" onclick="editPegawai(${p.id})" title="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="btn btn-sm btn-danger btn-icon" onclick="deletePegawai(${p.id})" title="Hapus">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data pegawai</td></tr>';
+
+            document.getElementById('pegawaiTable').innerHTML = html;
+        }
+
+        // Open add modal
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Pegawai';
+            document.getElementById('pegawaiForm').reset();
+            document.getElementById('pegawaiId').value = '';
+            App.openModal('pegawaiModal');
+        }
+
+        // Edit pegawai
+        function editPegawai(id) {
+            const p = Data.getById(Data.KEYS.PEGAWAI, id);
+            if (!p) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Pegawai';
+            document.getElementById('pegawaiId').value = p.id;
+            document.getElementById('nip').value = p.nip;
+            document.getElementById('nama').value = p.nama;
+            document.getElementById('email').value = p.email || '';
+            document.getElementById('telepon').value = p.telepon || '';
+            document.getElementById('alamat').value = p.alamat || '';
+            document.getElementById('tempatLahir').value = p.tempatLahir || '';
+            document.getElementById('tanggalLahir').value = p.tanggalLahir || '';
+            document.getElementById('jenisKelamin').value = p.jenisKelamin || 'L';
+            document.getElementById('agama').value = p.agama || 'Islam';
+            document.getElementById('jabatanId').value = p.jabatanId;
+            document.getElementById('unitKerjaId').value = p.unitKerjaId;
+            document.getElementById('statusNikah').value = p.statusNikah || 'Belum Menikah';
+            document.getElementById('tanggalMasuk').value = p.tanggalMasuk || '';
+            document.getElementById('status').value = p.status;
+
+            App.openModal('pegawaiModal');
+        }
+
+        // View pegawai
+        function viewPegawai(id) {
+            const p = Data.getPegawaiWithRelations().find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('viewContent').innerHTML = `
+        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+          <div><strong>NIP:</strong><br>${p.nip}</div>
+          <div><strong>Nama:</strong><br>${p.nama}</div>
+          <div><strong>Email:</strong><br>${p.email || '-'}</div>
+          <div><strong>Telepon:</strong><br>${p.telepon || '-'}</div>
+          <div><strong>Tempat/Tgl Lahir:</strong><br>${p.tempatLahir || '-'}, ${App.formatDate(p.tanggalLahir)}</div>
+          <div><strong>Jenis Kelamin:</strong><br>${p.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</div>
+          <div><strong>Agama:</strong><br>${p.agama || '-'}</div>
+          <div><strong>Status Nikah:</strong><br>${p.statusNikah || '-'}</div>
+          <div><strong>Jabatan:</strong><br>${p.jabatan?.nama || '-'}</div>
+          <div><strong>Unit Kerja:</strong><br>${p.unitKerja?.nama || '-'}</div>
+          <div><strong>Tanggal Masuk:</strong><br>${App.formatDate(p.tanggalMasuk)}</div>
+          <div><strong>Status:</strong><br>${App.getStatusBadge(p.status)}</div>
+        </div>
+        <div class="mt-4"><strong>Alamat:</strong><br>${p.alamat || '-'}</div>
+      `;
+
+            App.openModal('viewModal');
+        }
+
+        // Delete pegawai
+        function deletePegawai(id) {
+            if (App.confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) {
+                Data.delete(Data.KEYS.PEGAWAI, id);
+                App.showToast('Pegawai berhasil dihapus!', 'success');
+                loadPegawai();
+            }
+        }
+
+        // Handle form submit
+        document.getElementById('pegawaiForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('pegawaiId').value;
+            const pegawaiData = {
+                nip: document.getElementById('nip').value,
+                nama: document.getElementById('nama').value,
+                email: document.getElementById('email').value,
+                telepon: document.getElementById('telepon').value,
+                alamat: document.getElementById('alamat').value,
+                tempatLahir: document.getElementById('tempatLahir').value,
+                tanggalLahir: document.getElementById('tanggalLahir').value,
+                jenisKelamin: document.getElementById('jenisKelamin').value,
+                agama: document.getElementById('agama').value,
+                jabatanId: parseInt(document.getElementById('jabatanId').value),
+                unitKerjaId: parseInt(document.getElementById('unitKerjaId').value),
+                statusNikah: document.getElementById('statusNikah').value,
+                tanggalMasuk: document.getElementById('tanggalMasuk').value,
+                status: document.getElementById('status').value
+            };
+
+            if (id) {
+                Data.update(Data.KEYS.PEGAWAI, id, pegawaiData);
+                App.showToast('Pegawai berhasil diperbarui!', 'success');
+            } else {
+                Data.create(Data.KEYS.PEGAWAI, pegawaiData);
+                App.showToast('Pegawai berhasil ditambahkan!', 'success');
+            }
+
+            App.closeModal('pegawaiModal');
+            loadPegawai();
+        });
+
+        // Filter listeners
+        document.getElementById('searchInput').addEventListener('input', loadPegawai);
+        document.getElementById('filterUnit').addEventListener('change', loadPegawai);
+        document.getElementById('filterStatus').addEventListener('change', loadPegawai);
+
+        // Initialize
+        loadOptions();
+        loadPegawai();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pengajuan Cuti - SIMPEG PPPK">
+    <title>Cuti - SIMPEG PPPK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Mobile Close Button -->
+            <button class="sidebar-close" onclick="App.closeMobileSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </div>
+                <div class="sidebar-brand">
+                    <h1>SIMPEG</h1>
+                    <span>PPPK Management</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav"></nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" id="toggleSidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <div class="page-title">
+                        <h2 id="pageTitle">Pengajuan Cuti</h2>
+                        <p>Kelola pengajuan cuti pegawai</p>
+                    </div>
+                </div>
+                <div class="header-right" id="addBtnContainer">
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Ajukan Cuti
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-grid mb-5">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statPending">0</div>
+                        <div class="stat-label">Menunggu Persetujuan</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statApproved">0</div>
+                        <div class="stat-label">Disetujui</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon danger">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statRejected">0</div>
+                        <div class="stat-label">Ditolak</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters (Admin/Pimpinan) -->
+            <div id="filters" class="card mb-4 d-none">
+                <div class="card-body">
+                    <div class="d-flex gap-4 flex-wrap align-center">
+                        <div class="form-group m-0" style="min-width: 180px;">
+                            <select class="form-control" id="filterPegawai">
+                                <option value="">Semua Pegawai</option>
+                            </select>
+                        </div>
+                        <div class="form-group m-0" style="min-width: 150px;">
+                            <select class="form-control" id="filterStatus">
+                                <option value="">Semua Status</option>
+                                <option value="pending">Menunggu</option>
+                                <option value="approved">Disetujui</option>
+                                <option value="rejected">Ditolak</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Daftar Pengajuan Cuti</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th id="thPegawai">Pegawai</th>
+                                    <th>Jenis Cuti</th>
+                                    <th>Tanggal</th>
+                                    <th>Jumlah Hari</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cutiTable">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal-overlay" id="cutiModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Ajukan Cuti</h3>
+                <button class="modal-close" onclick="App.closeModal('cutiModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="cutiForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Jenis Cuti *</label>
+                        <select class="form-control" id="jenisCuti" required>
+                            <option value="">Pilih Jenis Cuti</option>
+                            <option value="Cuti Tahunan">Cuti Tahunan</option>
+                            <option value="Cuti Sakit">Cuti Sakit</option>
+                            <option value="Cuti Melahirkan">Cuti Melahirkan</option>
+                            <option value="Cuti Besar">Cuti Besar</option>
+                            <option value="Cuti Alasan Penting">Cuti Alasan Penting</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Mulai *</label>
+                            <input type="date" class="form-control" id="tanggalMulai" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Selesai *</label>
+                            <input type="date" class="form-control" id="tanggalSelesai" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Alasan *</label>
+                        <textarea class="form-control" id="alasan" rows="3" required
+                            placeholder="Jelaskan alasan pengajuan cuti"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="App.closeModal('cutiModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Ajukan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Detail Pengajuan Cuti</h3>
+                <button class="modal-close" onclick="App.closeModal('viewModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="viewContent">
+                <!-- Rendered by JS -->
+            </div>
+            <div class="modal-footer" id="viewFooter">
+                <button type="button" class="btn btn-secondary" onclick="App.closeModal('viewModal')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Require auth
+        if (!Auth.requireAuth()) {
+            // Redirected
+        }
+
+        const user = Auth.getCurrentUser();
+        const isPegawai = user.role === 'pegawai';
+        const isPimpinan = user.role === 'pimpinan';
+
+        // Setup UI based on role
+        function setupUI() {
+            if (isPimpinan) {
+                document.getElementById('pageTitle').textContent = 'Persetujuan Cuti';
+                document.getElementById('addBtnContainer').classList.add('d-none');
+            }
+
+            if (!isPegawai) {
+                document.getElementById('filters').classList.remove('d-none');
+                // Load pegawai filter
+                const pegawai = Data.getPegawai();
+                document.getElementById('filterPegawai').innerHTML = '<option value="">Semua Pegawai</option>' +
+                    pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
+            } else {
+                document.getElementById('thPegawai').style.display = 'none';
+            }
+        }
+
+        // Load cuti data
+        function loadCuti() {
+            const filterPegawai = document.getElementById('filterPegawai')?.value || '';
+            const filterStatus = document.getElementById('filterStatus')?.value || '';
+
+            let cuti = Data.getCutiWithPegawai();
+
+            // Filter by pegawai (for pegawai role)
+            if (isPegawai && user.pegawaiId) {
+                cuti = cuti.filter(c => c.pegawaiId === user.pegawaiId);
+            }
+
+            // Apply filters
+            if (filterPegawai) {
+                cuti = cuti.filter(c => c.pegawaiId == filterPegawai);
+            }
+            if (filterStatus) {
+                cuti = cuti.filter(c => c.status === filterStatus);
+            }
+
+            // Sort by date desc
+            cuti.sort((a, b) => new Date(b.tanggalPengajuan) - new Date(a.tanggalPengajuan));
+
+            // Update stats
+            const pending = cuti.filter(c => c.status === 'pending').length;
+            const approved = cuti.filter(c => c.status === 'approved').length;
+            const rejected = cuti.filter(c => c.status === 'rejected').length;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statApproved').textContent = approved;
+            document.getElementById('statRejected').textContent = rejected;
+
+            // Render table
+            const html = cuti.length > 0 ? cuti.map(c => `
+        <tr>
+          ${!isPegawai ? `<td>${c.pegawai?.nama || '-'}</td>` : ''}
+          <td>${c.jenisCuti}</td>
+          <td>${App.formatDate(c.tanggalMulai)} - ${App.formatDate(c.tanggalSelesai)}</td>
+          <td>${c.jumlahHari} hari</td>
+          <td>${App.getStatusBadge(c.status)}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-outline btn-icon" onclick="viewCuti(${c.id})" title="Lihat">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+            ${isPimpinan && c.status === 'pending' ? `
+            <button class="btn btn-sm btn-success btn-icon" onclick="approveCuti(${c.id})" title="Setujui">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+            <button class="btn btn-sm btn-danger btn-icon" onclick="rejectCuti(${c.id})" title="Tolak">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            ` : ''}
+            ${isPegawai && c.status === 'pending' ? `
+            <button class="btn btn-sm btn-danger btn-icon" onclick="cancelCuti(${c.id})" title="Batalkan">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('') : `<tr><td colspan="${isPegawai ? 5 : 6}" class="text-center text-muted">Tidak ada data pengajuan cuti</td></tr>`;
+
+            document.getElementById('cutiTable').innerHTML = html;
+        }
+
+        // Open add modal
+        function openAddModal() {
+            document.getElementById('cutiForm').reset();
+            // Set min date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggalMulai').min = today;
+            document.getElementById('tanggalSelesai').min = today;
+            App.openModal('cutiModal');
+        }
+
+        // View cuti
+        function viewCuti(id) {
+            const c = Data.getCutiWithPegawai().find(x => x.id === id);
+            if (!c) return;
+
+            document.getElementById('viewContent').innerHTML = `
+        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+          <div><strong>Pegawai:</strong><br>${c.pegawai?.nama || '-'}</div>
+          <div><strong>Status:</strong><br>${App.getStatusBadge(c.status)}</div>
+          <div><strong>Jenis Cuti:</strong><br>${c.jenisCuti}</div>
+          <div><strong>Jumlah Hari:</strong><br>${c.jumlahHari} hari</div>
+          <div><strong>Tanggal Mulai:</strong><br>${App.formatDate(c.tanggalMulai)}</div>
+          <div><strong>Tanggal Selesai:</strong><br>${App.formatDate(c.tanggalSelesai)}</div>
+          <div><strong>Tanggal Pengajuan:</strong><br>${App.formatDate(c.tanggalPengajuan)}</div>
+          <div><strong>Disetujui Oleh:</strong><br>${c.approver?.name || '-'}</div>
+        </div>
+        <div class="mt-4"><strong>Alasan:</strong><br>${c.alasan || '-'}</div>
+      `;
+
+            // Show approval buttons for pimpinan
+            const footer = document.getElementById('viewFooter');
+            if (isPimpinan && c.status === 'pending') {
+                footer.innerHTML = `
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('viewModal')">Tutup</button>
+          <button type="button" class="btn btn-danger" onclick="rejectCuti(${c.id}); App.closeModal('viewModal');">Tolak</button>
+          <button type="button" class="btn btn-success" onclick="approveCuti(${c.id}); App.closeModal('viewModal');">Setujui</button>
+        `;
+            } else {
+                footer.innerHTML = '<button type="button" class="btn btn-secondary" onclick="App.closeModal(\'viewModal\')">Tutup</button>';
+            }
+
+            App.openModal('viewModal');
+        }
+
+        // Approve cuti
+        function approveCuti(id) {
+            Data.update(Data.KEYS.CUTI, id, {
+                status: 'approved',
+                approvedBy: user.id,
+                approvedAt: new Date().toISOString().split('T')[0]
+            });
+            App.showToast('Cuti berhasil disetujui!', 'success');
+            loadCuti();
+        }
+
+        // Reject cuti
+        function rejectCuti(id) {
+            if (App.confirm('Apakah Anda yakin ingin menolak pengajuan cuti ini?')) {
+                Data.update(Data.KEYS.CUTI, id, {
+                    status: 'rejected',
+                    approvedBy: user.id,
+                    approvedAt: new Date().toISOString().split('T')[0]
+                });
+                App.showToast('Cuti berhasil ditolak!', 'success');
+                loadCuti();
+            }
+        }
+
+        // Cancel cuti (pegawai)
+        function cancelCuti(id) {
+            if (App.confirm('Apakah Anda yakin ingin membatalkan pengajuan cuti ini?')) {
+                Data.delete(Data.KEYS.CUTI, id);
+                App.showToast('Pengajuan cuti berhasil dibatalkan!', 'success');
+                loadCuti();
+            }
+        }
+
+        // Calculate days between dates
+        function calculateDays(start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            const diffTime = Math.abs(endDate - startDate);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        }
+
+        // Handle form submit
+        document.getElementById('cutiForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!user.pegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
+
+            const tanggalMulai = document.getElementById('tanggalMulai').value;
+            const tanggalSelesai = document.getElementById('tanggalSelesai').value;
+
+            if (tanggalSelesai < tanggalMulai) {
+                App.showToast('Tanggal selesai harus setelah tanggal mulai!', 'danger');
+                return;
+            }
+
+            const cutiData = {
+                pegawaiId: user.pegawaiId,
+                jenisCuti: document.getElementById('jenisCuti').value,
+                tanggalMulai: tanggalMulai,
+                tanggalSelesai: tanggalSelesai,
+                jumlahHari: calculateDays(tanggalMulai, tanggalSelesai),
+                alasan: document.getElementById('alasan').value,
+                status: 'pending',
+                tanggalPengajuan: new Date().toISOString().split('T')[0],
+                approvedBy: null,
+                approvedAt: null
+            };
+
+            Data.create(Data.KEYS.CUTI, cutiData);
+            App.showToast('Pengajuan cuti berhasil diajukan!', 'success');
+            App.closeModal('cutiModal');
+            loadCuti();
+        });
+
+        // Filter listeners
+        document.getElementById('filterPegawai')?.addEventListener('change', loadCuti);
+        document.getElementById('filterStatus')?.addEventListener('change', loadCuti);
+
+        // Initialize
+        setupUI();
+        loadCuti();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Absensi - SIMPEG PPPK">
+    <title>Absensi - SIMPEG PPPK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Mobile Close Button -->
+            <button class="sidebar-close" onclick="App.closeMobileSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </div>
+                <div class="sidebar-brand">
+                    <h1>SIMPEG</h1>
+                    <span>PPPK Management</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav"></nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" id="toggleSidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <div class="page-title">
+                        <h2>Absensi</h2>
+                        <p id="currentDate">Selasa, 24 Desember 2024</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Pegawai Quick Action -->
+            <div id="quickAction" class="d-none mb-5">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex gap-4 align-center flex-wrap">
+                            <div style="flex: 1;">
+                                <h3 class="mb-2">Absensi Hari Ini</h3>
+                                <p class="text-muted" id="attendanceInfo">Silakan lakukan check-in untuk memulai hari
+                                    kerja.</p>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <button id="btnCheckIn" class="btn btn-primary btn-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                    Check-In
+                                </button>
+                                <button id="btnCheckOut" class="btn btn-danger btn-lg" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                        <polyline points="16 17 21 12 16 7" />
+                                        <line x1="21" y1="12" x2="9" y2="12" />
+                                    </svg>
+                                    Check-Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters (Admin/Pimpinan) -->
+            <div id="filters" class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex gap-4 flex-wrap align-center">
+                        <div class="form-group m-0" style="min-width: 180px;">
+                            <select class="form-control" id="filterPegawai">
+                                <option value="">Semua Pegawai</option>
+                            </select>
+                        </div>
+                        <div class="form-group m-0" style="min-width: 150px;">
+                            <input type="month" class="form-control" id="filterMonth">
+                        </div>
+                        <div class="form-group m-0" style="min-width: 150px;">
+                            <select class="form-control" id="filterStatus">
+                                <option value="">Semua Status</option>
+                                <option value="tepat_waktu">Tepat Waktu</option>
+                                <option value="terlambat">Terlambat</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid mb-5" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTepatWaktu">0</div>
+                        <div class="stat-label">Tepat Waktu</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTerlambat">0</div>
+                        <div class="stat-label">Terlambat</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total Hari</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Riwayat Absensi</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th id="thPegawai">Pegawai</th>
+                                    <th>Jam Masuk</th>
+                                    <th>Jam Keluar</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absensiTable">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Require auth
+        if (!Auth.requireAuth()) {
+            // Redirected
+        }
+
+        const user = Auth.getCurrentUser();
+        const isPegawai = user.role === 'pegawai';
+
+        // Set current date
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
+
+        // Set default month filter
+        const now = new Date();
+        document.getElementById('filterMonth').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        // Setup UI based on role
+        function setupUI() {
+            if (isPegawai) {
+                document.getElementById('quickAction').classList.remove('d-none');
+                document.getElementById('filters').classList.add('d-none');
+                document.getElementById('thPegawai').style.display = 'none';
+                checkTodayAttendance();
+            } else {
+                // Load pegawai filter
+                const pegawai = Data.getPegawai();
+                document.getElementById('filterPegawai').innerHTML = '<option value="">Semua Pegawai</option>' +
+                    pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
+            }
+        }
+
+        // Check today attendance for pegawai
+        function checkTodayAttendance() {
+            if (!user.pegawaiId) return;
+
+            const today = new Date().toISOString().split('T')[0];
+            const absensi = Data.getAbsensi().find(a =>
+                a.pegawaiId === user.pegawaiId && a.tanggal === today
+            );
+
+            const infoEl = document.getElementById('attendanceInfo');
+            const btnCheckIn = document.getElementById('btnCheckIn');
+            const btnCheckOut = document.getElementById('btnCheckOut');
+
+            if (absensi) {
+                if (absensi.jamKeluar) {
+                    infoEl.textContent = `Absensi selesai. Masuk: ${absensi.jamMasuk} | Keluar: ${absensi.jamKeluar}`;
+                    btnCheckIn.disabled = true;
+                    btnCheckOut.disabled = true;
+                } else {
+                    infoEl.textContent = `Sudah check-in pada ${absensi.jamMasuk}. Jangan lupa check-out!`;
+                    btnCheckIn.disabled = true;
+                    btnCheckOut.disabled = false;
+                }
+            } else {
+                infoEl.textContent = 'Silakan lakukan check-in untuk memulai hari kerja.';
+                btnCheckIn.disabled = false;
+                btnCheckOut.disabled = true;
+            }
+        }
+
+        // Load absensi data
+        function loadAbsensi() {
+            const filterMonth = document.getElementById('filterMonth').value;
+            const filterPegawai = document.getElementById('filterPegawai').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            let absensi = Data.getAbsensiWithPegawai();
+
+            // Filter by pegawai (for pegawai role)
+            if (isPegawai && user.pegawaiId) {
+                absensi = absensi.filter(a => a.pegawaiId === user.pegawaiId);
+            }
+
+            // Apply filters
+            if (filterMonth) {
+                absensi = absensi.filter(a => a.tanggal.startsWith(filterMonth));
+            }
+            if (filterPegawai) {
+                absensi = absensi.filter(a => a.pegawaiId == filterPegawai);
+            }
+            if (filterStatus) {
+                absensi = absensi.filter(a => a.status === filterStatus);
+            }
+
+            // Sort by date desc
+            absensi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            // Update stats
+            const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
+            const terlambat = absensi.filter(a => a.status === 'terlambat').length;
+            document.getElementById('statTepatWaktu').textContent = tepatWaktu;
+            document.getElementById('statTerlambat').textContent = terlambat;
+            document.getElementById('statTotal').textContent = absensi.length;
+
+            // Render table
+            const html = absensi.length > 0 ? absensi.map(a => `
+        <tr>
+          <td>${App.formatDate(a.tanggal)}</td>
+          ${!isPegawai ? `<td>${a.pegawai?.nama || '-'}</td>` : ''}
+          <td>${a.jamMasuk || '-'}</td>
+          <td>${a.jamKeluar || '-'}</td>
+          <td>${App.getStatusBadge(a.status)}</td>
+          <td>${a.keterangan || '-'}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="${isPegawai ? 5 : 6}" class="text-center text-muted">Tidak ada data absensi</td></tr>`;
+
+            document.getElementById('absensiTable').innerHTML = html;
+        }
+
+        // Handle check-in
+        document.getElementById('btnCheckIn')?.addEventListener('click', function () {
+            if (!user.pegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
+
+            const now = new Date();
+            const jamMasuk = now.toTimeString().slice(0, 5);
+            const today = now.toISOString().split('T')[0];
+
+            Data.create(Data.KEYS.ABSENSI, {
+                pegawaiId: user.pegawaiId,
+                tanggal: today,
+                jamMasuk: jamMasuk,
+                jamKeluar: null,
+                status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
+                keterangan: ''
+            });
+
+            App.showToast(`Check-in berhasil pada ${jamMasuk}!`, 'success');
+            checkTodayAttendance();
+            loadAbsensi();
+        });
+
+        // Handle check-out
+        document.getElementById('btnCheckOut')?.addEventListener('click', function () {
+            if (!user.pegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const absensi = Data.getAbsensi().find(a =>
+                a.pegawaiId === user.pegawaiId && a.tanggal === today
+            );
+
+            if (absensi) {
+                const jamKeluar = new Date().toTimeString().slice(0, 5);
+                Data.update(Data.KEYS.ABSENSI, absensi.id, { jamKeluar });
+                App.showToast(`Check-out berhasil pada ${jamKeluar}!`, 'success');
+                checkTodayAttendance();
+                loadAbsensi();
+            }
+        });
+
+        // Filter listeners
+        document.getElementById('filterPegawai')?.addEventListener('change', loadAbsensi);
+        document.getElementById('filterMonth')?.addEventListener('change', loadAbsensi);
+        document.getElementById('filterStatus')?.addEventListener('change', loadAbsensi);
+
+        // Initialize
+        setupUI();
+        loadAbsensi();
+    </script>
+</body>
+
+</html>
