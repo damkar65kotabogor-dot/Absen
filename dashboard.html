@@ -215,7 +215,46 @@
           </div>
         </div>
 
-        <!-- Pegawai Quick Actions (only for pegawai role) -->
+        <!-- Pegawai Menu Cards (only for pegawai role) -->
+        <div id="pegawaiDashboard" class="d-none">
+          <div class="pegawai-menu-grid">
+            <a href="profil.html" class="menu-card">
+              <div class="menu-icon" style="background: #4da6ff;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="white"
+                  stroke="white" stroke-width="1">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M20 21a8 8 0 0 0-16 0" />
+                </svg>
+              </div>
+              <span class="menu-label">Profil Saya</span>
+            </a>
+
+            <a href="absensi.html" class="menu-card">
+              <div class="menu-icon" style="background: transparent;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                  stroke="#ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                </svg>
+              </div>
+              <span class="menu-label">Rekapitulasi<br>Kehadiran</span>
+            </a>
+
+            <a href="cuti.html" class="menu-card">
+              <div class="menu-icon" style="background: transparent;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none"
+                  stroke-width="2">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="#17a2b8" stroke-width="2" />
+                  <circle cx="12" cy="12" r="1" fill="#17a2b8" />
+                  <line x1="12" y1="12" x2="12" y2="7" stroke="#17a2b8" stroke-width="2" stroke-linecap="round" />
+                  <line x1="12" y1="12" x2="16" y2="14" stroke="#17a2b8" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </div>
+              <span class="menu-label">Fleksibilitas<br>Kerja</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Admin/Pimpinan Actions (check-in for pegawai moved here) -->
         <div id="pegawaiActions" class="d-none mt-5">
           <div class="card">
             <div class="card-header">
@@ -323,10 +362,15 @@
 
       document.getElementById('recentCuti').innerHTML = cutiHtml;
 
-      // Show pegawai actions if role is pegawai
+      // Show different dashboard based on role
       if (user.role === 'pegawai') {
-        document.getElementById('pegawaiActions').classList.remove('d-none');
-        checkTodayAttendance();
+        // Hide admin content for pegawai
+        document.querySelector('.stats-grid').style.display = 'none';
+        document.querySelector('.d-grid.gap-5').style.display = 'none';
+        document.querySelector('.header-right').style.display = 'none';
+
+        // Show simple pegawai menu
+        document.getElementById('pegawaiDashboard').classList.remove('d-none');
       }
     }
 

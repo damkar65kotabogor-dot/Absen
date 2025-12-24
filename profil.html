@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Profil Saya - SIMPEG PPPK">
+    <title>Profil Saya - SIMPEG PPPK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profil-menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            max-width: 450px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .profil-menu-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .profil-menu-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .profil-menu-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .profil-menu-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .profil-menu-label {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* Color themes for each card */
+        .profil-menu-icon.biodata {
+            background: #b3e0ff;
+        }
+
+        .profil-menu-icon.pendidikan {
+            background: #e6a817;
+        }
+
+        .profil-menu-icon.jabatan {
+            background: #d4eeff;
+        }
+
+        .profil-menu-icon.pangkat {
+            background: #c5d4f0;
+        }
+
+        .profil-menu-icon.diklat {
+            background: #90ee90;
+        }
+
+        .profil-menu-icon.kgb {
+            background: #a8e6cf;
+        }
+
+        .profil-menu-icon.skp {
+            background: #b8b0d8;
+        }
+
+        .profil-menu-icon.keluarga {
+            background: #ffcc99;
+        }
+
+        .profil-menu-icon.password {
+            background: #fff4a3;
+        }
+
+        @media (max-width: 400px) {
+            .profil-menu-grid {
+                gap: 0.75rem;
+            }
+
+            .profil-menu-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .profil-menu-icon svg {
+                width: 36px;
+                height: 36px;
+            }
+
+            .profil-menu-label {
+                font-size: 0.8125rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Mobile Close Button -->
+            <button class="sidebar-close" onclick="App.closeMobileSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </div>
+                <div class="sidebar-brand">
+                    <h1>SIMPEG</h1>
+                    <span>PPPK Management</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav"></nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" id="toggleSidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <div class="page-title">
+                        <h2>Profil Saya</h2>
+                        <p>Kelola data diri pegawai</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <a href="dashboard.html" class="btn btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12" />
+                            <polyline points="12 19 5 12 12 5" />
+                        </svg>
+                        Kembali
+                    </a>
+                </div>
+            </header>
+
+            <!-- Profile Menu Grid -->
+            <div class="profil-menu-grid">
+                <!-- Biodata -->
+                <a href="biodata.html" class="profil-menu-card">
+                    <div class="profil-menu-icon biodata">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1e90bf">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Biodata</span>
+                </a>
+
+                <!-- Pendidikan -->
+                <a href="pendidikan.html" class="profil-menu-card">
+                    <div class="profil-menu-icon pendidikan">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#1e3a5f" />
+                            <circle cx="12" cy="9" r="1" fill="#ffd700" />
+                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" fill="#1e3a5f" />
+                            <line x1="19" y1="9" x2="19" y2="15" stroke="#c9302c" stroke-width="1" />
+                            <path d="M18 15h2l-1 2-1-2z" fill="#c9302c" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Pendidikan</span>
+                </a>
+
+                <!-- Jabatan -->
+                <a href="jabatan-profil.html" class="profil-menu-card">
+                    <div class="profil-menu-icon jabatan">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <rect x="6" y="12" width="12" height="8" rx="1" fill="#2a6496" />
+                            <circle cx="12" cy="8" r="4" fill="#2a6496" />
+                            <text x="12" y="10" text-anchor="middle" font-size="5" fill="white">?</text>
+                            <rect x="7" y="20" width="2" height="3" fill="#1a4a70" />
+                            <rect x="15" y="20" width="2" height="3" fill="#1a4a70" />
+                            <rect x="8" y="14" width="3" height="1" rx="0.5" fill="#4a9bd9" />
+                            <rect x="13" y="14" width="3" height="1" rx="0.5" fill="#4a9bd9" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Jabatan</span>
+                </a>
+
+                <!-- Pangkat -->
+                <a href="pangkat.html" class="profil-menu-card">
+                    <div class="profil-menu-icon pangkat">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3366a8"
+                            stroke-width="2">
+                            <circle cx="12" cy="6" r="3" />
+                            <line x1="12" y1="9" x2="12" y2="12" />
+                            <line x1="12" y1="12" x2="6" y2="18" />
+                            <line x1="12" y1="12" x2="18" y2="18" />
+                            <circle cx="6" cy="18" r="2" />
+                            <circle cx="18" cy="18" r="2" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Pangkat</span>
+                </a>
+
+                <!-- Diklat -->
+                <a href="diklat.html" class="profil-menu-card">
+                    <div class="profil-menu-icon diklat">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <rect x="4" y="8" width="16" height="12" rx="1" fill="#f0f0f0" stroke="#333"
+                                stroke-width="1" />
+                            <rect x="6" y="10" width="4" height="3" fill="#87ceeb" />
+                            <rect x="6" y="14" width="4" height="3" fill="#87ceeb" />
+                            <rect x="11" y="10" width="7" height="1" fill="#333" />
+                            <rect x="11" y="12" width="5" height="1" fill="#333" />
+                            <rect x="11" y="14" width="7" height="1" fill="#333" />
+                            <rect x="11" y="16" width="4" height="1" fill="#333" />
+                            <path d="M8 4v4M16 4v4" stroke="#333" stroke-width="1" />
+                            <ellipse cx="12" cy="22" rx="6" ry="1" fill="#228b22" opacity="0.5" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Diklat</span>
+                </a>
+
+                <!-- KGB -->
+                <a href="kgb.html" class="profil-menu-card">
+                    <div class="profil-menu-icon kgb">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="4" width="18" height="16" rx="2" fill="#e8f4ea" stroke="#5cb85c"
+                                stroke-width="1" />
+                            <line x1="3" y1="8" x2="21" y2="8" stroke="#5cb85c" stroke-width="1" />
+                            <rect x="5" y="10" width="3" height="3" rx="0.5" fill="#c9302c" />
+                            <rect x="9" y="10" width="3" height="3" rx="0.5" fill="#c9302c" />
+                            <rect x="13" y="10" width="3" height="3" rx="0.5" fill="#5cb85c" />
+                            <rect x="5" y="14" width="3" height="3" rx="0.5" fill="#5cb85c" />
+                            <circle cx="18" cy="18" r="4" fill="#d4a574" />
+                            <text x="18" y="19.5" text-anchor="middle" font-size="4" fill="#654321">$</text>
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">KGB</span>
+                </a>
+
+                <!-- SKP -->
+                <a href="skp.html" class="profil-menu-card">
+                    <div class="profil-menu-icon skp">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="8" r="4" fill="#4a5568" />
+                            <path d="M20 21a8 8 0 0 0-16 0" fill="#4a5568" />
+                            <circle cx="12" cy="10" r="6" fill="none" stroke="#4a5568" stroke-width="1.5" />
+                            <line x1="6" y1="6" x2="4" y2="4" stroke="#4a5568" stroke-width="1.5" />
+                            <line x1="18" y1="6" x2="20" y2="4" stroke="#4a5568" stroke-width="1.5" />
+                            <line x1="6" y1="14" x2="4" y2="16" stroke="#4a5568" stroke-width="1.5" />
+                            <line x1="18" y1="14" x2="20" y2="16" stroke="#4a5568" stroke-width="1.5" />
+                            <circle cx="4" cy="4" r="1.5" fill="#4a5568" />
+                            <circle cx="20" cy="4" r="1.5" fill="#4a5568" />
+                            <circle cx="4" cy="16" r="1.5" fill="#4a5568" />
+                            <circle cx="20" cy="16" r="1.5" fill="#4a5568" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">SKP</span>
+                </a>
+
+                <!-- Keluarga -->
+                <a href="keluarga.html" class="profil-menu-card">
+                    <div class="profil-menu-icon keluarga">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <!-- Dad -->
+                            <circle cx="7" cy="7" r="3" fill="#4a90d9" />
+                            <path d="M7 10v6" stroke="#4a90d9" stroke-width="3" />
+                            <rect x="4" y="10" width="6" height="8" rx="1" fill="#4a90d9" />
+                            <!-- Mom -->
+                            <circle cx="17" cy="7" r="3" fill="#dc143c" />
+                            <path d="M17 10v8" stroke="#dc143c" stroke-width="0" />
+                            <path d="M14 10h6l-1 10h-4l-1-10z" fill="#dc143c" />
+                            <!-- Kid -->
+                            <circle cx="12" cy="12" r="2.5" fill="#f4a460" />
+                            <rect x="10" y="14" width="4" height="5" rx="1" fill="#87ceeb" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Keluarga</span>
+                </a>
+
+                <!-- Ubah Password -->
+                <a href="ubah-password.html" class="profil-menu-card">
+                    <div class="profil-menu-icon password">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <rect x="5" y="11" width="14" height="10" rx="2" fill="#f0ad4e" />
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="#999" stroke-width="2" />
+                            <circle cx="12" cy="16" r="1.5" fill="#333" />
+                            <line x1="12" y1="17" x2="12" y2="19" stroke="#333" stroke-width="1.5" />
+                        </svg>
+                    </div>
+                    <span class="profil-menu-label">Ubah<br>Password</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Require auth
+        if (!Auth.requireAuth()) {
+            // Redirected
+        }
+    </script>
+</body>
+
+</html>
