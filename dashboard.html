@@ -122,7 +122,7 @@
             <p class="page-subtitle" id="currentDate">Senin, 29 Desember 2024</p>
           </div>
           <div class="title-actions">
-            <button class="btn btn-outline action-btn" id="btnUnduhLaporan">
+            <button class="btn btn-outline action-btn" id="btnUnduhLaporan" onclick="downloadReport()">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -131,7 +131,7 @@
               </svg>
               Unduh Laporan
             </button>
-            <button class="btn btn-primary action-btn" id="btnAbsensiManual">
+            <button class="btn btn-primary action-btn" id="btnAbsensiManual" onclick="openManualAttendanceModal()">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -402,6 +402,61 @@
     </main>
   </div>
 
+  <!-- Manual Attendance Modal -->
+  <div class="modal-overlay" id="manualAttendanceModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Absensi Manual</h3>
+        <button class="modal-close" onclick="closeManualModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <form id="manualAttendanceForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Pegawai</label>
+            <select class="form-control" id="manualPegawai" required>
+              <option value="">Pilih Pegawai</option>
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal</label>
+            <input type="date" class="form-control" id="manualTanggal" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jam Masuk</label>
+            <input type="time" class="form-control" id="manualJamMasuk" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jam Keluar (Opsional)</label>
+            <input type="time" class="form-control" id="manualJamKeluar">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="manualStatus">
+              <option value="tepat_waktu">Hadir Tepat Waktu</option>
+              <option value="terlambat">Terlambat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Keterangan (Opsional)</label>
+            <input type="text" class="form-control" id="manualKeterangan"
+              placeholder="Contoh: Absensi manual oleh admin">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeManualModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
@@ -499,9 +554,21 @@
         document.getElementById('pegawaiDashboard').classList.remove('d-none');
       } else {
         // Initialize chart for admin/pimpinan
-        initChart();
-        // Initialize calendar
-        renderCalendar();
+        try {
+          if (typeof Chart !== 'undefined') {
+            initChart();
+          } else {
+            console.error('Chart.js not loaded');
+          }
+        } catch (e) {
+          console.error('Error initializing chart:', e);
+        }
+
+        try {
+          renderCalendar();
+        } catch (e) {
+          console.error('Error rendering calendar:', e);
+        }
       }
     }
 
@@ -741,12 +808,8 @@
     });
 
     // Handle download report
-    document.getElementById('btnUnduhLaporan')?.addEventListener('click', function () {
-      downloadReport();
-    });
-
-    // Download report as CSV
     function downloadReport() {
+      console.log('Running downloadReport');
       const absensi = Data.getAbsensiWithPegawai();
       const today = new Date();
       const month = today.getMonth();
@@ -775,82 +838,37 @@
       App.showToast('Laporan berhasil diunduh!', 'success');
     }
 
-    // Handle manual attendance button
-    document.getElementById('btnAbsensiManual')?.addEventListener('click', function () {
-      openManualAttendanceModal();
-    });
-
     // Open manual attendance modal
     function openManualAttendanceModal() {
+      console.log('Running openManualAttendanceModal');
       // Get pegawai list for dropdown
       const pegawai = Data.getPegawai().filter(p => p.status === 'aktif');
-      const pegawaiOptions = pegawai.map(p =>
-        `<option value="${p.id}">${p.nama} (${p.nip})</option>`
-      ).join('');
+      const select = document.getElementById('manualPegawai');
+      if (select) {
+        select.innerHTML = '<option value="">Pilih Pegawai</option>' +
+          pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
+      }
 
       const today = new Date().toISOString().split('T')[0];
       const now = new Date().toTimeString().slice(0, 5);
 
-      const modalHtml = `
-        <div class="modal-overlay show" id="manualAttendanceModal">
-          <div class="modal">
-            <div class="modal-header">
-              <h3 class="modal-title">Absensi Manual</h3>
-              <button class="modal-close" onclick="closeManualModal()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label class="form-label">Pegawai</label>
-                <select class="form-control" id="manualPegawai" required>
-                  <option value="">Pilih Pegawai</option>
-                  ${pegawaiOptions}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Tanggal</label>
-                <input type="date" class="form-control" id="manualTanggal" value="${today}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Jam Masuk</label>
-                <input type="time" class="form-control" id="manualJamMasuk" value="${now}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Jam Keluar (Opsional)</label>
-                <input type="time" class="form-control" id="manualJamKeluar">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Status</label>
-                <select class="form-control" id="manualStatus">
-                  <option value="tepat_waktu">Hadir Tepat Waktu</option>
-                  <option value="terlambat">Terlambat</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Keterangan (Opsional)</label>
-                <input type="text" class="form-control" id="manualKeterangan" placeholder="Contoh: Absensi manual oleh admin">
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" onclick="closeManualModal()">Batal</button>
-              <button class="btn btn-primary" onclick="submitManualAttendance()">Simpan</button>
-            </div>
-          </div>
-        </div>
-      `;
+      document.getElementById('manualTanggal').value = today;
+      document.getElementById('manualJamMasuk').value = now;
 
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      const modal = document.getElementById('manualAttendanceModal');
+      if (modal) modal.classList.add('show');
     }
+
+    // Handle manual form submit
+    document.getElementById('manualAttendanceForm')?.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitManualAttendance();
+    });
 
     // Close manual attendance modal
     function closeManualModal() {
       const modal = document.getElementById('manualAttendanceModal');
-      if (modal) modal.remove();
+      if (modal) modal.classList.remove('show');
     }
 
     // Submit manual attendance
