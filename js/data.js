@@ -20,6 +20,27 @@ const Data = {
     init() {
         if (!localStorage.getItem(this.KEYS.USERS)) {
             this.seedData();
+        } else {
+            // Migration: Convert DPKP usernames to NIP
+            const users = JSON.parse(localStorage.getItem(this.KEYS.USERS));
+            // Check if any user has DPKP format
+            const needsMigration = users.some(u => u.role === 'pegawai' && u.username.startsWith('DPKP'));
+
+            if (needsMigration) {
+                const pegawai = JSON.parse(localStorage.getItem(this.KEYS.PEGAWAI) || '[]');
+                const updatedUsers = users.map(u => {
+                    if (u.role === 'pegawai' && u.username.startsWith('DPKP')) {
+                        const p = pegawai.find(p => p.userId === u.id);
+                        if (p && p.nip) {
+                            return { ...u, username: p.nip };
+                        }
+                    }
+                    return u;
+                });
+
+                localStorage.setItem(this.KEYS.USERS, JSON.stringify(updatedUsers));
+                console.log('Migrated usernames to NIP successfully.');
+            }
         }
     },
 
@@ -29,34 +50,34 @@ const Data = {
         const users = [
             { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' },
             { id: 2, username: 'pimpinan', password: 'pimpinan123', role: 'pimpinan', name: 'Kepala Dinas' },
-            // Pegawai accounts - username = kode, password from data
-            { id: 3, username: 'DPKP001', password: '1998', role: 'pegawai', name: 'Adi Tya Kusuma' },
-            { id: 4, username: 'DPKP002', password: '1975', role: 'pegawai', name: 'Agus Suhaeri' },
-            { id: 5, username: 'DPKP003', password: '1997', role: 'pegawai', name: 'Akbar Solihin Zulkifli' },
-            { id: 6, username: 'DPKP004', password: '1999', role: 'pegawai', name: 'Asep Saepul Anwar' },
-            { id: 7, username: 'DPKP005', password: '1997', role: 'pegawai', name: 'Chaeril Hari Mugeni' },
-            { id: 8, username: 'DPKP006', password: '1999', role: 'pegawai', name: 'Deni Bachtiar' },
-            { id: 9, username: 'DPKP007', password: '1996', role: 'pegawai', name: 'Doni Safutra' },
-            { id: 10, username: 'DPKP008', password: '1998', role: 'pegawai', name: 'Erdinda Sukmadinata' },
-            { id: 11, username: 'DPKP009', password: '1997', role: 'pegawai', name: 'Fajar Triadi' },
-            { id: 12, username: 'DPKP010', password: '1994', role: 'pegawai', name: 'Fauzi Ramadan' },
-            { id: 13, username: 'DPKP011', password: '1988', role: 'pegawai', name: 'Juliyana Mulyadani' },
-            { id: 14, username: 'DPKP012', password: '2000', role: 'pegawai', name: 'Nahdi Ramhan' },
-            { id: 15, username: 'DPKP013', password: '1994', role: 'pegawai', name: 'Nandar Sukmana' },
-            { id: 16, username: 'DPKP014', password: '1995', role: 'pegawai', name: 'Novaldi Setiawan' },
-            { id: 17, username: 'DPKP015', password: '1998', role: 'pegawai', name: 'Raden Yunita' },
-            { id: 18, username: 'DPKP016', password: '1998', role: 'pegawai', name: 'Rizky Ramandani' },
-            { id: 19, username: 'DPKP017', password: '2000', role: 'pegawai', name: 'Sendy Dwi Pangga' },
-            { id: 20, username: 'DPKP018', password: '1995', role: 'pegawai', name: 'Seno Albianto' },
-            { id: 21, username: 'DPKP019', password: '1994', role: 'pegawai', name: 'Sri Handayani' },
-            { id: 22, username: 'DPKP020', password: '1994', role: 'pegawai', name: 'Sugianto' },
-            { id: 23, username: 'DPKP021', password: '1996', role: 'pegawai', name: 'Teguh Nurhakim' },
-            { id: 24, username: 'DPKP022', password: '1999', role: 'pegawai', name: 'Vareski Nalfaredo' },
-            { id: 25, username: 'DPKP023', password: '1997', role: 'pegawai', name: 'Vivi Hastuti' },
-            { id: 26, username: 'DPKP024', password: '1997', role: 'pegawai', name: 'Zico Arya Pratama' },
-            { id: 27, username: 'DPKP025', password: '1987', role: 'pegawai', name: 'Wellem Aula' },
-            { id: 28, username: 'DPKP026', password: '1980', role: 'pegawai', name: 'David Indra' },
-            { id: 29, username: 'DPKP027', password: '1993', role: 'pegawai', name: 'Rm. Rangga Putra' }
+            // Pegawai accounts - username = NIP, password from data
+            { id: 3, username: '199804162025211000', password: '1998', role: 'pegawai', name: 'Adi Tya Kusuma' },
+            { id: 4, username: '197502012025211300', password: '1975', role: 'pegawai', name: 'Agus Suhaeri' },
+            { id: 5, username: '199709242025211061', password: '1997', role: 'pegawai', name: 'Akbar Solihin Zulkifli' },
+            { id: 6, username: '199905182025211030', password: '1999', role: 'pegawai', name: 'Asep Saepul Anwar' },
+            { id: 7, username: '199703202025211056', password: '1997', role: 'pegawai', name: 'Chaeril Hari Mugeni' },
+            { id: 8, username: '199911262025211018', password: '1999', role: 'pegawai', name: 'Deni Bachtiar' },
+            { id: 9, username: '199609212025211070', password: '1996', role: 'pegawai', name: 'Doni Safutra' },
+            { id: 10, username: '199808232025211048', password: '1998', role: 'pegawai', name: 'Erdinda Sukmadinata' },
+            { id: 11, username: '199705212025211051', password: '1997', role: 'pegawai', name: 'Fajar Triadi' },
+            { id: 12, username: '199403092025211074', password: '1994', role: 'pegawai', name: 'Fauzi Ramadan' },
+            { id: 13, username: '198807052025211119', password: '1988', role: 'pegawai', name: 'Juliyana Mulyadani' },
+            { id: 14, username: '200001012025211065', password: '2000', role: 'pegawai', name: 'Nahdi Ramhan' },
+            { id: 15, username: '199401112025211066', password: '1994', role: 'pegawai', name: 'Nandar Sukmana' },
+            { id: 16, username: '199511032025211069', password: '1995', role: 'pegawai', name: 'Novaldi Setiawan' },
+            { id: 17, username: '199811162025212048', password: '1998', role: 'pegawai', name: 'Raden Yunita' },
+            { id: 18, username: '199801012025211072', password: '1998', role: 'pegawai', name: 'Rizky Ramandani' },
+            { id: 19, username: '200001012025211041', password: '2000', role: 'pegawai', name: 'Sendy Dwi Pangga' },
+            { id: 20, username: '199510252025211082', password: '1995', role: 'pegawai', name: 'Seno Albianto' },
+            { id: 21, username: '199406192025212073', password: '1994', role: 'pegawai', name: 'Sri Handayani' },
+            { id: 22, username: '199412302025211074', password: '1994', role: 'pegawai', name: 'Sugianto' },
+            { id: 23, username: '199610222025211050', password: '1996', role: 'pegawai', name: 'Teguh Nurhakim' },
+            { id: 24, username: '199902042025211036', password: '1999', role: 'pegawai', name: 'Vareski Nalfaredo' },
+            { id: 25, username: '199701052025212046', password: '1997', role: 'pegawai', name: 'Vivi Hastuti' },
+            { id: 26, username: '199706162025211052', password: '1997', role: 'pegawai', name: 'Zico Arya Pratama' },
+            { id: 27, username: '197812222025211081', password: '1987', role: 'pegawai', name: 'Wellem Aula' },
+            { id: 28, username: '198008092025211055', password: '1980', role: 'pegawai', name: 'David Indra' },
+            { id: 29, username: '199303242025211140', password: '1993', role: 'pegawai', name: 'Rm. Rangga Putra' }
         ];
 
         // Unit Kerja
