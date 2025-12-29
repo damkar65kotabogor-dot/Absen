@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -39,8 +40,8 @@
           </svg>
         </div>
         <div class="sidebar-brand">
-          <h1>SIMPEG</h1>
-          <span>PPPK Management</span>
+          <h1>Absensi PPPK</h1>
+          <span>Admin Panel</span>
         </div>
       </div>
 
@@ -55,23 +56,22 @@
             <div class="user-name">Administrator</div>
             <div class="user-role">Admin</div>
           </div>
+          <button class="sidebar-logout-btn" onclick="Auth.logout()" title="Logout">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
         </div>
-        <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Logout
-        </button>
       </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
       <!-- Top Header -->
-      <header class="top-header">
+      <header class="top-header dashboard-header">
         <div class="header-left">
           <button class="toggle-sidebar" id="toggleSidebar">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -81,29 +81,76 @@
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <div class="page-title">
-            <h2>Dashboard</h2>
-            <p id="currentDate">Selasa, 24 Desember 2024</p>
+          <h2 class="header-title">Dashboard</h2>
+        </div>
+        <div class="header-center">
+          <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="Cari pegawai..." class="search-input">
           </div>
         </div>
         <div class="header-right">
-          <button class="header-btn" title="Notifikasi">
+          <button class="header-icon-btn" title="Notifikasi">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-            <span class="badge" id="notifBadge">3</span>
+            <span class="notification-badge" id="notifBadge">3</span>
+          </button>
+          <button class="header-icon-btn" title="Bantuan">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
           </button>
         </div>
       </header>
 
       <!-- Dashboard Content -->
       <div id="dashboardContent">
+        <!-- Page Title Section -->
+        <div class="dashboard-title-section">
+          <div class="title-left">
+            <h1 class="page-main-title">Ringkasan Hari Ini</h1>
+            <p class="page-subtitle" id="currentDate">Senin, 29 Desember 2024</p>
+          </div>
+          <div class="title-actions">
+            <button class="btn btn-outline action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Unduh Laporan
+            </button>
+            <button class="btn btn-primary action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Absensi Manual
+            </button>
+          </div>
+        </div>
+
         <!-- Stats Cards -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon primary">
+        <div class="stats-grid-new">
+          <div class="stat-card-new">
+            <div class="stat-card-content">
+              <span class="stat-label-new">Total Pegawai</span>
+              <div class="stat-value-new" id="statTotalPegawai">0</div>
+              <span class="stat-change-new positive">+12 bulan ini</span>
+            </div>
+            <div class="stat-icon-new blue">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -112,28 +159,45 @@
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </div>
-            <div class="stat-content">
-              <div class="stat-value" id="statTotalPegawai">0</div>
-              <div class="stat-label">Total Pegawai</div>
-            </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon success">
+          <div class="stat-card-new">
+            <div class="stat-card-content">
+              <span class="stat-label-new">Hadir Tepat Waktu</span>
+              <div class="stat-value-new" id="statHadir">0</div>
+              <span class="stat-change-new muted"><span id="statHadirPersen">0</span>% dari total pegawai</span>
+            </div>
+            <div class="stat-icon-new green">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <div class="stat-content">
-              <div class="stat-value" id="statHadir">0</div>
-              <div class="stat-label">Hadir Hari Ini</div>
+          </div>
+
+          <div class="stat-card-new">
+            <div class="stat-card-content">
+              <span class="stat-label-new">Terlambat</span>
+              <div class="stat-value-new" id="statTerlambat">0</div>
+              <span class="stat-change-new warning">+5 dari kemarin</span>
+            </div>
+            <div class="stat-icon-new yellow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon danger">
+          <div class="stat-card-new">
+            <div class="stat-card-content">
+              <span class="stat-label-new">Absen / Izin</span>
+              <div class="stat-value-new" id="statTidakHadir">0</div>
+              <span class="stat-change-new danger"><span id="statTanpaKet">0</span> Tanpa Keterangan</span>
+            </div>
+            <div class="stat-icon-new red">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -141,76 +205,107 @@
                 <line x1="9" y1="9" x2="15" y2="15" />
               </svg>
             </div>
-            <div class="stat-content">
-              <div class="stat-value" id="statTidakHadir">0</div>
-              <div class="stat-label">Tidak Hadir</div>
+          </div>
+        </div>
+
+        <!-- Two Column Layout: Chart & Calendar -->
+        <div class="dashboard-grid">
+          <!-- Attendance Trend Chart -->
+          <div class="card chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Tren Kehadiran</h3>
+                <p class="card-subtitle" id="chartDateRange">Statistik mingguan</p>
+              </div>
+              <select class="filter-select" id="chartFilter">
+                <option value="week">Minggu Ini</option>
+                <option value="month">Bulan Ini</option>
+              </select>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+              </div>
             </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-icon warning">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
+          <!-- Calendar Widget -->
+          <div class="card calendar-card">
+            <div class="calendar-header">
+              <h3 class="calendar-title" id="calendarMonth">Desember 2024</h3>
+              <div class="calendar-nav">
+                <button class="calendar-nav-btn" id="prevMonth">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+                <button class="calendar-nav-btn" id="nextMonth">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div class="stat-content">
-              <div class="stat-value" id="statCutiPending">0</div>
-              <div class="stat-label">Cuti Pending</div>
+            <div class="calendar-body">
+              <div class="calendar-weekdays">
+                <span>Mn</span>
+                <span>Sn</span>
+                <span>Sl</span>
+                <span>Rb</span>
+                <span>Km</span>
+                <span>Jm</span>
+                <span>Sb</span>
+              </div>
+              <div class="calendar-days" id="calendarDays">
+                <!-- Days rendered by JS -->
+              </div>
+            </div>
+            <div class="calendar-legend">
+              <div class="legend-item">
+                <span class="legend-dot today"></span>
+                <span>Hari ini</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot holiday"></span>
+                <span>Libur Nasional (1)</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Two Column Layout -->
-        <div class="d-grid gap-5" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
-          <!-- Recent Attendance -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Absensi Terbaru</h3>
-              <a href="absensi.html" class="btn btn-sm btn-outline">Lihat Semua</a>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-container">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Pegawai</th>
-                      <th>Jam Masuk</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="recentAbsensi">
-                    <!-- Rendered by JS -->
-                  </tbody>
-                </table>
-              </div>
+        <!-- Recent Attendance Table -->
+        <div class="card attendance-table-card">
+          <div class="card-header">
+            <h3 class="card-title">Riwayat Absensi Terkini</h3>
+            <div class="table-actions">
+              <a href="absensi.html" class="link-action">Lihat Semua</a>
+              <button class="btn btn-outline btn-sm filter-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                Filter
+              </button>
             </div>
           </div>
-
-          <!-- Pending Leave Requests -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Pengajuan Cuti Terbaru</h3>
-              <a href="cuti.html" class="btn btn-sm btn-outline">Lihat Semua</a>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-container">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Pegawai</th>
-                      <th>Tanggal</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="recentCuti">
-                    <!-- Rendered by JS -->
-                  </tbody>
-                </table>
-              </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table attendance-table">
+                <thead>
+                  <tr>
+                    <th>PEGAWAI</th>
+                    <th>WAKTU MASUK</th>
+                    <th>STATUS</th>
+                    <th>LOKASI</th>
+                    <th>AKSI</th>
+                  </tr>
+                </thead>
+                <tbody id="recentAbsensi">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -254,7 +349,7 @@
           </div>
         </div>
 
-        <!-- Admin/Pimpinan Actions (check-in for pegawai moved here) -->
+        <!-- Pegawai Actions (for pegawai role) -->
         <div id="pegawaiActions" class="d-none mt-5">
           <div class="card">
             <div class="card-header">
@@ -320,59 +415,252 @@
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
 
+    // Chart instance
+    let attendanceChart = null;
+
+    // Calendar state
+    let currentCalendarDate = new Date();
+
     // Load dashboard data
     function loadDashboard() {
       const user = Auth.getCurrentUser();
       const stats = Data.getStats();
+      const totalPegawai = stats.totalPegawai;
 
       // Update stats
-      document.getElementById('statTotalPegawai').textContent = stats.totalPegawai;
-      document.getElementById('statHadir').textContent = stats.hadirHariIni;
+      document.getElementById('statTotalPegawai').textContent = totalPegawai;
+      document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
+      document.getElementById('statTerlambat').textContent = stats.terlambatHariIni;
       document.getElementById('statTidakHadir').textContent = stats.tidakHadir;
-      document.getElementById('statCutiPending').textContent = stats.cutiPending;
       document.getElementById('notifBadge').textContent = stats.cutiPending;
 
-      // Load recent absensi
+      // Calculate percentages
+      const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
+      document.getElementById('statHadirPersen').textContent = hadirPersen;
+      document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
+
+      // Load recent absensi with new format
       const absensi = Data.getAbsensiWithPegawai()
-        .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal))
+        .sort((a, b) => new Date(b.tanggal + ' ' + b.jamMasuk) - new Date(a.tanggal + ' ' + a.jamMasuk))
         .slice(0, 5);
 
-      const absensiHtml = absensi.length > 0 ? absensi.map(a => `
-        <tr>
-          <td>${a.pegawai?.nama || '-'}</td>
-          <td>${a.jamMasuk}</td>
-          <td>${App.getStatusBadge(a.status)}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="3" class="text-center text-muted">Belum ada data absensi</td></tr>';
+      const absensiHtml = absensi.length > 0 ? absensi.map(a => {
+        const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+        const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
+        const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
+        return `
+          <tr>
+            <td>
+              <div class="employee-cell">
+                <div class="employee-avatar">${initials}</div>
+                <div class="employee-info">
+                  <div class="employee-name">${a.pegawai?.nama || '-'}</div>
+                  <div class="employee-nip">NIP. ${a.pegawai?.nip || '-'}</div>
+                </div>
+              </div>
+            </td>
+            <td>${a.jamMasuk} WIB</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>
+              <span class="location-cell">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Kantor Pusat
+              </span>
+            </td>
+            <td>
+              <button class="action-menu-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada data absensi</td></tr>';
 
       document.getElementById('recentAbsensi').innerHTML = absensiHtml;
-
-      // Load recent cuti
-      const cuti = Data.getCutiWithPegawai()
-        .sort((a, b) => new Date(b.tanggalPengajuan) - new Date(a.tanggalPengajuan))
-        .slice(0, 5);
-
-      const cutiHtml = cuti.length > 0 ? cuti.map(c => `
-        <tr>
-          <td>${c.pegawai?.nama || '-'}</td>
-          <td>${App.formatDate(c.tanggalMulai)}</td>
-          <td>${App.getStatusBadge(c.status)}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="3" class="text-center text-muted">Belum ada pengajuan cuti</td></tr>';
-
-      document.getElementById('recentCuti').innerHTML = cutiHtml;
 
       // Show different dashboard based on role
       if (user.role === 'pegawai') {
         // Hide admin content for pegawai
-        document.querySelector('.stats-grid').style.display = 'none';
-        document.querySelector('.d-grid.gap-5').style.display = 'none';
-        document.querySelector('.header-right').style.display = 'none';
+        document.querySelector('.stats-grid-new').style.display = 'none';
+        document.querySelector('.dashboard-grid').style.display = 'none';
+        document.querySelector('.attendance-table-card').style.display = 'none';
+        document.querySelector('.title-actions').style.display = 'none';
 
         // Show simple pegawai menu
         document.getElementById('pegawaiDashboard').classList.remove('d-none');
+      } else {
+        // Initialize chart for admin/pimpinan
+        initChart();
+        // Initialize calendar
+        renderCalendar();
       }
     }
+
+    // Initialize attendance chart
+    function initChart() {
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+      // Get weekly data
+      const weekData = getWeeklyAttendanceData();
+
+      if (attendanceChart) {
+        attendanceChart.destroy();
+      }
+
+      attendanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+          datasets: [{
+            label: 'Kehadiran',
+            data: weekData,
+            backgroundColor: '#3b82f6',
+            borderRadius: 6,
+            borderSkipped: false,
+            barThickness: 40,
+            maxBarThickness: 50
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#64748b',
+                font: {
+                  size: 12
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: '#e2e8f0'
+              },
+              ticks: {
+                color: '#64748b',
+                font: {
+                  size: 12
+                },
+                stepSize: 20
+              }
+            }
+          }
+        }
+      });
+
+      // Update date range text
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      const formatDate = (d) => `${d.getDate()} ${d.toLocaleDateString('id-ID', { month: 'short' })}`;
+      document.getElementById('chartDateRange').textContent =
+        `Statistik mingguan (${formatDate(startOfWeek)}-${formatDate(endOfWeek)})`;
+    }
+
+    // Get weekly attendance data
+    function getWeeklyAttendanceData() {
+      const absensi = Data.getAbsensi();
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+
+      const weekData = [0, 0, 0, 0, 0, 0, 0];
+
+      absensi.forEach(a => {
+        const date = new Date(a.tanggal);
+        if (date >= startOfWeek) {
+          const dayIndex = (date.getDay() + 6) % 7; // Monday = 0
+          weekData[dayIndex]++;
+        }
+      });
+
+      // Simulate some data if empty
+      if (weekData.every(d => d === 0)) {
+        return [24, 22, 25, 23, 27, 5, 2];
+      }
+
+      return weekData;
+    }
+
+    // Render calendar
+    function renderCalendar() {
+      const year = currentCalendarDate.getFullYear();
+      const month = currentCalendarDate.getMonth();
+
+      // Update month title
+      const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+
+      // Get first day of month and total days
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const totalDays = lastDay.getDate();
+
+      // Get day of week for first day (0 = Sunday, adjust for Monday start)
+      let startDay = firstDay.getDay();
+      startDay = startDay === 0 ? 6 : startDay - 1; // Monday = 0
+
+      // Generate calendar HTML
+      const today = new Date();
+      let html = '';
+
+      // Previous month days
+      const prevMonth = new Date(year, month, 0);
+      const prevMonthDays = prevMonth.getDate();
+      for (let i = startDay - 1; i >= 0; i--) {
+        html += `<span class="calendar-day other-month">${prevMonthDays - i}</span>`;
+      }
+
+      // Current month days
+      for (let d = 1; d <= totalDays; d++) {
+        const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        const classes = ['calendar-day'];
+        if (isToday) classes.push('today');
+        html += `<span class="${classes.join(' ')}">${d}</span>`;
+      }
+
+      // Next month days
+      const remainingDays = 42 - (startDay + totalDays);
+      for (let d = 1; d <= remainingDays; d++) {
+        html += `<span class="calendar-day other-month">${d}</span>`;
+      }
+
+      document.getElementById('calendarDays').innerHTML = html;
+    }
+
+    // Calendar navigation
+    document.getElementById('prevMonth')?.addEventListener('click', function () {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    document.getElementById('nextMonth')?.addEventListener('click', function () {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+      renderCalendar();
+    });
 
     // Check today's attendance for pegawai
     function checkTodayAttendance() {
