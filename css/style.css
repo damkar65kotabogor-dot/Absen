@@ -2220,7 +2220,8 @@ select.form-control {
     box-shadow: var(--shadow-lg);
     padding: 0.5rem;
     min-width: 160px;
-    z-index: 1000;
+    z-index: 2100;
+    /* Higher than modal overlay (2000) */
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);

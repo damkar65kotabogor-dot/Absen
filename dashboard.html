@@ -1002,15 +1002,26 @@
     let currentAbsensiId = null;
 
     function showActionMenu(event, id) {
+      event.preventDefault();
       event.stopPropagation();
+
+      console.log('Action menu clicked for ID:', id);
       currentAbsensiId = id;
+
       const popover = document.getElementById('actionMenuPopover');
       const btn = event.currentTarget;
       const rect = btn.getBoundingClientRect();
 
-      // Position popover near button
-      popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
-      popover.style.left = `${rect.left + window.scrollX - 100}px`; // Align to left
+      // Dynamic positioning
+      const popoverWidth = 160;
+      let top = rect.bottom + window.scrollY + 5;
+      let left = rect.left + window.scrollX - popoverWidth + rect.width;
+
+      // Boundary check
+      if (left < 10) left = 10;
+
+      popover.style.top = `${top}px`;
+      popover.style.left = `${left}px`;
       popover.classList.add('show');
     }
 
