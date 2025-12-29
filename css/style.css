@@ -2259,3 +2259,96 @@ select.form-control {
 .action-menu-item.text-danger:hover {
     background: var(--danger-50);
 }
+
+/* ============ Mobile Responsive Adjustments ============ */
+@media (max-width: 576px) {
+
+    /* Modal Full Width Bottom Sheet style or just full width */
+    .modal {
+        width: 95%;
+        margin: 1rem;
+        max-height: 90vh;
+    }
+
+    /* Stack form rows that are split manually */
+    .modal-body .row {
+        flex-direction: column;
+        margin: 0 !important;
+    }
+
+    .modal-body .col-6 {
+        flex: auto !important;
+        margin: 0 0 1rem 0 !important;
+        width: 100%;
+    }
+
+    .modal-body .col-6:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* List Group Item Stacking */
+    .list-group-item .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .list-group-item .btn-group {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+
+    /* Card Headers */
+    .card-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Adjust Profile Details Grid */
+    .profile-detail-list {
+        grid-template-columns: 1fr;
+    }
+
+    /* Table Responsive */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Pegawai Dashboard Specifics */
+    .pegawai-menu-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    #pegawaiActions .d-flex {
+        flex-direction: column;
+        gap: 0.75rem !important;
+    }
+
+    #pegawaiActions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    /* Ensure action menu popover fits in screen */
+    .action-menu-popover {
+        right: 1rem;
+        left: auto !important;
+        /* Override left positioning if needed or handle in JS */
+        max-width: 200px;
+    }
+
+    /* Responsive Top Header */
+    .top-header {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+}
