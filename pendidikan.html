@@ -81,6 +81,15 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Riwayat Pendidikan</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openAddModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="mr-1">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Tambah
+                        </button>
                     </div>
                     <div class="card-body">
                         <div class="empty-state">
@@ -97,13 +106,190 @@
                     </div>
                 </div>
             </div>
-        </main>
+    </div>
+    </div>
+
+    <!-- Add/Edit Pendidikan Modal -->
+    <div class="modal-overlay" id="pendidikanModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Pendidikan</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="pendidikanForm">
+                <input type="hidden" id="editId">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Tingkat Pendidikan</label>
+                        <select class="form-control" id="tingkat" required>
+                            <option value="SD">SD/Sederajat</option>
+                            <option value="SMP">SMP/Sederajat</option>
+                            <option value="SMA">SMA/SMK/Sederajat</option>
+                            <option value="D3">D3</option>
+                            <option value="D4">D4</option>
+                            <option value="S1">S1</option>
+                            <option value="S2">S2</option>
+                            <option value="S3">S3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Sekolah/Universitas</label>
+                        <input type="text" class="form-control" id="namaSekolah" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jurusan/Prodi</label>
+                        <input type="text" class="form-control" id="jurusan" placeholder="Kosongkan jika SD/SMP">
+                    </div>
+                    <div class="row">
+                        <div class="col-6" style="flex:1; margin-right: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Tahun Lulus</label>
+                                <input type="number" class="form-control" id="tahunLulus" required>
+                            </div>
+                        </div>
+                        <div class="col-6" style="flex:1; margin-left: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Nomor Ijazah</label>
+                                <input type="text" class="form-control" id="noIjazah">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </main>
     </div>
 
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
-    <script>if (!Auth.requireAuth()) { }</script>
+    <script>
+        if (!Auth.requireAuth()) { }
+        const user = Auth.getCurrentUser();
+
+        function loadPendidikan() {
+            if (!user.pegawaiId) return;
+
+            const allPendidikan = Data.getPendidikan() || [];
+            const myPendidikan = allPendidikan.filter(p => p.pegawaiId === user.pegawaiId);
+            const container = document.querySelector('.card-body');
+
+            if (myPendidikan.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                            </svg>
+                        </div>
+                        <h3>Belum Ada Data</h3>
+                        <p>Data riwayat pendidikan belum tersedia</p>
+                    </div>`;
+            } else {
+                // Sort by year descending
+                myPendidikan.sort((a, b) => b.tahunLulus - a.tahunLulus);
+
+                let html = '<div class="list-group">';
+                myPendidikan.forEach(item => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="mb-1">${item.tingkat} - ${item.namaSekolah}</h4>
+                                    <p class="mb-0 text-muted small">${item.jurusan ? item.jurusan + ' • ' : ''}Lulus Tahun ${item.tahunLulus}</p>
+                                    <p class="mb-0 text-muted small">No. Ijazah: ${item.noIjazah || '-'}</p>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal(${item.id})">Edit</button>
+                                    <button class="btn btn-sm btn-outline text-danger" onclick="deletePendidikan(${item.id})">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        }
+
+        // Modal Functions
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';
+            document.getElementById('editId').value = '';
+            document.getElementById('pendidikanForm').reset();
+            document.getElementById('pendidikanModal').classList.add('show');
+        }
+
+        function openEditModal(id) {
+            const item = Data.getById(Data.KEYS.PENDIDIKAN, id);
+            if (!item) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Pendidikan';
+            document.getElementById('editId').value = item.id;
+            document.getElementById('tingkat').value = item.tingkat;
+            document.getElementById('namaSekolah').value = item.namaSekolah;
+            document.getElementById('jurusan').value = item.jurusan || '';
+            document.getElementById('tahunLulus').value = item.tahunLulus;
+            document.getElementById('noIjazah').value = item.noIjazah || '';
+
+            document.getElementById('pendidikanModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('pendidikanModal').classList.remove('show');
+        }
+
+        function deletePendidikan(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                Data.delete(Data.KEYS.PENDIDIKAN, id);
+                App.showToast('Data pendidikan berhasil dihapus', 'success');
+                loadPendidikan();
+            }
+        }
+
+        // Form Submit
+        document.getElementById('pendidikanForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editId').value;
+            const data = {
+                pegawaiId: user.pegawaiId,
+                tingkat: document.getElementById('tingkat').value,
+                namaSekolah: document.getElementById('namaSekolah').value,
+                jurusan: document.getElementById('jurusan').value,
+                tahunLulus: parseInt(document.getElementById('tahunLulus').value),
+                noIjazah: document.getElementById('noIjazah').value
+            };
+
+            if (id) {
+                Data.update(Data.KEYS.PENDIDIKAN, id, data);
+                App.showToast('Data pendidikan berhasil diperbarui', 'success');
+            } else {
+                Data.create(Data.KEYS.PENDIDIKAN, data);
+                App.showToast('Data pendidikan berhasil ditambahkan', 'success');
+            }
+
+            closeModal();
+            loadPendidikan();
+        });
+
+        // Load initially
+        loadPendidikan();
+    </script>
 </body>
 
 </html>

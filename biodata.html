@@ -81,6 +81,15 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Data Pribadi</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openEditBiodata()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="mr-1">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit
+                        </button>
                     </div>
                     <div class="card-body">
                         <div class="profile-detail-list" id="biodataContent">
@@ -89,7 +98,91 @@
                     </div>
                 </div>
             </div>
-        </main>
+    </div>
+
+    <!-- Edit Biodata Modal -->
+    <div class="modal-overlay" id="editBiodataModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Biodata</h3>
+                <button class="modal-close" onclick="closeEditModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="editBiodataForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="editNama" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NIP</label>
+                        <input type="text" class="form-control" id="editNip" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6" style="flex:1; margin-right: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Tempat Lahir</label>
+                                <input type="text" class="form-control" id="editTempatLahir">
+                            </div>
+                        </div>
+                        <div class="col-6" style="flex:1; margin-left: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="editTanggalLahir">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jenis Kelamin</label>
+                        <select class="form-control" id="editJenisKelamin">
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Agama</label>
+                        <select class="form-control" id="editAgama">
+                            <option value="Islam">Islam</option>
+                            <option value="Kristen">Kristen</option>
+                            <option value="Katolik">Katolik</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddha">Buddha</option>
+                            <option value="Konghucu">Konghucu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status Pernikahan</label>
+                        <select class="form-control" id="editStatusNikah">
+                            <option value="Belum Menikah">Belum Menikah</option>
+                            <option value="Menikah">Menikah</option>
+                            <option value="Cerai Hidup">Cerai Hidup</option>
+                            <option value="Cerai Mati">Cerai Mati</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telepon</label>
+                        <input type="tel" class="form-control" id="editTelepon">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Alamat</label>
+                        <textarea class="form-control" id="editAlamat" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="js/data.js"></script>
@@ -125,6 +218,61 @@
             `).join('');
         }
         loadBiodata();
+
+        // Edit Functionality
+        function openEditBiodata() {
+            const p = Data.getPegawaiWithRelations().find(x => x.id === user.pegawaiId);
+            if (!p) return;
+
+            document.getElementById('editNama').value = p.nama;
+            document.getElementById('editNip').value = p.nip;
+            document.getElementById('editTempatLahir').value = p.tempatLahir || '';
+            document.getElementById('editTanggalLahir').value = p.tanggalLahir || '';
+            document.getElementById('editJenisKelamin').value = p.jenisKelamin;
+            document.getElementById('editAgama').value = p.agama || 'Islam';
+            document.getElementById('editStatusNikah').value = p.statusNikah || 'Belum Menikah';
+            document.getElementById('editTelepon').value = p.telepon || '';
+            document.getElementById('editEmail').value = p.email || '';
+            document.getElementById('editAlamat').value = p.alamat || '';
+
+            document.getElementById('editBiodataModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editBiodataModal').classList.remove('show');
+        }
+
+        document.getElementById('editBiodataForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const updates = {
+                nama: document.getElementById('editNama').value,
+                nip: document.getElementById('editNip').value,
+                tempatLahir: document.getElementById('editTempatLahir').value,
+                tanggalLahir: document.getElementById('editTanggalLahir').value,
+                jenisKelamin: document.getElementById('editJenisKelamin').value,
+                agama: document.getElementById('editAgama').value,
+                statusNikah: document.getElementById('editStatusNikah').value,
+                telepon: document.getElementById('editTelepon').value,
+                email: document.getElementById('editEmail').value,
+                alamat: document.getElementById('editAlamat').value
+            };
+
+            // Update data
+            Data.update(Data.KEYS.PEGAWAI, user.pegawaiId, updates);
+
+            // Show feedback and reload
+            App.showToast('Biodata berhasil diperbarui!', 'success');
+            closeEditModal();
+            loadBiodata();
+
+            // Update sidebar profile if name changed
+            const updatedUser = Data.getPegawai().find(p => p.id === user.pegawaiId);
+            if (updatedUser) {
+                // Should also check if we need to update session user name if that's stored separately?
+                // The sidebar uses hardcoded/App logic, let's leave it for now or refresh page
+            }
+        });
     </script>
 </body>
 

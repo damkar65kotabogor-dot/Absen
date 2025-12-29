@@ -12,6 +12,7 @@ const Data = {
         UNIT_KERJA: 'simpeg_unit_kerja',
         ABSENSI: 'simpeg_absensi',
         CUTI: 'simpeg_cuti',
+        PENDIDIKAN: 'simpeg_pendidikan',
         CURRENT_USER: 'simpeg_current_user'
     },
 
@@ -192,6 +193,7 @@ const Data = {
     getUnitKerja() { return this.getAll(this.KEYS.UNIT_KERJA); },
     getAbsensi() { return this.getAll(this.KEYS.ABSENSI); },
     getCuti() { return this.getAll(this.KEYS.CUTI); },
+    getPendidikan() { return this.getAll(this.KEYS.PENDIDIKAN); },
 
     // Get pegawai with related data
     getPegawaiWithRelations() {

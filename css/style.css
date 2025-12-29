@@ -2214,7 +2214,8 @@ select.form-control {
 
 /* Action Menu Popover */
 .action-menu-popover {
-    position: absolute;
+    position: fixed;
+    /* Fixed to break out of overflow containers */
     background: #fff;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);

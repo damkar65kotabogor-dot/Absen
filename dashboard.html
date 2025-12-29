@@ -1012,13 +1012,19 @@
       const btn = event.currentTarget;
       const rect = btn.getBoundingClientRect();
 
-      // Dynamic positioning
+      // Dynamic positioning for FIXED element
+      // For fixed, top/left are relative to viewport, so rect.bottom/rect.left are already correct
       const popoverWidth = 160;
-      let top = rect.bottom + window.scrollY + 5;
-      let left = rect.left + window.scrollX - popoverWidth + rect.width;
+      let top = rect.bottom + 5;
+      let left = rect.left - popoverWidth + rect.width;
 
       // Boundary check
       if (left < 10) left = 10;
+
+      // Ensure it doesn't go off bottom
+      if (top + 100 > window.innerHeight) {
+        top = rect.top - 100; // Show above if too low
+      }
 
       popover.style.top = `${top}px`;
       popover.style.left = `${left}px`;
