@@ -281,7 +281,7 @@
             <h3 class="card-title">Riwayat Absensi Terkini</h3>
             <div class="table-actions">
               <a href="absensi.html" class="link-action">Lihat Semua</a>
-              <button class="btn btn-outline btn-sm filter-btn">
+              <button class="btn btn-outline btn-sm filter-btn" id="btnFilterAbsensi" onclick="openFilterModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -400,6 +400,64 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Filter Modal -->
+  <div class="modal-overlay" id="filterModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Filter Absensi</h3>
+        <button class="modal-close" onclick="closeFilterModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Status Kehadiran</label>
+          <select class="form-control" id="filterStatus">
+            <option value="all">Semua</option>
+            <option value="tepat_waktu">Hadir Tepat Waktu</option>
+            <option value="terlambat">Terlambat</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Mulai</label>
+          <input type="date" class="form-control" id="filterStartDate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Akhir</label>
+          <input type="date" class="form-control" id="filterEndDate">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeFilterModal()">Reset</button>
+        <button class="btn btn-primary" onclick="applyFilter()">Terapkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Menu Popover -->
+  <div class="action-menu-popover" id="actionMenuPopover">
+    <a href="#" class="action-menu-item" onclick="viewDetailAbsensi()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      Lihat Detail
+    </a>
+    <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      Hapus Data
+    </a>
   </div>
 
   <!-- Manual Attendance Modal -->
@@ -527,7 +585,7 @@
               </span>
             </td>
             <td>
-              <button class="action-menu-btn">
+              <button class="action-menu-btn" onclick="showActionMenu(event, ${a.id})">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="1" />
@@ -922,6 +980,68 @@
 
     // Initialize
     loadDashboard();
+
+    // ========= Filter Functionality =========
+    function openFilterModal() {
+      const modal = document.getElementById('filterModal');
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeFilterModal() {
+      const modal = document.getElementById('filterModal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    function applyFilter() {
+      App.showToast('Filter diterapkan (Simulasi)', 'success');
+      closeFilterModal();
+      // In real app, re-query data with filters
+    }
+
+    // ========= Action Menu Functionality =========
+    let currentAbsensiId = null;
+
+    function showActionMenu(event, id) {
+      event.stopPropagation();
+      currentAbsensiId = id;
+      const popover = document.getElementById('actionMenuPopover');
+      const btn = event.currentTarget;
+      const rect = btn.getBoundingClientRect();
+
+      // Position popover near button
+      popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
+      popover.style.left = `${rect.left + window.scrollX - 100}px`; // Align to left
+      popover.classList.add('show');
+    }
+
+    function viewDetailAbsensi() {
+      if (!currentAbsensiId) return;
+      App.showToast(`Melihat detail absensi ID: ${currentAbsensiId}`, 'info');
+      // Navigate to detail page or show modal
+      document.getElementById('actionMenuPopover').classList.remove('show');
+    }
+
+    function deleteAbsensi() {
+      if (!currentAbsensiId) return;
+      if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
+        // Remove from DB (localStorage)
+        const absensi = Data.getAbsensi();
+        const newAbsensi = absensi.filter(a => a.id !== currentAbsensiId);
+        localStorage.setItem(Data.KEYS.ABSENSI, JSON.stringify(newAbsensi));
+
+        App.showToast('Data absensi berhasil dihapus', 'success');
+        document.getElementById('actionMenuPopover').classList.remove('show');
+        loadDashboard();
+      }
+    }
+
+    // Close action menu when clicking outside
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('.action-menu-btn') && !event.target.closest('.action-menu-popover')) {
+        document.getElementById('actionMenuPopover')?.classList.remove('show');
+      }
+    });
+
   </script>
 </body>
 
