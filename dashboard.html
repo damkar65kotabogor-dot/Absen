@@ -611,6 +611,9 @@
         // Show simple pegawai menu
         document.getElementById('pegawaiDashboard').classList.remove('d-none');
       } else {
+        // Hide attendance table for admin/pimpinan as requested
+        document.querySelector('.attendance-table-card').style.display = 'none';
+
         // Initialize chart for admin/pimpinan
         try {
           if (typeof Chart !== 'undefined') {
