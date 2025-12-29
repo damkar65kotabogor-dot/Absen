@@ -832,6 +832,8 @@ select.form-control {
     overflow: hidden;
     transform: scale(0.9) translateY(20px);
     transition: transform var(--transition-normal);
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-overlay.show .modal {
@@ -870,6 +872,15 @@ select.form-control {
 .modal-body {
     padding: 1.5rem;
     overflow-y: auto;
+    flex: 1;
+}
+
+/* Form inside modal needs to be flex too to handle body scrolling */
+.modal form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
 }
 
 .modal-footer {

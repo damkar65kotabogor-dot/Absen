@@ -891,7 +891,17 @@
       );
 
       if (existing) {
-        App.showToast('Absensi untuk pegawai ini pada tanggal tersebut sudah ada!', 'warning');
+        if (confirm('Data absensi untuk pegawai ini pada tanggal tersebut sudah ada. Apakah Anda ingin mengupdate data ini?')) {
+          Data.update(Data.KEYS.ABSENSI, existing.id, {
+            jamMasuk: jamMasuk,
+            jamKeluar: jamKeluar,
+            status: status,
+            keterangan: keterangan
+          });
+          App.showToast('Data absensi berhasil diupdate!', 'success');
+          closeManualModal();
+          loadDashboard();
+        }
         return;
       }
 
