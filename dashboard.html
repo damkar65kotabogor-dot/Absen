@@ -277,9 +277,14 @@
 
         <!-- Recent Attendance Table -->
         <div class="card attendance-table-card">
-          <div class="card-header">
+          <div class="card-header d-flex justify-between align-center">
             <h3 class="card-title">Riwayat Absensi Terkini</h3>
-            <div class="table-actions">
+            <div class="table-actions d-flex gap-2">
+              <div id="bulkActions" class="d-none">
+                <button class="btn btn-sm btn-danger" onclick="bulkDeleteAbsensi()">
+                  Hapus Sekaligus (<span id="selectedCount">0</span>)
+                </button>
+              </div>
               <a href="absensi.html" class="link-action">Lihat Semua</a>
               <button class="btn btn-outline btn-sm filter-btn" id="btnFilterAbsensi" onclick="openFilterModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -295,6 +300,7 @@
               <table class="table attendance-table">
                 <thead>
                   <tr>
+                    <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
                     <th>PEGAWAI</th>
                     <th>WAKTU MASUK</th>
                     <th>STATUS</th>
@@ -522,6 +528,7 @@
               const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
               return `
           <tr>
+            <td><input type="checkbox" class="row-checkbox" value="${a.id}" onclick="updateBulkActionVisibility()"></td>
             <td>
               <div class="employee-cell">
                 <div class="employee-avatar">${avatarDisplay}</div>
@@ -555,9 +562,10 @@
             </td>
           </tr>
         `;
-            }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada data absensi</td></tr>';
+            }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi</td></tr>';
 
             document.getElementById('recentAbsensi').innerHTML = absensiHtml;
+            updateBulkActionVisibility();
 
             // Show different dashboard based on role
             if (user.role === 'pegawai') {
@@ -1072,6 +1080,48 @@
 
               App.showToast('Data absensi berhasil dihapus', 'success');
               document.getElementById('actionMenuPopover').classList.remove('show');
+              loadDashboard();
+            }
+          }
+
+          // ========= Selection & Bulk Action Logic =========
+          function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateBulkActionVisibility();
+          }
+
+          function updateBulkActionVisibility() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked);
+            const bulkActions = document.getElementById('bulkActions');
+            const selectAll = document.getElementById('selectAll');
+
+            if (bulkActions) {
+              if (checked.length > 0) {
+                bulkActions.classList.remove('d-none');
+                document.getElementById('selectedCount').textContent = checked.length;
+              } else {
+                bulkActions.classList.add('d-none');
+              }
+            }
+
+            if (selectAll) {
+              selectAll.checked = checkboxes.length > 0 && checked.length === checkboxes.length;
+            }
+          }
+
+          function bulkDeleteAbsensi() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} data absensi yang dipilih?`)) {
+              const absensi = Data.getAbsensi();
+              const newAbsensi = absensi.filter(a => !ids.includes(a.id));
+              localStorage.setItem(Data.KEYS.ABSENSI, JSON.stringify(newAbsensi));
+
+              App.showToast(`${ids.length} data absensi berhasil dihapus`, 'success');
               loadDashboard();
             }
           }
