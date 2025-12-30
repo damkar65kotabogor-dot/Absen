@@ -75,7 +75,7 @@ const Data = {
             { id: 24, username: '199902042025211036', password: '1999', role: 'pegawai', name: 'Vareski Nalfaredo' },
             { id: 25, username: '199701052025212046', password: '1997', role: 'pegawai', name: 'Vivi Hastuti' },
             { id: 26, username: '199706162025211052', password: '1997', role: 'pegawai', name: 'Zico Arya Pratama' },
-            { id: 27, username: '197812202025211041', password: '1987', role: 'pegawai', name: 'Wellem Aula' },
+            { id: 27, username: '197812202025211041', password: '1978', role: 'pegawai', name: 'Wellem Aula' },
             { id: 28, username: '198008092025211055', password: '1980', role: 'pegawai', name: 'David Indra' },
             { id: 29, username: '199303242025211140', password: '1993', role: 'pegawai', name: 'Rm. Rangga Putra' }
         ];
