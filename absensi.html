@@ -117,7 +117,7 @@
                     <div class="d-flex gap-4 flex-wrap align-center">
                         <div class="form-group m-0" style="min-width: 180px;">
                             <select class="form-control" id="filterPegawai">
-                                <option value="">Semua Pegawai</option>
+                                <option value="">Semua</option>
                             </select>
                         </div>
                         <div class="form-group m-0" style="min-width: 150px;">
@@ -239,7 +239,7 @@
             } else {
                 // Load pegawai filter
                 const pegawai = Data.getPegawai();
-                document.getElementById('filterPegawai').innerHTML = '<option value="">Semua Pegawai</option>' +
+                document.getElementById('filterPegawai').innerHTML = '<option value="">Semua</option>' +
                     pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
             }
         }

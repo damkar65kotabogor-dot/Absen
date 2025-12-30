@@ -83,14 +83,14 @@
           </button>
           <h2 class="header-title">Dashboard</h2>
         </div>
-        <div class="header-center">
+        <div class="header-center" id="headerSearch">
           <div class="search-box">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input type="text" placeholder="Cari pegawai..." class="search-input">
+            <input type="text" placeholder="Cari..." class="search-input">
           </div>
         </div>
         <div class="header-right">
@@ -605,6 +605,10 @@
 
       // Show different dashboard based on role
       if (user.role === 'pegawai') {
+        // Hide search for pegawai
+        const headerSearch = document.getElementById('headerSearch');
+        if (headerSearch) headerSearch.style.display = 'none';
+
         // Hide admin content for pegawai
         document.querySelector('.stats-grid-new').style.display = 'none';
         document.querySelector('.dashboard-grid').style.display = 'none';
@@ -614,6 +618,9 @@
         // Show simple pegawai menu
         document.getElementById('pegawaiDashboard').classList.remove('d-none');
       } else {
+        // Show search for admin/pimpinan
+        const headerSearch = document.getElementById('headerSearch');
+        if (headerSearch) headerSearch.style.display = '';
         // Initialize chart for admin/pimpinan
         try {
           if (typeof Chart !== 'undefined') {
