@@ -1,5 +1,5 @@
 /**
- * SIMPEG PPPK - Main Application
+ * SIMPEG PPPK Paruh Waktu - Main Application
  */
 
 const App = {
