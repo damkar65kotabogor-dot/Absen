@@ -147,17 +147,7 @@ const Data = {
         // Cuti (sample)
         const cuti = [
             {
-                id: 1,
-                pegawaiId: 1,
-                jenisCuti: 'Cuti Tahunan',
-                tanggalMulai: '2024-12-26',
-                tanggalSelesai: '2024-12-27',
-                jumlahHari: 2,
-                alasan: 'Keperluan keluarga',
-                status: 'pending',
-                tanggalPengajuan: '2024-12-20',
-                approvedBy: null,
-                approvedAt: null
+
             }
         ];
 
