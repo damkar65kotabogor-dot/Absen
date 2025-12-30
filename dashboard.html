@@ -349,222 +349,169 @@
           </div>
         </div>
 
-        <!-- Pegawai Actions (for pegawai role) -->
-        <div id="pegawaiActions" class="d-none mt-5">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Aksi Cepat</h3>
-            </div>
-            <div class="card-body">
-              <div class="d-flex gap-4 flex-wrap">
-                <button id="btnCheckIn" class="btn btn-primary btn-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                  Check-In
-                </button>
-                <button id="btnCheckOut" class="btn btn-danger btn-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
-                  Check-Out
-                </button>
-                <a href="cuti.html" class="btn btn-secondary btn-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                  Ajukan Cuti
-                </a>
-              </div>
-              <div id="attendanceStatus" class="alert alert-info mt-4 d-none">
+        <!-- Filter Modal -->
+        <div class="modal-overlay" id="filterModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h3 class="modal-title">Filter Absensi</h3>
+              <button class="modal-close" onclick="closeFilterModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="alert-icon">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
-                <span id="attendanceStatusText"></span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Status Kehadiran</label>
+                <select class="form-control" id="filterStatus">
+                  <option value="all">Semua</option>
+                  <option value="tepat_waktu">Hadir Tepat Waktu</option>
+                  <option value="terlambat">Terlambat</option>
+                </select>
               </div>
+              <div class="form-group">
+                <label class="form-label">Tanggal Mulai</label>
+                <input type="date" class="form-control" id="filterStartDate">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tanggal Akhir</label>
+                <input type="date" class="form-control" id="filterEndDate">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" onclick="closeFilterModal()">Reset</button>
+              <button class="btn btn-primary" onclick="applyFilter()">Terapkan</button>
             </div>
           </div>
         </div>
-      </div>
-    </main>
-  </div>
 
-  <!-- Filter Modal -->
-  <div class="modal-overlay" id="filterModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">Filter Absensi</h3>
-        <button class="modal-close" onclick="closeFilterModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Status Kehadiran</label>
-          <select class="form-control" id="filterStatus">
-            <option value="all">Semua</option>
-            <option value="tepat_waktu">Hadir Tepat Waktu</option>
-            <option value="terlambat">Terlambat</option>
-          </select>
+        <!-- Action Menu Popover -->
+        <div class="action-menu-popover" id="actionMenuPopover">
+          <a href="#" class="action-menu-item" onclick="viewDetailAbsensi()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Lihat Detail
+          </a>
+          <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Hapus Data
+          </a>
         </div>
-        <div class="form-group">
-          <label class="form-label">Tanggal Mulai</label>
-          <input type="date" class="form-control" id="filterStartDate">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tanggal Akhir</label>
-          <input type="date" class="form-control" id="filterEndDate">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeFilterModal()">Reset</button>
-        <button class="btn btn-primary" onclick="applyFilter()">Terapkan</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Action Menu Popover -->
-  <div class="action-menu-popover" id="actionMenuPopover">
-    <a href="#" class="action-menu-item" onclick="viewDetailAbsensi()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </svg>
-      Lihat Detail
-    </a>
-    <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="3 6 5 6 21 6"></polyline>
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-      </svg>
-      Hapus Data
-    </a>
-  </div>
-
-  <!-- Manual Attendance Modal -->
-  <div class="modal-overlay" id="manualAttendanceModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">Absensi Manual</h3>
-        <button class="modal-close" onclick="closeManualModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-      <form id="manualAttendanceForm">
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Pegawai</label>
-            <select class="form-control" id="manualPegawai" required>
-              <option value="">Pilih Pegawai</option>
-              <!-- Populated by JS -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tanggal</label>
-            <input type="date" class="form-control" id="manualTanggal" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Jam Masuk</label>
-            <input type="time" class="form-control" id="manualJamMasuk" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Jam Keluar (Opsional)</label>
-            <input type="time" class="form-control" id="manualJamKeluar">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Status</label>
-            <select class="form-control" id="manualStatus">
-              <option value="tepat_waktu">Hadir Tepat Waktu</option>
-              <option value="terlambat">Terlambat</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Keterangan (Opsional)</label>
-            <input type="text" class="form-control" id="manualKeterangan"
-              placeholder="Contoh: Absensi manual oleh admin">
+        <!-- Manual Attendance Modal -->
+        <div class="modal-overlay" id="manualAttendanceModal">
+          <div class="modal">
+            <div class="modal-header">
+              <h3 class="modal-title">Absensi Manual</h3>
+              <button class="modal-close" onclick="closeManualModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <form id="manualAttendanceForm">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="form-label">Pegawai</label>
+                  <select class="form-control" id="manualPegawai" required>
+                    <option value="">Pilih Pegawai</option>
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tanggal</label>
+                  <input type="date" class="form-control" id="manualTanggal" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Jam Masuk</label>
+                  <input type="time" class="form-control" id="manualJamMasuk" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Jam Keluar (Opsional)</label>
+                  <input type="time" class="form-control" id="manualJamKeluar">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Status</label>
+                  <select class="form-control" id="manualStatus">
+                    <option value="tepat_waktu">Hadir Tepat Waktu</option>
+                    <option value="terlambat">Terlambat</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Keterangan (Opsional)</label>
+                  <input type="text" class="form-control" id="manualKeterangan"
+                    placeholder="Contoh: Absensi manual oleh admin">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeManualModal()">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+              </div>
+            </form>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeManualModal()">Batal</button>
-          <button type="submit" class="btn btn-primary">Simpan</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <script src="js/data.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/app.js"></script>
-  <script>
-    // Require authentication
-    if (!Auth.requireAuth()) {
-      // Redirected to login
-    }
+        <script src="js/data.js"></script>
+        <script src="js/auth.js"></script>
+        <script src="js/app.js"></script>
+        <script>
+          // Require authentication
+          if (!Auth.requireAuth()) {
+            // Redirected to login
+          }
 
-    // Update current date
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
+          // Update current date
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
 
-    // Chart instance
-    let attendanceChart = null;
+          // Chart instance
+          let attendanceChart = null;
 
-    // Calendar state
-    let currentCalendarDate = new Date();
+          // Calendar state
+          let currentCalendarDate = new Date();
 
-    // Load dashboard data
-    function loadDashboard() {
-      const user = Auth.getCurrentUser();
-      const stats = Data.getStats();
-      const totalPegawai = stats.totalPegawai;
+          // Load dashboard data
+          function loadDashboard() {
+            const user = Auth.getCurrentUser();
+            const stats = Data.getStats();
+            const totalPegawai = stats.totalPegawai;
 
-      // Update stats
-      document.getElementById('statTotalPegawai').textContent = totalPegawai;
-      document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
-      document.getElementById('statTerlambat').textContent = stats.terlambatHariIni;
-      document.getElementById('statTidakHadir').textContent = stats.tidakHadir;
-      document.getElementById('notifBadge').textContent = stats.cutiPending;
+            // Update stats
+            document.getElementById('statTotalPegawai').textContent = totalPegawai;
+            document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
+            document.getElementById('statTerlambat').textContent = stats.terlambatHariIni;
+            document.getElementById('statTidakHadir').textContent = stats.tidakHadir;
+            document.getElementById('notifBadge').textContent = stats.cutiPending;
 
-      // Calculate percentages
-      const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
-      document.getElementById('statHadirPersen').textContent = hadirPersen;
-      document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
+            // Calculate percentages
+            const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
+            document.getElementById('statHadirPersen').textContent = hadirPersen;
+            document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
 
-      // Load recent absensi with new format
-      const absensi = Data.getAbsensiWithPegawai()
-        .sort((a, b) => new Date(b.tanggal + ' ' + b.jamMasuk) - new Date(a.tanggal + ' ' + a.jamMasuk))
-        .slice(0, 5);
+            // Load recent absensi with new format
+            const absensi = Data.getAbsensiWithPegawai()
+              .sort((a, b) => new Date(b.tanggal + ' ' + b.jamMasuk) - new Date(a.tanggal + ' ' + a.jamMasuk))
+              .slice(0, 5);
 
-      const absensiHtml = absensi.length > 0 ? absensi.map(a => {
-        const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
-        const avatarDisplay = a.pegawai?.foto ?
-          `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
-          initials;
-        const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
-        const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
-        return `
+            const absensiHtml = absensi.length > 0 ? absensi.map(a => {
+              const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+              const avatarDisplay = a.pegawai?.foto ?
+                `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
+                initials;
+              const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
+              const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
+              return `
           <tr>
             <td>
               <div class="employee-cell">
@@ -599,479 +546,479 @@
             </td>
           </tr>
         `;
-      }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada data absensi</td></tr>';
+            }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada data absensi</td></tr>';
 
-      document.getElementById('recentAbsensi').innerHTML = absensiHtml;
+            document.getElementById('recentAbsensi').innerHTML = absensiHtml;
 
-      // Show different dashboard based on role
-      if (user.role === 'pegawai') {
-        // Hide search for pegawai
-        const headerSearch = document.getElementById('headerSearch');
-        if (headerSearch) headerSearch.style.display = 'none';
+            // Show different dashboard based on role
+            if (user.role === 'pegawai') {
+              // Hide search for pegawai
+              const headerSearch = document.getElementById('headerSearch');
+              if (headerSearch) headerSearch.style.display = 'none';
 
-        // Hide admin content for pegawai
-        document.querySelector('.stats-grid-new').style.display = 'none';
-        document.querySelector('.dashboard-grid').style.display = 'none';
-        document.querySelector('.attendance-table-card').style.display = 'none';
-        document.querySelector('.title-actions').style.display = 'none';
+              // Hide admin content for pegawai
+              document.querySelector('.stats-grid-new').style.display = 'none';
+              document.querySelector('.dashboard-grid').style.display = 'none';
+              document.querySelector('.attendance-table-card').style.display = 'none';
+              document.querySelector('.title-actions').style.display = 'none';
 
-        // Show simple pegawai menu
-        document.getElementById('pegawaiDashboard').classList.remove('d-none');
-        document.getElementById('pegawaiActions').classList.remove('d-none');
-        checkTodayAttendance();
-      } else {
-        // Show search for admin/pimpinan
-        const headerSearch = document.getElementById('headerSearch');
-        if (headerSearch) headerSearch.style.display = '';
-        // Initialize chart for admin/pimpinan
-        try {
-          if (typeof Chart !== 'undefined') {
-            initChart();
-          } else {
-            console.error('Chart.js not loaded');
-          }
-        } catch (e) {
-          console.error('Error initializing chart:', e);
-        }
+              // Show simple pegawai menu
+              document.getElementById('pegawaiDashboard').classList.remove('d-none');
+              document.getElementById('pegawaiActions').classList.remove('d-none');
+              checkTodayAttendance();
+            } else {
+              // Show search for admin/pimpinan
+              const headerSearch = document.getElementById('headerSearch');
+              if (headerSearch) headerSearch.style.display = '';
+              // Initialize chart for admin/pimpinan
+              try {
+                if (typeof Chart !== 'undefined') {
+                  initChart();
+                } else {
+                  console.error('Chart.js not loaded');
+                }
+              } catch (e) {
+                console.error('Error initializing chart:', e);
+              }
 
-        try {
-          renderCalendar();
-        } catch (e) {
-          console.error('Error rendering calendar:', e);
-        }
-      }
-    }
-
-    // Initialize attendance chart
-    function initChart() {
-      const ctx = document.getElementById('attendanceChart').getContext('2d');
-
-      // Get weekly data
-      const weekData = getWeeklyAttendanceData();
-
-      if (attendanceChart) {
-        attendanceChart.destroy();
-      }
-
-      attendanceChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-          datasets: [{
-            label: 'Kehadiran',
-            data: weekData,
-            backgroundColor: '#3b82f6',
-            borderRadius: 6,
-            borderSkipped: false,
-            barThickness: 40,
-            maxBarThickness: 50
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
+              try {
+                renderCalendar();
+              } catch (e) {
+                console.error('Error rendering calendar:', e);
+              }
             }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
+          }
+
+          // Initialize attendance chart
+          function initChart() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+            // Get weekly data
+            const weekData = getWeeklyAttendanceData();
+
+            if (attendanceChart) {
+              attendanceChart.destroy();
+            }
+
+            attendanceChart = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                datasets: [{
+                  label: 'Kehadiran',
+                  data: weekData,
+                  backgroundColor: '#3b82f6',
+                  borderRadius: 6,
+                  borderSkipped: false,
+                  barThickness: 40,
+                  maxBarThickness: 50
+                }]
               },
-              ticks: {
-                color: '#64748b',
-                font: {
-                  size: 12
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: {
+                      display: false
+                    },
+                    ticks: {
+                      color: '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      color: '#e2e8f0'
+                    },
+                    ticks: {
+                      color: '#64748b',
+                      font: {
+                        size: 12
+                      },
+                      stepSize: 20
+                    }
+                  }
                 }
               }
-            },
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: '#e2e8f0'
-              },
-              ticks: {
-                color: '#64748b',
-                font: {
-                  size: 12
-                },
-                stepSize: 20
+            });
+
+            // Update date range text
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            const formatDate = (d) => `${d.getDate()} ${d.toLocaleDateString('id-ID', { month: 'short' })}`;
+            document.getElementById('chartDateRange').textContent =
+              `Statistik mingguan (${formatDate(startOfWeek)}-${formatDate(endOfWeek)})`;
+          }
+
+          // Get weekly attendance data
+          function getWeeklyAttendanceData() {
+            const absensi = Data.getAbsensi();
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+
+            const weekData = [0, 0, 0, 0, 0, 0, 0];
+
+            absensi.forEach(a => {
+              const date = new Date(a.tanggal);
+              if (date >= startOfWeek) {
+                const dayIndex = (date.getDay() + 6) % 7; // Monday = 0
+                weekData[dayIndex]++;
               }
+            });
+
+            // Simulate some data if empty
+            if (weekData.every(d => d === 0)) {
+              return [24, 22, 25, 23, 27, 5, 2];
+            }
+
+            return weekData;
+          }
+
+          // Render calendar
+          function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+
+            // Update month title
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+
+            // Get first day of month and total days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+
+            // Get day of week for first day (0 = Sunday, adjust for Monday start)
+            let startDay = firstDay.getDay();
+            startDay = startDay === 0 ? 6 : startDay - 1; // Monday = 0
+
+            // Generate calendar HTML
+            const today = new Date();
+            let html = '';
+
+            // Previous month days
+            const prevMonth = new Date(year, month, 0);
+            const prevMonthDays = prevMonth.getDate();
+            for (let i = startDay - 1; i >= 0; i--) {
+              html += `<span class="calendar-day other-month">${prevMonthDays - i}</span>`;
+            }
+
+            // Current month days
+            for (let d = 1; d <= totalDays; d++) {
+              const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+              const classes = ['calendar-day'];
+              if (isToday) classes.push('today');
+              html += `<span class="${classes.join(' ')}">${d}</span>`;
+            }
+
+            // Next month days
+            const remainingDays = 42 - (startDay + totalDays);
+            for (let d = 1; d <= remainingDays; d++) {
+              html += `<span class="calendar-day other-month">${d}</span>`;
+            }
+
+            document.getElementById('calendarDays').innerHTML = html;
+          }
+
+          // Calendar navigation
+          document.getElementById('prevMonth')?.addEventListener('click', function () {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+          });
+
+          document.getElementById('nextMonth')?.addEventListener('click', function () {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+          });
+
+          // Check today's attendance for pegawai
+          function checkTodayAttendance() {
+            const user = Auth.getCurrentUser();
+            if (!user.pegawaiId) return;
+
+            const today = new Date().toISOString().split('T')[0];
+            const absensi = Data.getAbsensi().find(a =>
+              a.pegawaiId === user.pegawaiId && a.tanggal === today
+            );
+
+            const statusDiv = document.getElementById('attendanceStatus');
+            const statusText = document.getElementById('attendanceStatusText');
+            const btnCheckIn = document.getElementById('btnCheckIn');
+            const btnCheckOut = document.getElementById('btnCheckOut');
+
+            if (absensi) {
+              statusDiv.classList.remove('d-none');
+              if (absensi.jamKeluar) {
+                statusText.textContent = `Anda sudah absen hari ini. Masuk: ${absensi.jamMasuk}, Keluar: ${absensi.jamKeluar}`;
+                btnCheckIn.disabled = true;
+                btnCheckOut.disabled = true;
+              } else {
+                statusText.textContent = `Anda sudah check-in pada ${absensi.jamMasuk}. Jangan lupa check-out!`;
+                btnCheckIn.disabled = true;
+                btnCheckOut.disabled = false;
+              }
+            } else {
+              btnCheckIn.disabled = false;
+              btnCheckOut.disabled = true;
             }
           }
-        }
-      });
 
-      // Update date range text
-      const today = new Date();
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay() + 1);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+          // Handle check-in
+          document.getElementById('btnCheckIn')?.addEventListener('click', function () {
+            const user = Auth.getCurrentUser();
+            if (!user.pegawaiId) {
+              App.showToast('Data pegawai tidak ditemukan!', 'danger');
+              return;
+            }
 
-      const formatDate = (d) => `${d.getDate()} ${d.toLocaleDateString('id-ID', { month: 'short' })}`;
-      document.getElementById('chartDateRange').textContent =
-        `Statistik mingguan (${formatDate(startOfWeek)}-${formatDate(endOfWeek)})`;
-    }
+            const now = new Date();
+            const jamMasuk = now.toTimeString().slice(0, 5);
+            const today = now.toISOString().split('T')[0];
 
-    // Get weekly attendance data
-    function getWeeklyAttendanceData() {
-      const absensi = Data.getAbsensi();
-      const today = new Date();
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+            Data.create(Data.KEYS.ABSENSI, {
+              pegawaiId: user.pegawaiId,
+              tanggal: today,
+              jamMasuk: jamMasuk,
+              jamKeluar: null,
+              status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
+              keterangan: ''
+            });
 
-      const weekData = [0, 0, 0, 0, 0, 0, 0];
-
-      absensi.forEach(a => {
-        const date = new Date(a.tanggal);
-        if (date >= startOfWeek) {
-          const dayIndex = (date.getDay() + 6) % 7; // Monday = 0
-          weekData[dayIndex]++;
-        }
-      });
-
-      // Simulate some data if empty
-      if (weekData.every(d => d === 0)) {
-        return [24, 22, 25, 23, 27, 5, 2];
-      }
-
-      return weekData;
-    }
-
-    // Render calendar
-    function renderCalendar() {
-      const year = currentCalendarDate.getFullYear();
-      const month = currentCalendarDate.getMonth();
-
-      // Update month title
-      const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
-
-      // Get first day of month and total days
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const totalDays = lastDay.getDate();
-
-      // Get day of week for first day (0 = Sunday, adjust for Monday start)
-      let startDay = firstDay.getDay();
-      startDay = startDay === 0 ? 6 : startDay - 1; // Monday = 0
-
-      // Generate calendar HTML
-      const today = new Date();
-      let html = '';
-
-      // Previous month days
-      const prevMonth = new Date(year, month, 0);
-      const prevMonthDays = prevMonth.getDate();
-      for (let i = startDay - 1; i >= 0; i--) {
-        html += `<span class="calendar-day other-month">${prevMonthDays - i}</span>`;
-      }
-
-      // Current month days
-      for (let d = 1; d <= totalDays; d++) {
-        const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-        const classes = ['calendar-day'];
-        if (isToday) classes.push('today');
-        html += `<span class="${classes.join(' ')}">${d}</span>`;
-      }
-
-      // Next month days
-      const remainingDays = 42 - (startDay + totalDays);
-      for (let d = 1; d <= remainingDays; d++) {
-        html += `<span class="calendar-day other-month">${d}</span>`;
-      }
-
-      document.getElementById('calendarDays').innerHTML = html;
-    }
-
-    // Calendar navigation
-    document.getElementById('prevMonth')?.addEventListener('click', function () {
-      currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-      renderCalendar();
-    });
-
-    document.getElementById('nextMonth')?.addEventListener('click', function () {
-      currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-      renderCalendar();
-    });
-
-    // Check today's attendance for pegawai
-    function checkTodayAttendance() {
-      const user = Auth.getCurrentUser();
-      if (!user.pegawaiId) return;
-
-      const today = new Date().toISOString().split('T')[0];
-      const absensi = Data.getAbsensi().find(a =>
-        a.pegawaiId === user.pegawaiId && a.tanggal === today
-      );
-
-      const statusDiv = document.getElementById('attendanceStatus');
-      const statusText = document.getElementById('attendanceStatusText');
-      const btnCheckIn = document.getElementById('btnCheckIn');
-      const btnCheckOut = document.getElementById('btnCheckOut');
-
-      if (absensi) {
-        statusDiv.classList.remove('d-none');
-        if (absensi.jamKeluar) {
-          statusText.textContent = `Anda sudah absen hari ini. Masuk: ${absensi.jamMasuk}, Keluar: ${absensi.jamKeluar}`;
-          btnCheckIn.disabled = true;
-          btnCheckOut.disabled = true;
-        } else {
-          statusText.textContent = `Anda sudah check-in pada ${absensi.jamMasuk}. Jangan lupa check-out!`;
-          btnCheckIn.disabled = true;
-          btnCheckOut.disabled = false;
-        }
-      } else {
-        btnCheckIn.disabled = false;
-        btnCheckOut.disabled = true;
-      }
-    }
-
-    // Handle check-in
-    document.getElementById('btnCheckIn')?.addEventListener('click', function () {
-      const user = Auth.getCurrentUser();
-      if (!user.pegawaiId) {
-        App.showToast('Data pegawai tidak ditemukan!', 'danger');
-        return;
-      }
-
-      const now = new Date();
-      const jamMasuk = now.toTimeString().slice(0, 5);
-      const today = now.toISOString().split('T')[0];
-
-      Data.create(Data.KEYS.ABSENSI, {
-        pegawaiId: user.pegawaiId,
-        tanggal: today,
-        jamMasuk: jamMasuk,
-        jamKeluar: null,
-        status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
-        keterangan: ''
-      });
-
-      App.showToast('Check-in berhasil!', 'success');
-      loadDashboard();
-    });
-
-    // Handle check-out
-    document.getElementById('btnCheckOut')?.addEventListener('click', function () {
-      const user = Auth.getCurrentUser();
-      if (!user.pegawaiId) {
-        App.showToast('Data pegawai tidak ditemukan!', 'danger');
-        return;
-      }
-
-      const today = new Date().toISOString().split('T')[0];
-      const absensi = Data.getAbsensi().find(a =>
-        a.pegawaiId === user.pegawaiId && a.tanggal === today
-      );
-
-      if (absensi) {
-        const jamKeluar = new Date().toTimeString().slice(0, 5);
-        Data.update(Data.KEYS.ABSENSI, absensi.id, { jamKeluar });
-        App.showToast('Check-out berhasil!', 'success');
-        loadDashboard();
-      }
-    });
-
-    // Handle download report
-    function downloadReport() {
-      console.log('Running downloadReport');
-      const absensi = Data.getAbsensiWithPegawai();
-      const today = new Date();
-      const month = today.getMonth();
-      const year = today.getFullYear();
-
-      // Filter current month
-      const monthlyData = absensi.filter(a => {
-        const date = new Date(a.tanggal);
-        return date.getMonth() === month && date.getFullYear() === year;
-      });
-
-      // Create CSV content
-      let csv = 'No,Nama,NIP,Tanggal,Jam Masuk,Jam Keluar,Status\n';
-      monthlyData.forEach((a, i) => {
-        const status = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
-        csv += `${i + 1},"${a.pegawai?.nama || '-'}","${a.pegawai?.nip || '-'}",${a.tanggal},${a.jamMasuk},${a.jamKeluar || '-'},${status}\n`;
-      });
-
-      // Download file
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `Laporan_Absensi_${year}_${String(month + 1).padStart(2, '0')}.csv`;
-      link.click();
-
-      App.showToast('Laporan berhasil diunduh!', 'success');
-    }
-
-    // Open manual attendance modal
-    function openManualAttendanceModal() {
-      console.log('Running openManualAttendanceModal');
-      // Get pegawai list for dropdown
-      const pegawai = Data.getPegawai().filter(p => p.status === 'aktif');
-      const select = document.getElementById('manualPegawai');
-      if (select) {
-        select.innerHTML = '<option value="">Pilih Pegawai</option>' +
-          pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
-      }
-
-      const today = new Date().toISOString().split('T')[0];
-      const now = new Date().toTimeString().slice(0, 5);
-
-      document.getElementById('manualTanggal').value = today;
-      document.getElementById('manualJamMasuk').value = now;
-
-      const modal = document.getElementById('manualAttendanceModal');
-      if (modal) modal.classList.add('show');
-    }
-
-    // Handle manual form submit
-    document.getElementById('manualAttendanceForm')?.addEventListener('submit', function (e) {
-      e.preventDefault();
-      submitManualAttendance();
-    });
-
-    // Close manual attendance modal
-    function closeManualModal() {
-      const modal = document.getElementById('manualAttendanceModal');
-      if (modal) modal.classList.remove('show');
-    }
-
-    // Submit manual attendance
-    function submitManualAttendance() {
-      const pegawaiId = document.getElementById('manualPegawai').value;
-      const tanggal = document.getElementById('manualTanggal').value;
-      const jamMasuk = document.getElementById('manualJamMasuk').value;
-      const jamKeluar = document.getElementById('manualJamKeluar').value || null;
-      const status = document.getElementById('manualStatus').value;
-      const keterangan = document.getElementById('manualKeterangan').value || 'Absensi manual';
-
-      if (!pegawaiId || !tanggal || !jamMasuk) {
-        App.showToast('Mohon lengkapi data yang diperlukan!', 'warning');
-        return;
-      }
-
-      // Check if attendance already exists
-      const existing = Data.getAbsensi().find(a =>
-        a.pegawaiId === parseInt(pegawaiId) && a.tanggal === tanggal
-      );
-
-      if (existing) {
-        if (confirm('Data absensi untuk pegawai ini pada tanggal tersebut sudah ada. Apakah Anda ingin mengupdate data ini?')) {
-          Data.update(Data.KEYS.ABSENSI, existing.id, {
-            jamMasuk: jamMasuk,
-            jamKeluar: jamKeluar,
-            status: status,
-            keterangan: keterangan
+            App.showToast('Check-in berhasil!', 'success');
+            loadDashboard();
           });
-          App.showToast('Data absensi berhasil diupdate!', 'success');
-          closeManualModal();
+
+          // Handle check-out
+          document.getElementById('btnCheckOut')?.addEventListener('click', function () {
+            const user = Auth.getCurrentUser();
+            if (!user.pegawaiId) {
+              App.showToast('Data pegawai tidak ditemukan!', 'danger');
+              return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const absensi = Data.getAbsensi().find(a =>
+              a.pegawaiId === user.pegawaiId && a.tanggal === today
+            );
+
+            if (absensi) {
+              const jamKeluar = new Date().toTimeString().slice(0, 5);
+              Data.update(Data.KEYS.ABSENSI, absensi.id, { jamKeluar });
+              App.showToast('Check-out berhasil!', 'success');
+              loadDashboard();
+            }
+          });
+
+          // Handle download report
+          function downloadReport() {
+            console.log('Running downloadReport');
+            const absensi = Data.getAbsensiWithPegawai();
+            const today = new Date();
+            const month = today.getMonth();
+            const year = today.getFullYear();
+
+            // Filter current month
+            const monthlyData = absensi.filter(a => {
+              const date = new Date(a.tanggal);
+              return date.getMonth() === month && date.getFullYear() === year;
+            });
+
+            // Create CSV content
+            let csv = 'No,Nama,NIP,Tanggal,Jam Masuk,Jam Keluar,Status\n';
+            monthlyData.forEach((a, i) => {
+              const status = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
+              csv += `${i + 1},"${a.pegawai?.nama || '-'}","${a.pegawai?.nip || '-'}",${a.tanggal},${a.jamMasuk},${a.jamKeluar || '-'},${status}\n`;
+            });
+
+            // Download file
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Laporan_Absensi_${year}_${String(month + 1).padStart(2, '0')}.csv`;
+            link.click();
+
+            App.showToast('Laporan berhasil diunduh!', 'success');
+          }
+
+          // Open manual attendance modal
+          function openManualAttendanceModal() {
+            console.log('Running openManualAttendanceModal');
+            // Get pegawai list for dropdown
+            const pegawai = Data.getPegawai().filter(p => p.status === 'aktif');
+            const select = document.getElementById('manualPegawai');
+            if (select) {
+              select.innerHTML = '<option value="">Pilih Pegawai</option>' +
+                pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date().toTimeString().slice(0, 5);
+
+            document.getElementById('manualTanggal').value = today;
+            document.getElementById('manualJamMasuk').value = now;
+
+            const modal = document.getElementById('manualAttendanceModal');
+            if (modal) modal.classList.add('show');
+          }
+
+          // Handle manual form submit
+          document.getElementById('manualAttendanceForm')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+            submitManualAttendance();
+          });
+
+          // Close manual attendance modal
+          function closeManualModal() {
+            const modal = document.getElementById('manualAttendanceModal');
+            if (modal) modal.classList.remove('show');
+          }
+
+          // Submit manual attendance
+          function submitManualAttendance() {
+            const pegawaiId = document.getElementById('manualPegawai').value;
+            const tanggal = document.getElementById('manualTanggal').value;
+            const jamMasuk = document.getElementById('manualJamMasuk').value;
+            const jamKeluar = document.getElementById('manualJamKeluar').value || null;
+            const status = document.getElementById('manualStatus').value;
+            const keterangan = document.getElementById('manualKeterangan').value || 'Absensi manual';
+
+            if (!pegawaiId || !tanggal || !jamMasuk) {
+              App.showToast('Mohon lengkapi data yang diperlukan!', 'warning');
+              return;
+            }
+
+            // Check if attendance already exists
+            const existing = Data.getAbsensi().find(a =>
+              a.pegawaiId === parseInt(pegawaiId) && a.tanggal === tanggal
+            );
+
+            if (existing) {
+              if (confirm('Data absensi untuk pegawai ini pada tanggal tersebut sudah ada. Apakah Anda ingin mengupdate data ini?')) {
+                Data.update(Data.KEYS.ABSENSI, existing.id, {
+                  jamMasuk: jamMasuk,
+                  jamKeluar: jamKeluar,
+                  status: status,
+                  keterangan: keterangan
+                });
+                App.showToast('Data absensi berhasil diupdate!', 'success');
+                closeManualModal();
+                loadDashboard();
+              }
+              return;
+            }
+
+            // Create attendance record
+            Data.create(Data.KEYS.ABSENSI, {
+              pegawaiId: parseInt(pegawaiId),
+              tanggal: tanggal,
+              jamMasuk: jamMasuk,
+              jamKeluar: jamKeluar,
+              status: status,
+              keterangan: keterangan
+            });
+
+            App.showToast('Absensi manual berhasil disimpan!', 'success');
+            closeManualModal();
+            loadDashboard();
+          }
+
+          // Initialize
           loadDashboard();
-        }
-        return;
-      }
 
-      // Create attendance record
-      Data.create(Data.KEYS.ABSENSI, {
-        pegawaiId: parseInt(pegawaiId),
-        tanggal: tanggal,
-        jamMasuk: jamMasuk,
-        jamKeluar: jamKeluar,
-        status: status,
-        keterangan: keterangan
-      });
+          // ========= Filter Functionality =========
+          function openFilterModal() {
+            const modal = document.getElementById('filterModal');
+            if (modal) modal.classList.add('show');
+          }
 
-      App.showToast('Absensi manual berhasil disimpan!', 'success');
-      closeManualModal();
-      loadDashboard();
-    }
+          function closeFilterModal() {
+            const modal = document.getElementById('filterModal');
+            if (modal) modal.classList.remove('show');
+          }
 
-    // Initialize
-    loadDashboard();
+          function applyFilter() {
+            App.showToast('Filter diterapkan (Simulasi)', 'success');
+            closeFilterModal();
+            // In real app, re-query data with filters
+          }
 
-    // ========= Filter Functionality =========
-    function openFilterModal() {
-      const modal = document.getElementById('filterModal');
-      if (modal) modal.classList.add('show');
-    }
+          // ========= Action Menu Functionality =========
+          let currentAbsensiId = null;
 
-    function closeFilterModal() {
-      const modal = document.getElementById('filterModal');
-      if (modal) modal.classList.remove('show');
-    }
+          function showActionMenu(event, id) {
+            event.preventDefault();
+            event.stopPropagation();
 
-    function applyFilter() {
-      App.showToast('Filter diterapkan (Simulasi)', 'success');
-      closeFilterModal();
-      // In real app, re-query data with filters
-    }
+            console.log('Action menu clicked for ID:', id);
+            currentAbsensiId = id;
 
-    // ========= Action Menu Functionality =========
-    let currentAbsensiId = null;
+            const popover = document.getElementById('actionMenuPopover');
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
 
-    function showActionMenu(event, id) {
-      event.preventDefault();
-      event.stopPropagation();
+            // Dynamic positioning for FIXED element
+            // For fixed, top/left are relative to viewport, so rect.bottom/rect.left are already correct
+            const popoverWidth = 160;
+            let top = rect.bottom + 5;
+            let left = rect.left - popoverWidth + rect.width;
 
-      console.log('Action menu clicked for ID:', id);
-      currentAbsensiId = id;
+            // Boundary check
+            if (left < 10) left = 10;
 
-      const popover = document.getElementById('actionMenuPopover');
-      const btn = event.currentTarget;
-      const rect = btn.getBoundingClientRect();
+            // Ensure it doesn't go off bottom
+            if (top + 100 > window.innerHeight) {
+              top = rect.top - 100; // Show above if too low
+            }
 
-      // Dynamic positioning for FIXED element
-      // For fixed, top/left are relative to viewport, so rect.bottom/rect.left are already correct
-      const popoverWidth = 160;
-      let top = rect.bottom + 5;
-      let left = rect.left - popoverWidth + rect.width;
+            popover.style.top = `${top}px`;
+            popover.style.left = `${left}px`;
+            popover.classList.add('show');
+          }
 
-      // Boundary check
-      if (left < 10) left = 10;
+          function viewDetailAbsensi() {
+            if (!currentAbsensiId) return;
+            App.showToast(`Melihat detail absensi ID: ${currentAbsensiId}`, 'info');
+            // Navigate to detail page or show modal
+            document.getElementById('actionMenuPopover').classList.remove('show');
+          }
 
-      // Ensure it doesn't go off bottom
-      if (top + 100 > window.innerHeight) {
-        top = rect.top - 100; // Show above if too low
-      }
+          function deleteAbsensi() {
+            if (!currentAbsensiId) return;
+            if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
+              // Remove from DB (localStorage)
+              const absensi = Data.getAbsensi();
+              const newAbsensi = absensi.filter(a => a.id !== currentAbsensiId);
+              localStorage.setItem(Data.KEYS.ABSENSI, JSON.stringify(newAbsensi));
 
-      popover.style.top = `${top}px`;
-      popover.style.left = `${left}px`;
-      popover.classList.add('show');
-    }
+              App.showToast('Data absensi berhasil dihapus', 'success');
+              document.getElementById('actionMenuPopover').classList.remove('show');
+              loadDashboard();
+            }
+          }
 
-    function viewDetailAbsensi() {
-      if (!currentAbsensiId) return;
-      App.showToast(`Melihat detail absensi ID: ${currentAbsensiId}`, 'info');
-      // Navigate to detail page or show modal
-      document.getElementById('actionMenuPopover').classList.remove('show');
-    }
+          // Close action menu when clicking outside
+          document.addEventListener('click', function (event) {
+            if (!event.target.closest('.action-menu-btn') && !event.target.closest('.action-menu-popover')) {
+              document.getElementById('actionMenuPopover')?.classList.remove('show');
+            }
+          });
 
-    function deleteAbsensi() {
-      if (!currentAbsensiId) return;
-      if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
-        // Remove from DB (localStorage)
-        const absensi = Data.getAbsensi();
-        const newAbsensi = absensi.filter(a => a.id !== currentAbsensiId);
-        localStorage.setItem(Data.KEYS.ABSENSI, JSON.stringify(newAbsensi));
-
-        App.showToast('Data absensi berhasil dihapus', 'success');
-        document.getElementById('actionMenuPopover').classList.remove('show');
-        loadDashboard();
-      }
-    }
-
-    // Close action menu when clicking outside
-    document.addEventListener('click', function (event) {
-      if (!event.target.closest('.action-menu-btn') && !event.target.closest('.action-menu-popover')) {
-        document.getElementById('actionMenuPopover')?.classList.remove('show');
-      }
-    });
-
-  </script>
+        </script>
 </body>
 
 </html>
