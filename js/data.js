@@ -53,7 +53,7 @@ const Data = {
             // Pegawai accounts - username = NIP, password from data
             { id: 3, username: '199804162025211000', password: '1998', role: 'pegawai', name: 'Adi Tya Kusuma' },
             { id: 4, username: '197502102025211030', password: '1975', role: 'pegawai', name: 'Agus Suhaeri' },
-            { id: 5, username: '199709242025211061', password: '1997', role: 'pegawai', name: 'Akbar Solihin Zulkifli' },
+            { id: 5, username: '199709242025211000', password: '1997', role: 'pegawai', name: 'Akbar Solihin Zulkifli' },
             { id: 6, username: '199905182025211036', password: '1999', role: 'pegawai', name: 'Asep Saepul Anwar' },
             { id: 7, username: '199703202025211056', password: '1997', role: 'pegawai', name: 'Chaeril Hari Mugeni' },
             { id: 8, username: '199911262025211039', password: '1999', role: 'pegawai', name: 'Deni Bachtiar' },
