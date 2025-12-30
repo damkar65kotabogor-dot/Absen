@@ -617,6 +617,8 @@
 
         // Show simple pegawai menu
         document.getElementById('pegawaiDashboard').classList.remove('d-none');
+        document.getElementById('pegawaiActions').classList.remove('d-none');
+        checkTodayAttendance();
       } else {
         // Show search for admin/pimpinan
         const headerSearch = document.getElementById('headerSearch');
