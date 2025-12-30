@@ -2364,3 +2364,108 @@ select.form-control {
         gap: 1rem;
     }
 }
+/* ============ Mobile Sub-Page Styles ============ */
+.mobile-page-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: 80px; /* Space for bottom nav */
+}
+
+.mobile-top-bar {
+    background: #fff;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.mobile-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--gray-900);
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.mobile-back-btn:hover {
+    background: #f0f0f0;
+}
+
+.mobile-page-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.mobile-content {
+    padding: 1rem;
+}
+
+.empty-state-dash {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    font-size: 3rem;
+    font-weight: 300;
+    color: #cbd5e0;
+}
+
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.nav-btn-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-radius: 35px;
+}
+
+.nav-btn-mobile.btn-datang { background: #10b981; color: #fff; }
+.nav-btn-mobile.btn-beranda { background: #312e81; color: #fff; }
+.nav-btn-mobile.btn-pulang { background: #ef4444; color: #fff; }
+
+.sub-page .sidebar, 
+.sub-page .sidebar-overlay,
+.sub-page .top-header {
+    display: none !important;
+}
+
+.sub-page .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+.sub-page .app-container {
+    padding: 0 !important;
+    display: block !important;
+}
