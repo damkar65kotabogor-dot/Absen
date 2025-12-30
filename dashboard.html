@@ -397,6 +397,14 @@
             </svg>
             Lihat Detail
           </a>
+          <a href="#" class="action-menu-item" onclick="editAbsensi()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Data
+          </a>
           <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -421,6 +429,7 @@
               </button>
             </div>
             <form id="manualAttendanceForm">
+              <input type="hidden" id="editAbsensiId">
               <div class="modal-body">
                 <div class="form-group">
                   <label class="form-label">Pegawai</label>
@@ -858,6 +867,14 @@
           // Open manual attendance modal
           function openManualAttendanceModal() {
             console.log('Running openManualAttendanceModal');
+
+            // Reset form and title
+            const form = document.getElementById('manualAttendanceForm');
+            if (form) form.reset();
+            document.getElementById('editAbsensiId').value = '';
+            const modalHeader = document.querySelector('#manualAttendanceModal .modal-title');
+            if (modalHeader) modalHeader.textContent = 'Absensi Manual';
+
             // Get pegawai list for dropdown
             const pegawai = Data.getPegawai().filter(p => p.status === 'aktif');
             const select = document.getElementById('manualPegawai');
@@ -890,6 +907,7 @@
 
           // Submit manual attendance
           function submitManualAttendance() {
+            const editId = document.getElementById('editAbsensiId').value;
             const pegawaiId = document.getElementById('manualPegawai').value;
             const tanggal = document.getElementById('manualTanggal').value;
             const jamMasuk = document.getElementById('manualJamMasuk').value;
@@ -902,7 +920,22 @@
               return;
             }
 
-            // Check if attendance already exists
+            if (editId) {
+              Data.update(Data.KEYS.ABSENSI, parseInt(editId), {
+                pegawaiId: parseInt(pegawaiId),
+                tanggal: tanggal,
+                jamMasuk: jamMasuk,
+                jamKeluar: jamKeluar,
+                status: status,
+                keterangan: keterangan
+              });
+              App.showToast('Data absensi berhasil diperbarui!', 'success');
+              closeManualModal();
+              loadDashboard();
+              return;
+            }
+
+            // Check if attendance already exists (for NEW entries)
             const existing = Data.getAbsensi().find(a =>
               a.pegawaiId === parseInt(pegawaiId) && a.tanggal === tanggal
             );
@@ -995,6 +1028,38 @@
             App.showToast(`Melihat detail absensi ID: ${currentAbsensiId}`, 'info');
             // Navigate to detail page or show modal
             document.getElementById('actionMenuPopover').classList.remove('show');
+          }
+
+          function editAbsensi() {
+            if (!currentAbsensiId) return;
+            const a = Data.getAbsensi().find(x => x.id === currentAbsensiId);
+            if (!a) return;
+
+            // Get pegawai list first to ensure dropdown is ready
+            const pegawai = Data.getPegawai().filter(p => p.status === 'aktif');
+            const select = document.getElementById('manualPegawai');
+            if (select) {
+              select.innerHTML = '<option value="">Pilih Pegawai</option>' +
+                pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
+            }
+
+            document.getElementById('editAbsensiId').value = a.id;
+            document.getElementById('manualPegawai').value = a.pegawaiId;
+            document.getElementById('manualTanggal').value = a.tanggal;
+            document.getElementById('manualJamMasuk').value = a.jamMasuk;
+            document.getElementById('manualJamKeluar').value = a.jamKeluar || '';
+            document.getElementById('manualStatus').value = a.status;
+            document.getElementById('manualKeterangan').value = a.keterangan || '';
+
+            const modalHeader = document.querySelector('#manualAttendanceModal .modal-title');
+            if (modalHeader) modalHeader.textContent = 'Edit Absensi';
+
+            // Hide popover
+            document.getElementById('actionMenuPopover').classList.remove('show');
+
+            // Open modal
+            const modal = document.getElementById('manualAttendanceModal');
+            if (modal) modal.classList.add('show');
           }
 
           function deleteAbsensi() {
