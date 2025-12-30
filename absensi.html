@@ -10,9 +10,40 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .mobile-page-container {
+            display: none;
+        }
+
+        body.sub-page .mobile-page-container {
+            display: block;
+        }
+
+        body.sub-page .app-container {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Mobile Sub-Page Layout (for Pegawai) -->
+    <div class="mobile-page-container">
+        <header class="mobile-top-bar">
+            <a href="dashboard.html" class="mobile-back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <h2 class="mobile-page-title">Rekapitulasi Kehadiran</h2>
+        </header>
+
+        <main class="mobile-content">
+            <div class="empty-state-dash">-</div>
+        </main>
+    </div>
+
     <div class="app-container">
         <!-- Sidebar Overlay (Mobile) -->
         <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
@@ -232,16 +263,17 @@
         // Setup UI based on role
         function setupUI() {
             if (isPegawai) {
-                document.getElementById('quickAction').classList.remove('d-none');
-                document.getElementById('filters').classList.add('d-none');
-                document.getElementById('thPegawai').style.display = 'none';
-                checkTodayAttendance();
-            } else {
-                // Load pegawai filter
-                const pegawai = Data.getPegawai();
-                document.getElementById('filterPegawai').innerHTML = '<option value="">Semua</option>' +
-                    pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
+                document.body.classList.add('sub-page');
+                return;
             }
+
+            // Admin/Pimpinan UI
+            document.getElementById('filters').classList.remove('d-none');
+
+            // Load pegawai filter
+            const pegawai = Data.getPegawai();
+            document.getElementById('filterPegawai').innerHTML = '<option value="">Semua</option>' +
+                pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
         }
 
         // Check today attendance for pegawai
