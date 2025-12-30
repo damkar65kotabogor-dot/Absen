@@ -309,16 +309,29 @@
             document.getElementById('statTotal').textContent = absensi.length;
 
             // Render table
-            const html = absensi.length > 0 ? absensi.map(a => `
-        <tr>
-          <td>${App.formatDate(a.tanggal)}</td>
-          ${!isPegawai ? `<td>${a.pegawai?.nama || '-'}</td>` : ''}
-          <td>${a.jamMasuk || '-'}</td>
-          <td>${a.jamKeluar || '-'}</td>
-          <td>${App.getStatusBadge(a.status)}</td>
-          <td>${a.keterangan || '-'}</td>
-        </tr>
-      `).join('') : `<tr><td colspan="${isPegawai ? 5 : 6}" class="text-center text-muted">Tidak ada data absensi</td></tr>`;
+            const html = absensi.length > 0 ? absensi.map(a => {
+                const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+                const avatarDisplay = a.pegawai?.foto ?
+                    `<img src="${a.pegawai.foto}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` :
+                    `<div style="width:24px;height:24px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#64748b;">${initials}</div>`;
+
+                return `
+                    <tr>
+                    <td>${App.formatDate(a.tanggal)}</td>
+                    ${!isPegawai ? `
+                        <td>
+                            <div class="d-flex align-center gap-2">
+                                ${avatarDisplay}
+                                <span>${a.pegawai?.nama || '-'}</span>
+                            </div>
+                        </td>` : ''}
+                    <td>${a.jamMasuk || '-'}</td>
+                    <td>${a.jamKeluar || '-'}</td>
+                    <td>${App.getStatusBadge(a.status)}</td>
+                    <td>${a.keterangan || '-'}</td>
+                    </tr>
+                `;
+            }).join('') : `<tr><td colspan="${isPegawai ? 5 : 6}" class="text-center text-muted">Tidak ada data absensi</td></tr>`;
 
             document.getElementById('absensiTable').innerHTML = html;
         }

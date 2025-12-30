@@ -209,8 +209,18 @@ const App = {
             const roleLabels = { admin: 'Administrator', pegawai: 'Pegawai', pimpinan: 'Pimpinan' };
             userRole.textContent = roleLabels[user.role] || user.role;
         }
+
         if (userAvatar) {
-            userAvatar.textContent = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            // Check if user has a profile photo in pegawai data
+            const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+            if (pegawai && pegawai.foto) {
+                userAvatar.innerHTML = `<img src="${pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                userAvatar.style.background = 'none';
+            } else {
+                userAvatar.textContent = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                userAvatar.style.background = ''; // Restore default background
+                userAvatar.innerHTML = userAvatar.textContent; // Clear any img
+            }
         }
     },
 

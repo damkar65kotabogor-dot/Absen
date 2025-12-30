@@ -335,37 +335,49 @@
                 pegawai = pegawai.filter(p => p.status === filterStatus);
             }
 
-            const html = pegawai.length > 0 ? pegawai.map(p => `
-        <tr>
-          <td>${p.nip}</td>
-          <td>${p.nama}</td>
-          <td>${p.jabatan?.nama || '-'}</td>
-          <td>${p.unitKerja?.nama || '-'}</td>
-          <td>${App.getStatusBadge(p.status)}</td>
-          <td class="actions">
-            <button class="btn btn-sm btn-outline btn-icon" onclick="viewPegawai(${p.id})" title="Lihat">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-            ${user.role === 'admin' ? `
-            <button class="btn btn-sm btn-outline btn-icon" onclick="editPegawai(${p.id})" title="Edit">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn btn-sm btn-danger btn-icon" onclick="deletePegawai(${p.id})" title="Hapus">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              </svg>
-            </button>
-            ` : ''}
-          </td>
-        </tr>
-      `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data pegawai</td></tr>';
+            const html = pegawai.length > 0 ? pegawai.map(p => {
+                const initials = p.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const avatarDisplay = p.foto ?
+                    `<img src="${p.foto}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` :
+                    `<div style="width:32px;height:32px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#64748b;">${initials}</div>`;
+
+                return `
+                    <tr>
+                    <td>${p.nip}</td>
+                    <td>
+                        <div class="d-flex align-center gap-2">
+                            ${avatarDisplay}
+                            <span>${p.nama}</span>
+                        </div>
+                    </td>
+                    <td>${p.jabatan?.nama || '-'}</td>
+                    <td>${p.unitKerja?.nama || '-'}</td>
+                    <td>${App.getStatusBadge(p.status)}</td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-outline btn-icon" onclick="viewPegawai(${p.id})" title="Lihat">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        </button>
+                        ${user.role === 'admin' ? `
+                        <button class="btn btn-sm btn-outline btn-icon" onclick="editPegawai(${p.id})" title="Edit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-icon" onclick="deletePegawai(${p.id})" title="Hapus">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        </button>
+                        ` : ''}
+                    </td>
+                    </tr>
+                `;
+            }).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data pegawai</td></tr>';
 
             document.getElementById('pegawaiTable').innerHTML = html;
         }
@@ -408,7 +420,15 @@
             const p = Data.getPegawaiWithRelations().find(x => x.id === id);
             if (!p) return;
 
+            const initials = p.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const photoUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=random&size=128`;
+
             document.getElementById('viewContent').innerHTML = `
+        <div class="text-center mb-4">
+            <img src="${photoUrl}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #f0f2f5;">
+            <h4 class="mt-2 mb-0">${p.nama}</h4>
+            <p class="text-muted small">${p.nip}</p>
+        </div>
         <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
           <div><strong>NIP:</strong><br>${p.nip}</div>
           <div><strong>Nama:</strong><br>${p.nama}</div>

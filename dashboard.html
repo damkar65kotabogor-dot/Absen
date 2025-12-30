@@ -559,13 +559,16 @@
 
       const absensiHtml = absensi.length > 0 ? absensi.map(a => {
         const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+        const avatarDisplay = a.pegawai?.foto ?
+          `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
+          initials;
         const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
         const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
         return `
           <tr>
             <td>
               <div class="employee-cell">
-                <div class="employee-avatar">${initials}</div>
+                <div class="employee-avatar">${avatarDisplay}</div>
                 <div class="employee-info">
                   <div class="employee-name">${a.pegawai?.nama || '-'}</div>
                   <div class="employee-nip">NIP. ${a.pegawai?.nip || '-'}</div>
