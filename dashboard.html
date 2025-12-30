@@ -402,6 +402,158 @@
     </main>
   </div>
 
+  <!-- Mobile Dashboard Container (for Pegawai) -->
+  <div class="mobile-dashboard-container">
+    <header class="mobile-header-new">
+      <button class="mobile-header-btn" onclick="App.toggleMobileSidebar()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+      <h1 class="mobile-header-title">PPPK paruh waktu</h1>
+      <button class="mobile-header-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+      </button>
+    </header>
+
+    <div class="greeting-section">
+      <p class="greeting-text">Selamat Pagi</p>
+      <div class="user-welcome">
+        <h2 id="mobileUserName">Budi Santoso</h2>
+        <div class="user-avatar-mobile">
+          <img src="https://ui-avatars.com/api/?name=Budi+Santoso&background=random" id="mobileUserAvatar" alt="Avatar">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header-mobile">
+      <div class="section-title-group">
+        <h3>Ringkasan</h3>
+        <p>Aktivitas Hari Ini</p>
+      </div>
+      <div class="date-picker-mini">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        <span id="mobileCurrentDate">Senin, 29 Des</span>
+      </div>
+    </div>
+
+    <div class="status-card-large" id="mobileStatusCard">
+      <div class="status-label-mobile">Status KehadiranCheck</div>
+      <div class="status-value-mobile" id="mobileStatusText">Hadir</div>
+      <div class="check-icon-overlay">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+      <div class="status-time-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        <span id="mobileStatusTime">Masuk: 07:30 WIB</span>
+      </div>
+    </div>
+
+    <a href="profil.html" class="profile-strip-card">
+      <div class="avatar-placeholder-mobile">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f97316"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span class="presence-dot"></span>
+      </div>
+      <div class="profile-info-mobile">
+        <div class="profile-name-mobile" id="mobileProfileName">Budi Santoso, S.Kom</div>
+        <div class="profile-nip-mobile" id="mobileProfileNIP">NIP. 19930112 201903 1 004</div>
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+        stroke="var(--gray-300)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </a>
+
+    <div class="menu-grid-mobile">
+      <a href="absensi.html" class="menu-item-mobile">
+        <div class="menu-icon-circle orange">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
+        <div class="menu-text">
+          <div class="menu-label-main">Rekapitulasi</div>
+          <div class="menu-label-sub orange">KEHADIRAN</div>
+        </div>
+      </a>
+      <a href="cuti.html" class="menu-item-mobile">
+        <div class="menu-icon-circle teal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <div class="menu-text">
+          <div class="menu-label-main">Fleksibilitas</div>
+          <div class="menu-label-sub teal">KERJA</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav-container">
+      <div class="bottom-nav-side">
+        <button class="btn-nav-action datang" id="btnMobileCheckIn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9" />
+            <polyline points="9 21 3 21 3 15" />
+            <line x1="21" y1="3" x2="14" y2="10" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+          Datang
+        </button>
+      </div>
+      <a href="dashboard.html" class="nav-center-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      </a>
+      <div class="bottom-nav-side">
+        <button class="btn-nav-action pulang" id="btnMobileCheckOut">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Pulang
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Filter Modal -->
   <div class="modal-overlay" id="filterModal">
     <div class="modal">
@@ -540,6 +692,28 @@
       const stats = Data.getStats();
       const totalPegawai = stats.totalPegawai;
 
+      // Update basic user info
+      document.querySelectorAll('.user-name').forEach(el => el.textContent = user.name || 'User');
+      document.querySelectorAll('.user-role').forEach(el => el.textContent = user.role || 'Pegawai');
+
+      // Update mobile-specific info
+      if (user.role === 'pegawai') {
+        document.body.classList.add('pegawai-mode');
+        document.getElementById('mobileUserName').textContent = user.name.split(' ')[0];
+        document.getElementById('mobileProfileName').textContent = user.name;
+        document.getElementById('mobileProfileNIP').textContent = `NIP. ${user.nip || '-'}`;
+        document.getElementById('mobileUserAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;
+
+        const now = new Date();
+        const optionsDate = { weekday: 'long', day: 'numeric', month: 'short' };
+        document.getElementById('mobileCurrentDate').textContent = now.toLocaleDateString('id-ID', optionsDate);
+
+        checkTodayAttendance();
+        return; // Skip admin specific updates
+      } else {
+        document.body.classList.remove('pegawai-mode');
+      }
+
       // Update stats
       document.getElementById('statTotalPegawai').textContent = totalPegawai;
       document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
@@ -600,33 +774,21 @@
 
       document.getElementById('recentAbsensi').innerHTML = absensiHtml;
 
-      // Show different dashboard based on role
-      if (user.role === 'pegawai') {
-        // Hide admin content for pegawai
-        document.querySelector('.stats-grid-new').style.display = 'none';
-        document.querySelector('.dashboard-grid').style.display = 'none';
-        document.querySelector('.attendance-table-card').style.display = 'none';
-        document.querySelector('.title-actions').style.display = 'none';
-
-        // Show simple pegawai menu
-        document.getElementById('pegawaiDashboard').classList.remove('d-none');
-      } else {
-        // Initialize chart for admin/pimpinan
-        try {
-          if (typeof Chart !== 'undefined') {
-            initChart();
-          } else {
-            console.error('Chart.js not loaded');
-          }
-        } catch (e) {
-          console.error('Error initializing chart:', e);
+      // Initialize chart for admin/pimpinan
+      try {
+        if (typeof Chart !== 'undefined') {
+          initChart();
+        } else {
+          console.error('Chart.js not loaded');
         }
+      } catch (e) {
+        console.error('Error initializing chart:', e);
+      }
 
-        try {
-          renderCalendar();
-        } catch (e) {
-          console.error('Error rendering calendar:', e);
-        }
+      try {
+        renderCalendar();
+      } catch (e) {
+        console.error('Error rendering calendar:', e);
       }
     }
 
@@ -797,30 +959,67 @@
         a.pegawaiId === user.pegawaiId && a.tanggal === today
       );
 
+      // Desktop Elements
       const statusDiv = document.getElementById('attendanceStatus');
       const statusText = document.getElementById('attendanceStatusText');
       const btnCheckIn = document.getElementById('btnCheckIn');
       const btnCheckOut = document.getElementById('btnCheckOut');
 
+      // Mobile Elements
+      const mobileStatusText = document.getElementById('mobileStatusText');
+      const mobileStatusTime = document.getElementById('mobileStatusTime');
+      const btnMobileCheckIn = document.getElementById('btnMobileCheckIn');
+      const btnMobileCheckOut = document.getElementById('btnMobileCheckOut');
+      const mobileStatusCard = document.getElementById('mobileStatusCard');
+
       if (absensi) {
-        statusDiv.classList.remove('d-none');
+        if (statusDiv) statusDiv.classList.remove('d-none');
+
+        const statusValue = absensi.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
+        if (mobileStatusText) mobileStatusText.textContent = statusValue;
+        if (mobileStatusCard) mobileStatusCard.style.background = absensi.status === 'tepat_waktu' ?
+          'linear-gradient(135deg, #2563eb, #1e40af)' : 'linear-gradient(135deg, #f59e0b, #d97706)';
+
         if (absensi.jamKeluar) {
-          statusText.textContent = `Anda sudah absen hari ini. Masuk: ${absensi.jamMasuk}, Keluar: ${absensi.jamKeluar}`;
-          btnCheckIn.disabled = true;
-          btnCheckOut.disabled = true;
+          if (statusText) statusText.textContent = `Anda sudah absen hari ini. Masuk: ${absensi.jamMasuk}, Keluar: ${absensi.jamKeluar}`;
+          if (btnCheckIn) btnCheckIn.disabled = true;
+          if (btnCheckOut) btnCheckOut.disabled = true;
+
+          if (mobileStatusTime) mobileStatusTime.textContent = `Masuk: ${absensi.jamMasuk} | Keluar: ${absensi.jamKeluar}`;
+          if (btnMobileCheckIn) btnMobileCheckIn.disabled = true;
+          if (btnMobileCheckIn) btnMobileCheckIn.style.opacity = '0.5';
+          if (btnMobileCheckOut) btnMobileCheckOut.disabled = true;
+          if (btnMobileCheckOut) btnMobileCheckOut.style.opacity = '0.5';
         } else {
-          statusText.textContent = `Anda sudah check-in pada ${absensi.jamMasuk}. Jangan lupa check-out!`;
-          btnCheckIn.disabled = true;
-          btnCheckOut.disabled = false;
+          if (statusText) statusText.textContent = `Anda sudah check-in pada ${absensi.jamMasuk}. Jangan lupa check-out!`;
+          if (btnCheckIn) btnCheckIn.disabled = true;
+          if (btnCheckOut) btnCheckOut.disabled = false;
+
+          if (mobileStatusTime) mobileStatusTime.textContent = `Masuk: ${absensi.jamMasuk} WIB`;
+          if (btnMobileCheckIn) btnMobileCheckIn.disabled = true;
+          if (btnMobileCheckIn) btnMobileCheckIn.style.opacity = '0.5';
+          if (btnMobileCheckOut) btnMobileCheckOut.disabled = false;
         }
       } else {
-        btnCheckIn.disabled = false;
-        btnCheckOut.disabled = true;
+        if (btnCheckIn) btnCheckIn.disabled = false;
+        if (btnCheckOut) btnCheckOut.disabled = true;
+
+        if (mobileStatusText) mobileStatusText.textContent = 'Belum Hadir';
+        if (mobileStatusTime) mobileStatusTime.textContent = 'Silahkan Klik Datang';
+        if (mobileStatusCard) mobileStatusCard.style.background = 'linear-gradient(135deg, #64748b, #334155)';
+        if (btnMobileCheckIn) btnMobileCheckIn.disabled = false;
+        if (btnMobileCheckOut) btnMobileCheckOut.disabled = true;
+        if (btnMobileCheckOut) btnMobileCheckOut.style.opacity = '0.5';
       }
     }
 
-    // Handle check-in
-    document.getElementById('btnCheckIn')?.addEventListener('click', function () {
+    // Handle check-out
+    document.getElementById('btnCheckIn')?.addEventListener('click', handleCheckIn);
+    document.getElementById('btnCheckOut')?.addEventListener('click', handleCheckOut);
+    document.getElementById('btnMobileCheckIn')?.addEventListener('click', handleCheckIn);
+    document.getElementById('btnMobileCheckOut')?.addEventListener('click', handleCheckOut);
+
+    function handleCheckIn() {
       const user = Auth.getCurrentUser();
       if (!user.pegawaiId) {
         App.showToast('Data pegawai tidak ditemukan!', 'danger');
@@ -842,10 +1041,9 @@
 
       App.showToast('Check-in berhasil!', 'success');
       loadDashboard();
-    });
+    }
 
-    // Handle check-out
-    document.getElementById('btnCheckOut')?.addEventListener('click', function () {
+    function handleCheckOut() {
       const user = Auth.getCurrentUser();
       if (!user.pegawaiId) {
         App.showToast('Data pegawai tidak ditemukan!', 'danger');
@@ -863,7 +1061,7 @@
         App.showToast('Check-out berhasil!', 'success');
         loadDashboard();
       }
-    });
+    }
 
     // Handle download report
     function downloadReport() {
