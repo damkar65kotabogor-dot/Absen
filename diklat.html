@@ -23,28 +23,218 @@
                 </svg>
             </a>
             <h2 class="mobile-page-title">Riwayat Diklat</h2>
-            <button class="mobile-action-btn" onclick="openEditModal()">
+            <button class="mobile-action-btn" onclick="openAddModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Edit
+                Tambah
             </button>
         </header>
 
-        <!-- Main Content (Empty State Dash) -->
         <main class="mobile-content">
-            <div class="empty-state-dash">-</div>
-        </main>
-
+            <div id="diklatList" class="diklat-list">
+                <!-- Rendered by JS -->
+            </div>
         </main>
     </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="diklatModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Riwayat Diklat</h3>
+                <button class="modal-close" onclick="App.closeModal('diklatModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="diklatForm">
+                <div class="modal-body">
+                    <input type="hidden" id="diklatId">
+                    <div class="form-group">
+                        <label class="form-label">Nama Diklat/Pelatihan *</label>
+                        <input type="text" class="form-control" id="namaDiklat" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tahun *</label>
+                        <input type="number" class="form-control" id="tahun" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Penyelenggara</label>
+                        <input type="text" class="form-control" id="penyelenggara">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">No. Sertifikat</label>
+                        <input type="text" class="form-control" id="noSertifikat">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Keterangan</label>
+                        <textarea class="form-control" id="keterangan" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="deleteBtn" class="btn btn-danger d-none"
+                        onclick="deleteDiklat()">Hapus</button>
+                    <div class="footer-right">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="App.closeModal('diklatModal')">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <style>
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .diklat-card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-100);
+        }
+
+        .diklat-header {
+            margin-bottom: 0.75rem;
+        }
+
+        .diklat-name {
+            font-weight: 700;
+            color: var(--primary-600);
+            display: block;
+            font-size: 1rem;
+        }
+
+        .diklat-tahun {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 0.875rem;
+        }
+
+        .diklat-info {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        .diklat-info p {
+            margin-bottom: 0.25rem;
+        }
+    </style>
 
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
-    <script>if (!Auth.requireAuth()) { }</script>
+    <script>
+        if (!Auth.requireAuth()) { }
+
+        const user = Auth.getCurrentUser();
+        const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+
+        function loadDiklat() {
+            if (!pegawai) return;
+            const records = Data.getAll(Data.KEYS.DIKLAT).filter(r => r.pegawaiId === pegawai.id);
+            const container = document.getElementById('diklatList');
+
+            if (records.length === 0) {
+                container.innerHTML = '<div class="empty-state-dash">-</div>';
+                return;
+            }
+
+            // Sort by year descending
+            records.sort((a, b) => b.tahun - a.tahun);
+
+            container.innerHTML = records.map(r => `
+                <div class="diklat-card" onclick="editDiklat(${r.id})">
+                    <div class="diklat-header">
+                        <span class="diklat-name">${r.namaDiklat}</span>
+                        <span class="diklat-tahun">Tahun: ${r.tahun}</span>
+                    </div>
+                    <div class="diklat-info">
+                        <p><strong>Penyelenggara:</strong> ${r.penyelenggara || '-'}</p>
+                        <p><strong>Sertifikat:</strong> ${r.noSertifikat || '-'}</p>
+                        ${r.keterangan ? `<p class="mt-2 text-muted italic">${r.keterangan}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Riwayat Diklat';
+            document.getElementById('diklatForm').reset();
+            document.getElementById('diklatId').value = '';
+            document.getElementById('deleteBtn').classList.add('d-none');
+            App.openModal('diklatModal');
+        }
+
+        function editDiklat(id) {
+            const r = Data.getById(Data.KEYS.DIKLAT, id);
+            if (!r) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Riwayat Diklat';
+            document.getElementById('diklatId').value = r.id;
+            document.getElementById('namaDiklat').value = r.namaDiklat;
+            document.getElementById('tahun').value = r.tahun;
+            document.getElementById('penyelenggara').value = r.penyelenggara || '';
+            document.getElementById('noSertifikat').value = r.noSertifikat || '';
+            document.getElementById('keterangan').value = r.keterangan || '';
+
+            document.getElementById('deleteBtn').classList.remove('d-none');
+            App.openModal('diklatModal');
+        }
+
+        function deleteDiklat() {
+            const id = document.getElementById('diklatId').value;
+            if (!id) return;
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                Data.delete(Data.KEYS.DIKLAT, id);
+                App.showToast('Data berhasil dihapus', 'success');
+                App.closeModal('diklatModal');
+                loadDiklat();
+            }
+        }
+
+        document.getElementById('diklatForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('diklatId').value;
+            const data = {
+                pegawaiId: pegawai.id,
+                namaDiklat: document.getElementById('namaDiklat').value,
+                tahun: document.getElementById('tahun').value,
+                penyelenggara: document.getElementById('penyelenggara').value,
+                noSertifikat: document.getElementById('noSertifikat').value,
+                keterangan: document.getElementById('keterangan').value
+            };
+
+            if (id) {
+                Data.update(Data.KEYS.DIKLAT, id, data);
+                App.showToast('Data berhasil diperbarui', 'success');
+            } else {
+                Data.create(Data.KEYS.DIKLAT, data);
+                App.showToast('Data berhasil ditambahkan', 'success');
+            }
+
+            App.closeModal('diklatModal');
+            loadDiklat();
+        });
+
+        loadDiklat();
+    </script>
 </body>
 
 </html>

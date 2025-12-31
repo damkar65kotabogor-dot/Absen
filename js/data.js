@@ -13,6 +13,10 @@ const Data = {
         ABSENSI: 'simpeg_absensi',
         CUTI: 'simpeg_cuti',
         PENDIDIKAN: 'simpeg_pendidikan',
+        KELUARGA: 'simpeg_keluarga',
+        KGB: 'simpeg_kgb',
+        DIKLAT: 'simpeg_diklat',
+        PANGKAT: 'simpeg_pangkat',
         CURRENT_USER: 'simpeg_current_user'
     },
 
