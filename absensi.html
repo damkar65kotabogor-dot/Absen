@@ -204,15 +204,15 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    ${!isPegawai ? `<th style="width: 40px;"><input type="checkbox" id="selectAll"
-                                            onclick="toggleSelectAll()"></th>` : ''}
+                                    <th id="thSelectAll" style="width: 40px;"><input type="checkbox" id="selectAll"
+                                            onclick="toggleSelectAll()"></th>
                                     <th>Tanggal</th>
                                     <th id="thPegawai">Pegawai</th>
                                     <th>Jam Masuk</th>
                                     <th>Jam Keluar</th>
                                     <th>Status</th>
                                     <th>Keterangan</th>
-                                    ${!isPegawai ? `<th style="width: 50px;">Aksi</th>` : ''}
+                                    <th id="thAksi" style="width: 50px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="absensiTable">
@@ -263,6 +263,8 @@
                 document.getElementById('quickAction').classList.remove('d-none');
                 document.getElementById('filters').classList.add('d-none');
                 document.getElementById('thPegawai').style.display = 'none';
+                document.getElementById('thSelectAll').style.display = 'none';
+                document.getElementById('thAksi').style.display = 'none';
                 checkTodayAttendance();
             } else {
                 // Load pegawai filter
