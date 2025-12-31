@@ -796,12 +796,15 @@
           }
 
           // Handle check-in
-          document.getElementById('btnCheckIn')?.addEventListener('click', function () {
+          document.getElementById('btnCheckIn')?.addEventListener('click', async function () {
             const user = Auth.getCurrentUser();
             if (!user.pegawaiId) {
               App.showToast('Data pegawai tidak ditemukan!', 'danger');
               return;
             }
+
+            const isAtLocation = await App.validateLocation();
+            if (!isAtLocation) return;
 
             const now = new Date();
             const jamMasuk = now.toTimeString().slice(0, 5);
@@ -813,20 +816,23 @@
               jamMasuk: jamMasuk,
               jamKeluar: null,
               status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
-              keterangan: ''
+              keterangan: 'Check-in via Geolocation'
             });
 
-            App.showToast('Check-in berhasil!', 'success');
+            App.showToast('Check-in berhasil di lokasi Authorized!', 'success');
             loadDashboard();
           });
 
           // Handle check-out
-          document.getElementById('btnCheckOut')?.addEventListener('click', function () {
+          document.getElementById('btnCheckOut')?.addEventListener('click', async function () {
             const user = Auth.getCurrentUser();
             if (!user.pegawaiId) {
               App.showToast('Data pegawai tidak ditemukan!', 'danger');
               return;
             }
+
+            const isAtLocation = await App.validateLocation();
+            if (!isAtLocation) return;
 
             const today = new Date().toISOString().split('T')[0];
             const absensi = Data.getAbsensi().find(a =>
@@ -836,7 +842,7 @@
             if (absensi) {
               const jamKeluar = new Date().toTimeString().slice(0, 5);
               Data.update(Data.KEYS.ABSENSI, absensi.id, { jamKeluar });
-              App.showToast('Check-out berhasil!', 'success');
+              App.showToast('Check-out berhasil di lokasi Authorized!', 'success');
               loadDashboard();
             }
           });
