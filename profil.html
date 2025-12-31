@@ -127,6 +127,29 @@
             background: #1d4ed8;
         }
 
+        .btn-hapus-foto {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: white;
+            color: #ef4444;
+            border: 1.5px solid #fee2e2;
+            padding: 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-hapus-foto:hover {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
         .profil-menu-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -269,6 +292,16 @@
                             </svg>
                             Edit Profil
                         </a>
+                        <button id="btnHapusFoto" class="btn-hapus-foto" onclick="deletePhoto()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            Hapus Foto
+                        </button>
                     </div>
                 </div>
 
@@ -415,11 +448,15 @@
 
             // Handle Photo
             const avatarImg = document.getElementById('targetProfileImg');
+            const btnHapus = document.getElementById('btnHapusFoto');
+
             if (pegawai.foto) {
                 avatarImg.src = pegawai.foto;
+                btnHapus.style.display = 'flex';
             } else {
                 // Default avatar using UI Avatars
                 avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(pegawai.nama)}&background=random&size=200`;
+                btnHapus.style.display = 'none';
             }
 
             // Also update sidebar if it's there
@@ -428,6 +465,24 @@
                 if (pegawai.foto) {
                     sidebarAvatar.innerHTML = `<img src="${pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
                     sidebarAvatar.style.background = 'none';
+                } else {
+                    // Reset sidebar avatar if photo deleted
+                    const initials = pegawai.nama.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    sidebarAvatar.innerHTML = initials;
+                    sidebarAvatar.style.background = '';
+                }
+            }
+        }
+
+        function deletePhoto() {
+            if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
+                const user = Auth.getCurrentUser();
+                const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+
+                if (pegawai) {
+                    Data.update(Data.KEYS.PEGAWAI, pegawai.id, { foto: null });
+                    App.showToast('Foto profil berhasil dihapus!', 'success');
+                    populateProfile();
                 }
             }
         }
