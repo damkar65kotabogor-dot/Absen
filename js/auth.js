@@ -18,6 +18,8 @@ const Auth = {
 
         try {
             users = await Data.getUsers();
+            console.log('Users from DB:', users);
+            console.log('Looking for:', { username, password });
             if (users.length === 0) throw new Error('DB_EMPTY');
         } catch (err) {
             console.warn('Cloud login failed, checking LocalStorage fallback...');
