@@ -95,11 +95,20 @@
 
       try {
         console.log('Testing Supabase connection...');
+
+        if (typeof window.supabase === 'undefined') {
+          throw new Error('Supabase library (CDN) gagal dimuat.');
+        }
+
+        if (typeof window.supabaseClient === 'undefined') {
+          throw new Error('Supabase Client gagal diinisialisasi.');
+        }
+
         const { data, error } = await supabaseClient.from('users').select('id').limit(1);
 
         if (error) {
           console.error('Connection error:', error);
-          throw error;
+          throw new Error(`DB Error: ${error.message}`);
         }
 
         console.log('Connection successful!');
@@ -108,7 +117,7 @@
         setTimeout(() => dbStatus.style.display = 'none', 3000);
       } catch (err) {
         statusDot.style.background = '#ef4444'; // Red
-        statusText.textContent = 'Gagal terhubung ke database!';
+        statusText.innerHTML = `<strong>Gagal:</strong> ${err.message}`;
         console.error('Connection check failed:', err);
       }
     })();
