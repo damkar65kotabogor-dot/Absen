@@ -95,7 +95,7 @@
 
       try {
         console.log('Testing Supabase connection...');
-        const { data, error } = await supabase.from('users').select('id').limit(1);
+        const { data, error } = await supabaseClient.from('users').select('id').limit(1);
 
         if (error) {
           console.error('Connection error:', error);

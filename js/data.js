@@ -8,11 +8,13 @@ const Data = {
     async init() {
         try {
             console.log('Initializing SIMPEG Data Layer...');
-            const { data: users, error } = await supabase.from('users').select('id').limit(1);
+            const { data: users, error } = await supabaseClient.from('users').select('id').limit(1);
 
             if (error) {
                 console.error('Supabase connection error:', error.message);
-                App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
+                if (typeof App !== 'undefined' && App.showToast) {
+                    App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
+                }
                 return;
             }
 
@@ -37,27 +39,27 @@ const Data = {
             { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' },
             { username: 'pimpinan', password: 'pimpinan123', role: 'pimpinan', name: 'Kepala Dinas' }
         ];
-        await supabase.from('users').insert(users);
+        await supabaseClient.from('users').insert(users);
 
         // Unit Kerja
         const unitKerja = [
             { kode: 'DPKP', nama: 'Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor', kepala: 'Kepala Dinas' }
         ];
-        await supabase.from('unit_kerja').insert(unitKerja);
+        await supabaseClient.from('unit_kerja').insert(unitKerja);
 
         // Jabatan
         const jabatan = [
             { kode: 'J001', nama: 'Operator Layanan Operasional', golongan: '-', tunjangan: 0 },
             { kode: 'J002', nama: 'Pengelola Umum Operasional', golongan: '-', tunjangan: 0 }
         ];
-        await supabase.from('jabatan').insert(jabatan);
+        await supabaseClient.from('jabatan').insert(jabatan);
 
         // Pegawai and Absensi seeding logic could be added here as well
     },
 
     // Generic CRUD operations using Supabase
     async getAll(table) {
-        const { data, error } = await supabase.from(table).select('*');
+        const { data, error } = await supabaseClient.from(table).select('*');
         if (error) {
             console.error(`Error fetching from ${table}:`, error);
             return [];
@@ -66,7 +68,7 @@ const Data = {
     },
 
     async getById(table, id) {
-        const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
+        const { data, error } = await supabaseClient.from(table).select('*').eq('id', id).single();
         if (error) {
             console.error(`Error fetching from ${table} with id ${id}:`, error);
             return null;
@@ -75,7 +77,7 @@ const Data = {
     },
 
     async create(table, item) {
-        const { data, error } = await supabase.from(table).insert(item).select().single();
+        const { data, error } = await supabaseClient.from(table).insert(item).select().single();
         if (error) {
             console.error(`Error creating in ${table}:`, error);
             return null;
@@ -84,7 +86,7 @@ const Data = {
     },
 
     async update(table, id, updates) {
-        const { data, error } = await supabase.from(table).update(updates).eq('id', id).select().single();
+        const { data, error } = await supabaseClient.from(table).update(updates).eq('id', id).select().single();
         if (error) {
             console.error(`Error updating in ${table}:`, error);
             return null;
@@ -93,7 +95,7 @@ const Data = {
     },
 
     async delete(table, id) {
-        const { error } = await supabase.from(table).delete().eq('id', id);
+        const { error } = await supabaseClient.from(table).delete().eq('id', id);
         if (error) {
             console.error(`Error deleting from ${table}:`, error);
             return false;
@@ -111,7 +113,7 @@ const Data = {
 
     // Get pegawai with related data
     async getPegawaiWithRelations() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('pegawai')
             .select(`
                 *,
@@ -130,9 +132,9 @@ const Data = {
     async getStats() {
         const today = new Date().toISOString().split('T')[0];
 
-        const { data: pegawai, error: errP } = await supabase.from('pegawai').select('id, status');
-        const { data: absensi, error: errA } = await supabase.from('absensi').select('*').eq('tanggal', today);
-        const { count: cutiPending, error: errC } = await supabase.from('cuti').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+        const { data: pegawai, error: errP } = await supabaseClient.from('pegawai').select('id, status');
+        const { data: absensi, error: errA } = await supabaseClient.from('absensi').select('*').eq('tanggal', today);
+        const { count: cutiPending, error: errC } = await supabaseClient.from('cuti').select('*', { count: 'exact', head: true }).eq('status', 'pending');
 
         if (errP || errA || errC) {
             console.error('Error fetching stats:', errP || errA || errC);
@@ -154,7 +156,7 @@ const Data = {
 
     // Get absensi with related data
     async getAbsensiWithPegawai() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('absensi')
             .select(`
                 *,
@@ -170,5 +172,7 @@ const Data = {
     }
 };
 
-// Initialize
-Data.init();
+// Initialize on DOM load to ensure other modules (App) are available
+document.addEventListener('DOMContentLoaded', () => {
+    Data.init();
+});
