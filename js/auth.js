@@ -13,34 +13,43 @@ const Auth = {
     // Login (Now asynchronous)
     async login(username, password) {
         console.log(`Login attempt for user: ${username}`);
-        const users = await Data.getUsers();
+        let users = [];
+        let source = 'Supabase';
 
-        if (users.length === 0) {
-            console.warn('No users found in database. Seeding might be in progress or failed.');
+        try {
+            users = await Data.getUsers();
+            if (users.length === 0) throw new Error('DB_EMPTY');
+        } catch (err) {
+            console.warn('Cloud login failed, checking LocalStorage fallback...');
+            const localData = localStorage.getItem('simpeg_users');
+            if (localData) {
+                users = JSON.parse(localData);
+                source = 'LocalStorage';
+            }
         }
 
         const user = users.find(u => u.username === username && u.password === password);
 
         if (user) {
-            console.log('User found, role:', user.role);
+            console.log(`User found via ${source}, role:`, user.role);
             const { password: _, ...userWithoutPassword } = user;
+            userWithoutPassword.authSource = source;
 
-            // Get pegawai data if exists
-            const pegawaiData = await Data.getPegawai();
-            const pegawai = pegawaiData.find(p => p.user_id === user.id);
-            if (pegawai) {
-                console.log('Linked employee record found:', pegawai.nama);
-                userWithoutPassword.pegawaiId = pegawai.id;
-                userWithoutPassword.pegawaiData = pegawai;
-            } else {
-                console.log('No linked employee record found for this user.');
+            try {
+                const pegawaiData = await Data.getPegawai();
+                const pegawai = pegawaiData.find(p => p.user_id === user.id);
+                if (pegawai) {
+                    userWithoutPassword.pegawaiId = pegawai.id;
+                    userWithoutPassword.pegawaiData = pegawai;
+                }
+            } catch (err) {
+                console.warn('Could not fetch linked pegawai data from cloud.');
             }
 
             localStorage.setItem(Data.KEYS.CURRENT_USER, JSON.stringify(userWithoutPassword));
             return { success: true, user: userWithoutPassword };
         }
 
-        console.warn('Login failed: Invalid username or password.');
         return { success: false, message: 'Username atau password salah!' };
     },
 
