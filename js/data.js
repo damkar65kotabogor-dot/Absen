@@ -6,15 +6,24 @@ const Data = {
 
     // Initialize - Migrates data if necessary
     async init() {
-        const { data: users, error } = await supabase.from('users').select('id').limit(1);
-        if (error) {
-            console.error('Error connecting to Supabase:', error);
-            return;
-        }
+        try {
+            console.log('Initializing SIMPEG Data Layer...');
+            const { data: users, error } = await supabase.from('users').select('id').limit(1);
 
-        if (users.length === 0) {
-            console.log('Database empty, seeding initial data...');
-            await this.seedData();
+            if (error) {
+                console.error('Supabase connection error:', error.message);
+                App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
+                return;
+            }
+
+            if (users.length === 0) {
+                console.log('Database empty, seeding initial data...');
+                await this.seedData();
+            } else {
+                console.log('Database connected and ready.');
+            }
+        } catch (err) {
+            console.error('Unexpected error during initialization:', err);
         }
     },
 
@@ -98,6 +107,7 @@ const Data = {
     async getJabatan() { return this.getAll('jabatan'); },
     async getUnitKerja() { return this.getAll('unit_kerja'); },
     async getAbsensi() { return this.getAll('absensi'); },
+    async getCuti() { return this.getAll('cuti'); },
 
     // Get pegawai with related data
     async getPegawaiWithRelations() {

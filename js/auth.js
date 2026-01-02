@@ -12,24 +12,35 @@ const Auth = {
 
     // Login (Now asynchronous)
     async login(username, password) {
+        console.log(`Login attempt for user: ${username}`);
         const users = await Data.getUsers();
+
+        if (users.length === 0) {
+            console.warn('No users found in database. Seeding might be in progress or failed.');
+        }
+
         const user = users.find(u => u.username === username && u.password === password);
 
         if (user) {
+            console.log('User found, role:', user.role);
             const { password: _, ...userWithoutPassword } = user;
 
             // Get pegawai data if exists
             const pegawaiData = await Data.getPegawai();
             const pegawai = pegawaiData.find(p => p.user_id === user.id);
             if (pegawai) {
+                console.log('Linked employee record found:', pegawai.nama);
                 userWithoutPassword.pegawaiId = pegawai.id;
                 userWithoutPassword.pegawaiData = pegawai;
+            } else {
+                console.log('No linked employee record found for this user.');
             }
 
             localStorage.setItem(Data.KEYS.CURRENT_USER, JSON.stringify(userWithoutPassword));
             return { success: true, user: userWithoutPassword };
         }
 
+        console.warn('Login failed: Invalid username or password.');
         return { success: false, message: 'Username atau password salah!' };
     },
 
