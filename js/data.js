@@ -132,10 +132,10 @@ const Data = {
 
         const { data: pegawai, error: errP } = await supabase.from('pegawai').select('id, status');
         const { data: absensi, error: errA } = await supabase.from('absensi').select('*').eq('tanggal', today);
-        const { count: cutiPending, error: errC } = await supabase.from('absensi').select('*', { count: 'exact', head: true }).eq('status', 'pending'); // Assuming 'absensi' or another table handles cuti
+        const { count: cutiPending, error: errC } = await supabase.from('cuti').select('*', { count: 'exact', head: true }).eq('status', 'pending');
 
-        if (errP || errA) {
-            console.error('Error fetching stats:', errP || errA);
+        if (errP || errA || errC) {
+            console.error('Error fetching stats:', errP || errA || errC);
             return { totalPegawai: 0, hadirHariIni: 0, tidakHadir: 0, cutiPending: 0, terlambatHariIni: 0 };
         }
 

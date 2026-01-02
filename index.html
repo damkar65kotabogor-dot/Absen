@@ -38,13 +38,20 @@
           </div>
 
           <div id="loginError" class="alert alert-danger d-none">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
-            <span id="loginErrorText">NIP/Username atau password salah!</span>
+            <span id="loginErrorText">Username atau password salah!</span>
+          </div>
+
+          <div id="dbStatus" class="alert alert-info" style="font-size: 0.8rem; padding: 0.5rem; margin-bottom: 1rem;">
+            <div class="d-flex align-center gap-2">
+              <div id="statusDot" style="width: 8px; height: 8px; border-radius: 50%; background: #9ca3af;"></div>
+              <span id="statusText">Menghubungkan ke database...</span>
+            </div>
           </div>
 
           <button type="submit" class="btn btn-primary login-btn">
@@ -71,14 +78,43 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
   <script>
     // Redirect if already logged in
     if (Auth.isLoggedIn()) {
       window.location.href = 'dashboard.html';
     }
 
+    // Check connection status
+    (async () => {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const dbStatus = document.getElementById('dbStatus');
+
+      if (!statusDot || !statusText || !dbStatus) return;
+
+      try {
+        console.log('Testing Supabase connection...');
+        const { data, error } = await supabase.from('users').select('id').limit(1);
+
+        if (error) {
+          console.error('Connection error:', error);
+          throw error;
+        }
+
+        console.log('Connection successful!');
+        statusDot.style.background = '#10b981'; // Green
+        statusText.textContent = 'Terhubung ke database!';
+        setTimeout(() => dbStatus.style.display = 'none', 3000);
+      } catch (err) {
+        statusDot.style.background = '#ef4444'; // Red
+        statusText.textContent = 'Gagal terhubung ke database!';
+        console.error('Connection check failed:', err);
+      }
+    })();
+
     // Handle login form
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    document.getElementById('loginForm')?.addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const username = document.getElementById('username').value;
@@ -86,13 +122,30 @@
       const errorDiv = document.getElementById('loginError');
       const errorText = document.getElementById('loginErrorText');
 
-      const result = await Auth.login(username, password);
+      if (!username || !password) return;
 
-      if (result.success) {
-        window.location.href = 'dashboard.html';
-      } else {
-        errorText.textContent = result.message;
+      // Show loading
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Memproses...';
+
+      try {
+        const result = await Auth.login(username, password);
+
+        if (result.success) {
+          window.location.href = 'dashboard.html';
+        } else {
+          errorText.textContent = result.message;
+          errorDiv.classList.remove('d-none');
+        }
+      } catch (err) {
+        errorText.textContent = 'Terjadi kesalahan sistem!';
         errorDiv.classList.remove('d-none');
+        console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
       }
     });
   </script>
