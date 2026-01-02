@@ -197,6 +197,8 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
@@ -214,9 +216,9 @@
     document.getElementById('cutiMonth').value = currentMonth;
 
     // Load dropdowns
-    function loadDropdowns() {
-      const pegawai = Data.getPegawai();
-      const unitKerja = Data.getUnitKerja();
+    async function loadDropdowns() {
+      const pegawai = await Data.getPegawai();
+      const unitKerja = await Data.getUnitKerja();
 
       document.getElementById('absensiPegawai').innerHTML = '<option value="">Semua Pegawai</option>' +
         pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
@@ -232,18 +234,18 @@
     });
 
     // Generate Absensi Report
-    function generateAbsensiReport() {
+    async function generateAbsensiReport() {
       const month = document.getElementById('absensiMonth').value;
       const pegawaiId = document.getElementById('absensiPegawai').value;
 
-      let absensi = Data.getAbsensiWithPegawai();
+      let absensi = await Data.getAbsensiWithPegawai();
 
       // Apply filters
       if (month) {
         absensi = absensi.filter(a => a.tanggal.startsWith(month));
       }
       if (pegawaiId) {
-        absensi = absensi.filter(a => a.pegawaiId == pegawaiId);
+        absensi = absensi.filter(a => a.pegawai_id == pegawaiId);
       }
 
       // Sort by date
@@ -282,8 +284,8 @@
                   <td>${i + 1}</td>
                   <td>${App.formatDate(a.tanggal)}</td>
                   <td>${a.pegawai?.nama || '-'}</td>
-                  <td>${a.jamMasuk || '-'}</td>
-                  <td>${a.jamKeluar || '-'}</td>
+                  <td>${a.jam_masuk || '-'}</td>
+                  <td>${a.jam_keluar || '-'}</td>
                   <td>${App.getStatusBadge(a.status)}</td>
                 </tr>
               `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
@@ -296,15 +298,15 @@
     }
 
     // Generate Kepegawaian Report
-    function generateKepegawaianReport() {
+    async function generateKepegawaianReport() {
       const type = document.getElementById('kepegawaianType').value;
       const unitId = document.getElementById('kepegawaianUnit').value;
 
-      let pegawai = Data.getPegawaiWithRelations();
+      let pegawai = await Data.getPegawaiWithRelations();
 
       // Apply filter
       if (type === 'unit' && unitId) {
-        pegawai = pegawai.filter(p => p.unitKerjaId == unitId);
+        pegawai = pegawai.filter(p => p.unit_kerja_id == unitId);
       }
 
       // Group by if needed
@@ -313,7 +315,7 @@
       if (type === 'unit') {
         const grouped = {};
         pegawai.forEach(p => {
-          const key = p.unitKerja?.nama || 'Tidak Ada Unit';
+          const key = p.unit_kerja?.nama || 'Tidak Ada Unit';
           if (!grouped[key]) grouped[key] = [];
           grouped[key].push(p);
         });
@@ -372,7 +374,7 @@
                   <td>${p.nip}</td>
                   <td>${p.nama}</td>
                   <td>${p.jabatan?.nama || '-'}</td>
-                  <td>${p.unitKerja?.nama || '-'}</td>
+                  <td>${p.unit_kerja?.nama || '-'}</td>
                   <td>${App.getStatusBadge(p.status)}</td>
                 </tr>
               `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
@@ -383,22 +385,29 @@
     }
 
     // Generate Cuti Report
-    function generateCutiReport() {
+    async function generateCutiReport() {
       const month = document.getElementById('cutiMonth').value;
       const status = document.getElementById('cutiStatus').value;
 
-      let cuti = Data.getCutiWithPegawai();
+      // Assuming Data.getCutiWithPegawai() is implemented or use generic
+      const cutiList = await Data.getAll('cuti'); // Fallback if no specific getter
+      // Need to link with pegawai
+      const employees = await Data.getPegawai();
+      let cuti = cutiList.map(c => ({
+        ...c,
+        pegawai: employees.find(e => e.id === c.pegawai_id)
+      }));
 
       // Apply filters
       if (month) {
-        cuti = cuti.filter(c => c.tanggalMulai.startsWith(month) || c.tanggalSelesai.startsWith(month));
+        cuti = cuti.filter(c => (c.tanggal_mulai && c.tanggal_mulai.startsWith(month)) || (c.tanggal_selesai && c.tanggal_selesai.startsWith(month)));
       }
       if (status) {
         cuti = cuti.filter(c => c.status === status);
       }
 
       // Sort by date
-      cuti.sort((a, b) => new Date(a.tanggalMulai) - new Date(b.tanggalMulai));
+      cuti.sort((a, b) => new Date(a.tanggal_mulai) - new Date(b.tanggal_mulai));
 
       // Calculate summary
       const pending = cuti.filter(c => c.status === 'pending').length;
@@ -433,9 +442,9 @@
                 <tr>
                   <td>${i + 1}</td>
                   <td>${c.pegawai?.nama || '-'}</td>
-                  <td>${c.jenisCuti}</td>
-                  <td>${App.formatDate(c.tanggalMulai)} - ${App.formatDate(c.tanggalSelesai)}</td>
-                  <td>${c.jumlahHari}</td>
+                  <td>${c.jenis_cuti || '-'}</td>
+                  <td>${App.formatDate(c.tanggal_mulai)} - ${App.formatDate(c.tanggal_selesai)}</td>
+                  <td>${c.jumlah_hari || '-'}</td>
                   <td>${App.getStatusBadge(c.status)}</td>
                 </tr>
               `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
@@ -491,7 +500,7 @@
         hour: '2-digit',
         minute: '2-digit'
       })}</p>
-          <hr>
+      <hr>
           ${content}
         </body>
         </html>
@@ -501,7 +510,10 @@
     }
 
     // Initialize
-    loadDropdowns();
+    (async () => {
+      await loadDropdowns();
+    })();
+  </script>
   </script>
 </body>
 

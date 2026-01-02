@@ -254,6 +254,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
@@ -268,7 +270,7 @@
         const isPimpinan = user.role === 'pimpinan';
 
         // Setup UI based on role
-        function setupUI() {
+        async function setupUI() {
             if (isPimpinan) {
                 document.getElementById('pageTitle').textContent = 'Persetujuan Cuti';
                 document.getElementById('addBtnContainer').classList.add('d-none');
@@ -277,7 +279,7 @@
             if (!isPegawai) {
                 document.getElementById('filters').classList.remove('d-none');
                 // Load pegawai filter
-                const pegawai = Data.getPegawai();
+                const pegawai = await Data.getPegawai();
                 document.getElementById('filterPegawai').innerHTML = '<option value="">Semua Pegawai</option>' +
                     pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
             } else {
@@ -286,27 +288,33 @@
         }
 
         // Load cuti data
-        function loadCuti() {
+        async function loadCuti() {
             const filterPegawai = document.getElementById('filterPegawai')?.value || '';
             const filterStatus = document.getElementById('filterStatus')?.value || '';
 
-            let cuti = Data.getCutiWithPegawai();
+            // Using generic getAll for cuti as there's no specific getter in Data yet
+            const cutiList = await Data.getAll('cuti');
+            const employees = await Data.getPegawai();
+            let cuti = cutiList.map(c => ({
+                ...c,
+                pegawai: employees.find(e => e.id === c.pegawai_id)
+            }));
 
             // Filter by pegawai (for pegawai role)
             if (isPegawai && user.pegawaiId) {
-                cuti = cuti.filter(c => c.pegawaiId === user.pegawaiId);
+                cuti = cuti.filter(c => c.pegawai_id === user.pegawaiId);
             }
 
             // Apply filters
             if (filterPegawai) {
-                cuti = cuti.filter(c => c.pegawaiId == filterPegawai);
+                cuti = cuti.filter(c => c.pegawai_id == filterPegawai);
             }
             if (filterStatus) {
                 cuti = cuti.filter(c => c.status === filterStatus);
             }
 
             // Sort by date desc
-            cuti.sort((a, b) => new Date(b.tanggalPengajuan) - new Date(a.tanggalPengajuan));
+            cuti.sort((a, b) => new Date(b.tanggal_pengajuan) - new Date(a.tanggal_pengajuan));
 
             // Update stats
             const pending = cuti.filter(c => c.status === 'pending').length;
@@ -320,9 +328,9 @@
             const html = cuti.length > 0 ? cuti.map(c => `
         <tr>
           ${!isPegawai ? `<td>${c.pegawai?.nama || '-'}</td>` : ''}
-          <td>${c.jenisCuti}</td>
-          <td>${App.formatDate(c.tanggalMulai)} - ${App.formatDate(c.tanggalSelesai)}</td>
-          <td>${c.jumlahHari} hari</td>
+          <td>${c.jenis_cuti || '-'}</td>
+          <td>${App.formatDate(c.tanggal_mulai)} - ${App.formatDate(c.tanggal_selesai)}</td>
+          <td>${c.jumlah_hari || '0'} hari</td>
           <td>${App.getStatusBadge(c.status)}</td>
           <td class="actions">
             <button class="btn btn-sm btn-outline btn-icon" onclick="viewCuti(${c.id})" title="Lihat">
@@ -370,20 +378,26 @@
         }
 
         // View cuti
-        function viewCuti(id) {
-            const c = Data.getCutiWithPegawai().find(x => x.id === id);
+        async function viewCuti(id) {
+            const cutiList = await Data.getAll('cuti');
+            const employees = await Data.getPegawai();
+            const c = cutiList.map(item => ({
+                ...item,
+                pegawai: employees.find(e => e.id === item.pegawai_id)
+            })).find(x => x.id === id);
+
             if (!c) return;
 
             document.getElementById('viewContent').innerHTML = `
         <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
           <div><strong>Pegawai:</strong><br>${c.pegawai?.nama || '-'}</div>
           <div><strong>Status:</strong><br>${App.getStatusBadge(c.status)}</div>
-          <div><strong>Jenis Cuti:</strong><br>${c.jenisCuti}</div>
-          <div><strong>Jumlah Hari:</strong><br>${c.jumlahHari} hari</div>
-          <div><strong>Tanggal Mulai:</strong><br>${App.formatDate(c.tanggalMulai)}</div>
-          <div><strong>Tanggal Selesai:</strong><br>${App.formatDate(c.tanggalSelesai)}</div>
-          <div><strong>Tanggal Pengajuan:</strong><br>${App.formatDate(c.tanggalPengajuan)}</div>
-          <div><strong>Disetujui Oleh:</strong><br>${c.approver?.name || '-'}</div>
+          <div><strong>Jenis Cuti:</strong><br>${c.jenis_cuti || '-'}</div>
+          <div><strong>Jumlah Hari:</strong><br>${c.jumlah_hari || '0'} hari</div>
+          <div><strong>Tanggal Mulai:</strong><br>${App.formatDate(c.tanggal_mulai)}</div>
+          <div><strong>Tanggal Selesai:</strong><br>${App.formatDate(c.tanggal_selesai)}</div>
+          <div><strong>Tanggal Pengajuan:</strong><br>${App.formatDate(c.tanggal_pengajuan)}</div>
+          <div><strong>Disetujui Oleh:</strong><br>${c.approved_by || '-'}</div>
         </div>
         <div class="mt-4"><strong>Alasan:</strong><br>${c.alasan || '-'}</div>
       `;
@@ -404,35 +418,35 @@
         }
 
         // Approve cuti
-        function approveCuti(id) {
-            Data.update(Data.KEYS.CUTI, id, {
+        async function approveCuti(id) {
+            await Data.update('cuti', id, {
                 status: 'approved',
-                approvedBy: user.id,
-                approvedAt: new Date().toISOString().split('T')[0]
+                approved_by: user.username, // Using username as simplified approver identity
+                approved_at: new Date().toISOString().split('T')[0]
             });
             App.showToast('Cuti berhasil disetujui!', 'success');
-            loadCuti();
+            await loadCuti();
         }
 
         // Reject cuti
-        function rejectCuti(id) {
-            if (App.confirm('Apakah Anda yakin ingin menolak pengajuan cuti ini?')) {
-                Data.update(Data.KEYS.CUTI, id, {
+        async function rejectCuti(id) {
+            if (confirm('Apakah Anda yakin ingin menolak pengajuan cuti ini?')) {
+                await Data.update('cuti', id, {
                     status: 'rejected',
-                    approvedBy: user.id,
-                    approvedAt: new Date().toISOString().split('T')[0]
+                    approved_by: user.username,
+                    approved_at: new Date().toISOString().split('T')[0]
                 });
                 App.showToast('Cuti berhasil ditolak!', 'success');
-                loadCuti();
+                await loadCuti();
             }
         }
 
         // Cancel cuti (pegawai)
-        function cancelCuti(id) {
-            if (App.confirm('Apakah Anda yakin ingin membatalkan pengajuan cuti ini?')) {
-                Data.delete(Data.KEYS.CUTI, id);
+        async function cancelCuti(id) {
+            if (confirm('Apakah Anda yakin ingin membatalkan pengajuan cuti ini?')) {
+                await Data.delete('cuti', id);
                 App.showToast('Pengajuan cuti berhasil dibatalkan!', 'success');
-                loadCuti();
+                await loadCuti();
             }
         }
 
@@ -445,7 +459,7 @@
         }
 
         // Handle form submit
-        document.getElementById('cutiForm').addEventListener('submit', function (e) {
+        document.getElementById('cutiForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             if (!user.pegawaiId) {
@@ -453,31 +467,31 @@
                 return;
             }
 
-            const tanggalMulai = document.getElementById('tanggalMulai').value;
-            const tanggalSelesai = document.getElementById('tanggalSelesai').value;
+            const tanggal_mulai = document.getElementById('tanggalMulai').value;
+            const tanggal_selesai = document.getElementById('tanggalSelesai').value;
 
-            if (tanggalSelesai < tanggalMulai) {
+            if (tanggal_selesai < tanggal_mulai) {
                 App.showToast('Tanggal selesai harus setelah tanggal mulai!', 'danger');
                 return;
             }
 
             const cutiData = {
-                pegawaiId: user.pegawaiId,
-                jenisCuti: document.getElementById('jenisCuti').value,
-                tanggalMulai: tanggalMulai,
-                tanggalSelesai: tanggalSelesai,
-                jumlahHari: calculateDays(tanggalMulai, tanggalSelesai),
+                pegawai_id: user.pegawaiId,
+                jenis_cuti: document.getElementById('jenisCuti').value,
+                tanggal_mulai: tanggal_mulai,
+                tanggal_selesai: tanggal_selesai,
+                jumlah_hari: calculateDays(tanggal_mulai, tanggal_selesai),
                 alasan: document.getElementById('alasan').value,
                 status: 'pending',
-                tanggalPengajuan: new Date().toISOString().split('T')[0],
-                approvedBy: null,
-                approvedAt: null
+                tanggal_pengajuan: new Date().toISOString().split('T')[0],
+                approved_by: null,
+                approved_at: null
             };
 
-            Data.create(Data.KEYS.CUTI, cutiData);
+            await Data.create('cuti', cutiData);
             App.showToast('Pengajuan cuti berhasil diajukan!', 'success');
             App.closeModal('cutiModal');
-            loadCuti();
+            await loadCuti();
         });
 
         // Filter listeners
@@ -485,8 +499,10 @@
         document.getElementById('filterStatus')?.addEventListener('change', loadCuti);
 
         // Initialize
-        setupUI();
-        loadCuti();
+        (async () => {
+            await setupUI();
+            await loadCuti();
+        })();
     </script>
 </body>
 

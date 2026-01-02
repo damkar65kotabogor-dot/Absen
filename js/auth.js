@@ -1,7 +1,3 @@
-/**
- * SIMPEG PPPK - Authentication Module
- */
-
 const Auth = {
     // Check if user is logged in
     isLoggedIn() {
@@ -14,16 +10,17 @@ const Auth = {
         return user ? JSON.parse(user) : null;
     },
 
-    // Login
-    login(username, password) {
-        const users = Data.getUsers();
+    // Login (Now asynchronous)
+    async login(username, password) {
+        const users = await Data.getUsers();
         const user = users.find(u => u.username === username && u.password === password);
 
         if (user) {
             const { password: _, ...userWithoutPassword } = user;
 
             // Get pegawai data if exists
-            const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+            const pegawaiData = await Data.getPegawai();
+            const pegawai = pegawaiData.find(p => p.user_id === user.id);
             if (pegawai) {
                 userWithoutPassword.pegawaiId = pegawai.id;
                 userWithoutPassword.pegawaiData = pegawai;

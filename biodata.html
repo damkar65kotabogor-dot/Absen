@@ -185,6 +185,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
@@ -192,19 +194,20 @@
         if (!Auth.requireAuth()) { }
         const user = Auth.getCurrentUser();
 
-        function loadBiodata() {
+        async function loadBiodata() {
             if (!user.pegawaiId) { window.location.href = 'profil.html'; return; }
-            const p = Data.getPegawaiWithRelations().find(x => x.id === user.pegawaiId);
+            const employees = await Data.getPegawaiWithRelations();
+            const p = employees.find(x => x.id === user.pegawaiId);
             if (!p) { window.location.href = 'profil.html'; return; }
 
             const items = [
                 { label: 'NIP', value: p.nip },
                 { label: 'Nama Lengkap', value: p.nama },
-                { label: 'Tempat Lahir', value: p.tempatLahir || '-' },
-                { label: 'Tanggal Lahir', value: p.tanggalLahir ? App.formatDate(p.tanggalLahir) : '-' },
-                { label: 'Jenis Kelamin', value: p.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
+                { label: 'Tempat Lahir', value: p.tempat_lahir || '-' },
+                { label: 'Tanggal Lahir', value: p.tanggal_lahir ? App.formatDate(p.tanggal_lahir) : '-' },
+                { label: 'Jenis Kelamin', value: p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
                 { label: 'Agama', value: p.agama || '-' },
-                { label: 'Status Pernikahan', value: p.statusNikah || '-' },
+                { label: 'Status Pernikahan', value: p.status_nikah || '-' },
                 { label: 'Email', value: p.email || '-' },
                 { label: 'Telepon', value: p.telepon || '-' },
                 { label: 'Alamat', value: p.alamat || '-' }
@@ -217,20 +220,25 @@
                 </div>
             `).join('');
         }
-        loadBiodata();
+
+        // Initialize
+        (async () => {
+            await loadBiodata();
+        })();
 
         // Edit Functionality
-        function openEditBiodata() {
-            const p = Data.getPegawaiWithRelations().find(x => x.id === user.pegawaiId);
+        async function openEditBiodata() {
+            const employees = await Data.getPegawaiWithRelations();
+            const p = employees.find(x => x.id === user.pegawaiId);
             if (!p) return;
 
             document.getElementById('editNama').value = p.nama;
             document.getElementById('editNip').value = p.nip;
-            document.getElementById('editTempatLahir').value = p.tempatLahir || '';
-            document.getElementById('editTanggalLahir').value = p.tanggalLahir || '';
-            document.getElementById('editJenisKelamin').value = p.jenisKelamin;
+            document.getElementById('editTempatLahir').value = p.tempat_lahir || '';
+            document.getElementById('editTanggalLahir').value = p.tanggal_lahir || '';
+            document.getElementById('editJenisKelamin').value = p.jenis_kelamin;
             document.getElementById('editAgama').value = p.agama || 'Islam';
-            document.getElementById('editStatusNikah').value = p.statusNikah || 'Belum Menikah';
+            document.getElementById('editStatusNikah').value = p.status_nikah || 'Belum Menikah';
             document.getElementById('editTelepon').value = p.telepon || '';
             document.getElementById('editEmail').value = p.email || '';
             document.getElementById('editAlamat').value = p.alamat || '';
@@ -242,37 +250,31 @@
             document.getElementById('editBiodataModal').classList.remove('show');
         }
 
-        document.getElementById('editBiodataForm').addEventListener('submit', function (e) {
+        document.getElementById('editBiodataForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const updates = {
                 nama: document.getElementById('editNama').value,
                 nip: document.getElementById('editNip').value,
-                tempatLahir: document.getElementById('editTempatLahir').value,
-                tanggalLahir: document.getElementById('editTanggalLahir').value,
-                jenisKelamin: document.getElementById('editJenisKelamin').value,
+                tempat_lahir: document.getElementById('editTempatLahir').value,
+                tanggal_lahir: document.getElementById('editTanggalLahir').value,
+                jenis_kelamin: document.getElementById('editJenisKelamin').value,
                 agama: document.getElementById('editAgama').value,
-                statusNikah: document.getElementById('editStatusNikah').value,
+                status_nikah: document.getElementById('editStatusNikah').value,
                 telepon: document.getElementById('editTelepon').value,
                 email: document.getElementById('editEmail').value,
                 alamat: document.getElementById('editAlamat').value
             };
 
             // Update data
-            Data.update(Data.KEYS.PEGAWAI, user.pegawaiId, updates);
+            await Data.update('pegawai', user.pegawaiId, updates);
 
             // Show feedback and reload
             App.showToast('Biodata berhasil diperbarui!', 'success');
             closeEditModal();
-            loadBiodata();
-
-            // Update sidebar profile if name changed
-            const updatedUser = Data.getPegawai().find(p => p.id === user.pegawaiId);
-            if (updatedUser) {
-                // Should also check if we need to update session user name if that's stored separately?
-                // The sidebar uses hardcoded/App logic, let's leave it for now or refresh page
-            }
+            await loadBiodata();
         });
+    </script>
     </script>
 </body>
 

@@ -67,6 +67,8 @@
   </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script>
@@ -76,7 +78,7 @@
     }
 
     // Handle login form
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const username = document.getElementById('username').value;
@@ -84,7 +86,7 @@
       const errorDiv = document.getElementById('loginError');
       const errorText = document.getElementById('loginErrorText');
 
-      const result = Auth.login(username, password);
+      const result = await Auth.login(username, password);
 
       if (result.success) {
         window.location.href = 'dashboard.html';

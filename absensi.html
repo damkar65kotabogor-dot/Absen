@@ -237,6 +237,8 @@
         </a>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
@@ -258,29 +260,30 @@
         document.getElementById('filterMonth').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
         // Setup UI based on role
-        function setupUI() {
+        async function setupUI() {
             if (isPegawai) {
                 document.getElementById('quickAction').classList.remove('d-none');
                 document.getElementById('filters').classList.add('d-none');
                 document.getElementById('thPegawai').style.display = 'none';
                 document.getElementById('thSelectAll').style.display = 'none';
                 document.getElementById('thAksi').style.display = 'none';
-                checkTodayAttendance();
+                await checkTodayAttendance();
             } else {
                 // Load pegawai filter
-                const pegawai = Data.getPegawai();
+                const pegawai = await Data.getPegawai();
                 document.getElementById('filterPegawai').innerHTML = '<option value="">Semua</option>' +
                     pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
             }
         }
 
         // Check today attendance for pegawai
-        function checkTodayAttendance() {
+        async function checkTodayAttendance() {
             if (!user.pegawaiId) return;
 
             const today = new Date().toISOString().split('T')[0];
-            const absensi = Data.getAbsensi().find(a =>
-                a.pegawaiId === user.pegawaiId && a.tanggal === today
+            const attendance = await Data.getAbsensi();
+            const absensi = attendance.find(a =>
+                a.pegawai_id === user.pegawaiId && a.tanggal === today
             );
 
             const infoEl = document.getElementById('attendanceInfo');
@@ -288,12 +291,12 @@
             const btnCheckOut = document.getElementById('btnCheckOut');
 
             if (absensi) {
-                if (absensi.jamKeluar) {
-                    infoEl.textContent = `Absensi selesai. Masuk: ${absensi.jamMasuk} | Keluar: ${absensi.jamKeluar}`;
+                if (absensi.jam_keluar) {
+                    infoEl.textContent = `Absensi selesai. Masuk: ${absensi.jam_masuk} | Keluar: ${absensi.jam_keluar}`;
                     btnCheckIn.disabled = true;
                     btnCheckOut.disabled = true;
                 } else {
-                    infoEl.textContent = `Sudah check-in pada ${absensi.jamMasuk}. Jangan lupa check-out!`;
+                    infoEl.textContent = `Sudah check-in pada ${absensi.jam_masuk}. Jangan lupa check-out!`;
                     btnCheckIn.disabled = true;
                     btnCheckOut.disabled = false;
                 }
@@ -305,16 +308,16 @@
         }
 
         // Load absensi data
-        function loadAbsensi() {
+        async function loadAbsensi() {
             const filterMonth = document.getElementById('filterMonth').value;
             const filterPegawai = document.getElementById('filterPegawai').value;
             const filterStatus = document.getElementById('filterStatus').value;
 
-            let absensi = Data.getAbsensiWithPegawai();
+            let absensi = await Data.getAbsensiWithPegawai();
 
             // Filter by pegawai (for pegawai role)
             if (isPegawai && user.pegawaiId) {
-                absensi = absensi.filter(a => a.pegawaiId === user.pegawaiId);
+                absensi = absensi.filter(a => a.pegawai_id === user.pegawaiId);
             }
 
             // Apply filters
@@ -322,7 +325,7 @@
                 absensi = absensi.filter(a => a.tanggal.startsWith(filterMonth));
             }
             if (filterPegawai) {
-                absensi = absensi.filter(a => a.pegawaiId == filterPegawai);
+                absensi = absensi.filter(a => a.pegawai_id == filterPegawai);
             }
             if (filterStatus) {
                 absensi = absensi.filter(a => a.status === filterStatus);
@@ -356,8 +359,8 @@
                                 <span>${a.pegawai?.nama || '-'}</span>
                             </div>
                         </td>` : ''}
-                    <td>${a.jamMasuk || '-'}</td>
-                    <td>${a.jamKeluar || '-'}</td>
+                    <td>${a.jam_masuk || '-'}</td>
+                    <td>${a.jam_keluar || '-'}</td>
                     <td>${App.getStatusBadge(a.status)}</td>
                     <td>${a.keterangan || '-'}</td>
                     ${!isPegawai ? `
@@ -407,17 +410,17 @@
             }
         }
 
-        function bulkDeleteAbsensi() {
+        async function bulkDeleteAbsensi() {
             const checkboxes = document.querySelectorAll('.row-checkbox:checked');
             const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
             if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} data absensi yang dipilih?`)) {
-                const absensi = Data.getAbsensi();
-                const newAbsensi = absensi.filter(a => !ids.includes(a.id));
-                localStorage.setItem(Data.KEYS.ABSENSI, JSON.stringify(newAbsensi));
+                for (const id of ids) {
+                    await Data.delete('absensi', id);
+                }
 
                 App.showToast(`${ids.length} data absensi berhasil dihapus`, 'success');
-                loadAbsensi();
+                await loadAbsensi();
             }
         }
 
@@ -445,16 +448,14 @@
             popover.classList.add('show');
         }
 
-        function deleteAbsensi() {
+        async function deleteAbsensi() {
             if (!currentAbsensiId) return;
             if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
-                const absensi = Data.getAbsensi();
-                const newAbsensi = absensi.filter(a => a.id !== currentAbsensiId);
-                localStorage.setItem(Data.KEYS.ABSENSI, JSON.stringify(newAbsensi));
+                await Data.delete('absensi', currentAbsensiId);
 
                 App.showToast('Data absensi berhasil dihapus', 'success');
                 document.getElementById('actionMenuPopover').classList.remove('show');
-                loadAbsensi();
+                await loadAbsensi();
             }
         }
 
@@ -479,18 +480,18 @@
             const jamMasuk = now.toTimeString().slice(0, 5);
             const today = now.toISOString().split('T')[0];
 
-            Data.create(Data.KEYS.ABSENSI, {
-                pegawaiId: user.pegawaiId,
+            await Data.create('absensi', {
+                pegawai_id: user.pegawaiId,
                 tanggal: today,
-                jamMasuk: jamMasuk,
-                jamKeluar: null,
+                jam_masuk: jamMasuk,
+                jam_keluar: null,
                 status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
                 keterangan: 'Check-in via Geolocation'
             });
 
             App.showToast(`Check-in berhasil!`, 'success');
-            checkTodayAttendance();
-            loadAbsensi();
+            await checkTodayAttendance();
+            await loadAbsensi();
         });
 
         // Handle check-out
@@ -504,16 +505,17 @@
             if (!isAtLocation) return;
 
             const today = new Date().toISOString().split('T')[0];
-            const absensi = Data.getAbsensi().find(a =>
-                a.pegawaiId === user.pegawaiId && a.tanggal === today
+            const attendance = await Data.getAbsensi();
+            const absensi = attendance.find(a =>
+                a.pegawai_id === user.pegawaiId && a.tanggal === today
             );
 
             if (absensi) {
                 const jamKeluar = new Date().toTimeString().slice(0, 5);
-                Data.update(Data.KEYS.ABSENSI, absensi.id, { jamKeluar });
+                await Data.update('absensi', absensi.id, { jam_keluar: jamKeluar });
                 App.showToast(`Check-out berhasil!`, 'success');
-                checkTodayAttendance();
-                loadAbsensi();
+                await checkTodayAttendance();
+                await loadAbsensi();
             }
         });
 
@@ -523,8 +525,10 @@
         document.getElementById('filterStatus')?.addEventListener('change', loadAbsensi);
 
         // Initialize
-        setupUI();
-        loadAbsensi();
+        (async () => {
+            await setupUI();
+            await loadAbsensi();
+        })();
     </script>
 </body>
 

@@ -286,6 +286,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
@@ -298,9 +300,9 @@
         const user = Auth.getCurrentUser();
 
         // Load dropdown options
-        function loadOptions() {
-            const jabatan = Data.getJabatan();
-            const unitKerja = Data.getUnitKerja();
+        async function loadOptions() {
+            const jabatan = await Data.getJabatan();
+            const unitKerja = await Data.getUnitKerja();
 
             document.getElementById('jabatanId').innerHTML = '<option value="">Pilih Jabatan</option>' +
                 jabatan.map(j => `<option value="${j.id}">${j.nama}</option>`).join('');
@@ -313,12 +315,12 @@
         }
 
         // Load pegawai data
-        function loadPegawai() {
+        async function loadPegawai() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const filterUnit = document.getElementById('filterUnit').value;
             const filterStatus = document.getElementById('filterStatus').value;
 
-            let pegawai = Data.getPegawaiWithRelations();
+            let pegawai = await Data.getPegawaiWithRelations();
 
             // Apply filters
             if (search) {
@@ -328,7 +330,7 @@
                 );
             }
             if (filterUnit) {
-                pegawai = pegawai.filter(p => p.unitKerjaId == filterUnit);
+                pegawai = pegawai.filter(p => p.unit_kerja_id == filterUnit);
             }
             if (filterStatus) {
                 pegawai = pegawai.filter(p => p.status === filterStatus);
@@ -350,7 +352,7 @@
                         </div>
                     </td>
                     <td>${p.jabatan?.nama || '-'}</td>
-                    <td>${p.unitKerja?.nama || '-'}</td>
+                    <td>${p.unit_kerja?.nama || '-'}</td>
                     <td>${App.getStatusBadge(p.status)}</td>
                     <td class="actions">
                         <button class="btn btn-sm btn-outline btn-icon" onclick="viewPegawai(${p.id})" title="Lihat">
@@ -390,8 +392,9 @@
         }
 
         // Edit pegawai
-        function editPegawai(id) {
-            const p = Data.getById(Data.KEYS.PEGAWAI, id);
+        async function editPegawai(id) {
+            const employees = await Data.getPegawai();
+            const p = employees.find(x => x.id === id);
             if (!p) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Pegawai';
@@ -401,25 +404,25 @@
             document.getElementById('email').value = p.email || '';
             document.getElementById('telepon').value = p.telepon || '';
             document.getElementById('alamat').value = p.alamat || '';
-            document.getElementById('tempatLahir').value = p.tempatLahir || '';
-            document.getElementById('tanggalLahir').value = p.tanggalLahir || '';
-            document.getElementById('jenisKelamin').value = p.jenisKelamin || 'L';
+            document.getElementById('tempatLahir').value = p.tempat_lahir || '';
+            document.getElementById('tanggalLahir').value = p.tanggal_lahir || '';
+            document.getElementById('jenisKelamin').value = p.jenis_kelamin || 'L';
             document.getElementById('agama').value = p.agama || 'Islam';
-            document.getElementById('jabatanId').value = p.jabatanId;
-            document.getElementById('unitKerjaId').value = p.unitKerjaId;
-            document.getElementById('statusNikah').value = p.statusNikah || 'Belum Menikah';
-            document.getElementById('tanggalMasuk').value = p.tanggalMasuk || '';
+            document.getElementById('jabatanId').value = p.jabatan_id;
+            document.getElementById('unitKerjaId').value = p.unit_kerja_id;
+            document.getElementById('statusNikah').value = p.status_nikah || 'Belum Menikah';
+            document.getElementById('tanggalMasuk').value = p.tanggal_masuk || '';
             document.getElementById('status').value = p.status;
 
             App.openModal('pegawaiModal');
         }
 
         // View pegawai
-        function viewPegawai(id) {
-            const p = Data.getPegawaiWithRelations().find(x => x.id === id);
+        async function viewPegawai(id) {
+            const employees = await Data.getPegawaiWithRelations();
+            const p = employees.find(x => x.id === id);
             if (!p) return;
 
-            const initials = p.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             const photoUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=random&size=128`;
 
             document.getElementById('viewContent').innerHTML = `
@@ -433,13 +436,13 @@
           <div><strong>Nama:</strong><br>${p.nama}</div>
           <div><strong>Email:</strong><br>${p.email || '-'}</div>
           <div><strong>Telepon:</strong><br>${p.telepon || '-'}</div>
-          <div><strong>Tempat/Tgl Lahir:</strong><br>${p.tempatLahir || '-'}, ${App.formatDate(p.tanggalLahir)}</div>
-          <div><strong>Jenis Kelamin:</strong><br>${p.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</div>
+          <div><strong>Tempat/Tgl Lahir:</strong><br>${p.tempat_lahir || '-'}, ${App.formatDate(p.tanggal_lahir)}</div>
+          <div><strong>Jenis Kelamin:</strong><br>${p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</div>
           <div><strong>Agama:</strong><br>${p.agama || '-'}</div>
-          <div><strong>Status Nikah:</strong><br>${p.statusNikah || '-'}</div>
+          <div><strong>Status Nikah:</strong><br>${p.status_nikah || '-'}</div>
           <div><strong>Jabatan:</strong><br>${p.jabatan?.nama || '-'}</div>
-          <div><strong>Unit Kerja:</strong><br>${p.unitKerja?.nama || '-'}</div>
-          <div><strong>Tanggal Masuk:</strong><br>${App.formatDate(p.tanggalMasuk)}</div>
+          <div><strong>Unit Kerja:</strong><br>${p.unit_kerja?.nama || '-'}</div>
+          <div><strong>Tanggal Masuk:</strong><br>${App.formatDate(p.tanggal_masuk)}</div>
           <div><strong>Status:</strong><br>${App.getStatusBadge(p.status)}</div>
         </div>
         <div class="mt-4"><strong>Alamat:</strong><br>${p.alamat || '-'}</div>
@@ -449,16 +452,16 @@
         }
 
         // Delete pegawai
-        function deletePegawai(id) {
-            if (App.confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) {
-                Data.delete(Data.KEYS.PEGAWAI, id);
+        async function deletePegawai(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) {
+                await Data.delete('pegawai', id);
                 App.showToast('Pegawai berhasil dihapus!', 'success');
-                loadPegawai();
+                await loadPegawai();
             }
         }
 
         // Handle form submit
-        document.getElementById('pegawaiForm').addEventListener('submit', function (e) {
+        document.getElementById('pegawaiForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const id = document.getElementById('pegawaiId').value;
@@ -468,27 +471,27 @@
                 email: document.getElementById('email').value,
                 telepon: document.getElementById('telepon').value,
                 alamat: document.getElementById('alamat').value,
-                tempatLahir: document.getElementById('tempatLahir').value,
-                tanggalLahir: document.getElementById('tanggalLahir').value,
-                jenisKelamin: document.getElementById('jenisKelamin').value,
+                tempat_lahir: document.getElementById('tempatLahir').value,
+                tanggal_lahir: document.getElementById('tanggalLahir').value,
+                jenis_kelamin: document.getElementById('jenisKelamin').value,
                 agama: document.getElementById('agama').value,
-                jabatanId: parseInt(document.getElementById('jabatanId').value),
-                unitKerjaId: parseInt(document.getElementById('unitKerjaId').value),
-                statusNikah: document.getElementById('statusNikah').value,
-                tanggalMasuk: document.getElementById('tanggalMasuk').value,
+                jabatan_id: parseInt(document.getElementById('jabatanId').value),
+                unit_kerja_id: parseInt(document.getElementById('unitKerjaId').value),
+                status_nikah: document.getElementById('statusNikah').value,
+                tanggal_masuk: document.getElementById('tanggalMasuk').value,
                 status: document.getElementById('status').value
             };
 
             if (id) {
-                Data.update(Data.KEYS.PEGAWAI, id, pegawaiData);
+                await Data.update('pegawai', id, pegawaiData);
                 App.showToast('Pegawai berhasil diperbarui!', 'success');
             } else {
-                Data.create(Data.KEYS.PEGAWAI, pegawaiData);
+                await Data.create('pegawai', pegawaiData);
                 App.showToast('Pegawai berhasil ditambahkan!', 'success');
             }
 
             App.closeModal('pegawaiModal');
-            loadPegawai();
+            await loadPegawai();
         });
 
         // Filter listeners
@@ -497,8 +500,10 @@
         document.getElementById('filterStatus').addEventListener('change', loadPegawai);
 
         // Initialize
-        loadOptions();
-        loadPegawai();
+        (async () => {
+            await loadOptions();
+            await loadPegawai();
+        })();
     </script>
 </body>
 

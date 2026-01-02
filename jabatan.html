@@ -155,18 +155,20 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
         // Require admin
-        if (!Auth.requireRole('admin')) {
+        if (!Auth.requireRole(['admin'])) {
             // Redirected
         }
 
         // Load jabatan data
-        function loadJabatan() {
-            const jabatan = Data.getJabatan();
+        async function loadJabatan() {
+            const jabatan = await Data.getJabatan();
 
             const html = jabatan.length > 0 ? jabatan.map(j => `
         <tr>
@@ -203,8 +205,9 @@
         }
 
         // Edit jabatan
-        function editJabatan(id) {
-            const j = Data.getById(Data.KEYS.JABATAN, id);
+        async function editJabatan(id) {
+            const jabatan = await Data.getJabatan();
+            const j = jabatan.find(x => x.id === id);
             if (!j) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Jabatan';
@@ -218,16 +221,16 @@
         }
 
         // Delete jabatan
-        function deleteJabatan(id) {
-            if (App.confirm('Apakah Anda yakin ingin menghapus jabatan ini?')) {
-                Data.delete(Data.KEYS.JABATAN, id);
+        async function deleteJabatan(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus jabatan ini?')) {
+                await Data.delete('jabatan', id);
                 App.showToast('Jabatan berhasil dihapus!', 'success');
-                loadJabatan();
+                await loadJabatan();
             }
         }
 
         // Handle form submit
-        document.getElementById('jabatanForm').addEventListener('submit', function (e) {
+        document.getElementById('jabatanForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const id = document.getElementById('jabatanId').value;
@@ -239,19 +242,21 @@
             };
 
             if (id) {
-                Data.update(Data.KEYS.JABATAN, id, jabatanData);
+                await Data.update('jabatan', id, jabatanData);
                 App.showToast('Jabatan berhasil diperbarui!', 'success');
             } else {
-                Data.create(Data.KEYS.JABATAN, jabatanData);
+                await Data.create('jabatan', jabatanData);
                 App.showToast('Jabatan berhasil ditambahkan!', 'success');
             }
 
             App.closeModal('jabatanModal');
-            loadJabatan();
+            await loadJabatan();
         });
 
         // Initialize
-        loadJabatan();
+        (async () => {
+            await loadJabatan();
+        })();
     </script>
 </body>
 
