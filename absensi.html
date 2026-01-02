@@ -488,7 +488,7 @@
                 keterangan: 'Check-in via Geolocation'
             });
 
-            App.showToast(`Check-in berhasil di lokasi Authorized!`, 'success');
+            App.showToast(`Check-in berhasil!`, 'success');
             checkTodayAttendance();
             loadAbsensi();
         });
@@ -511,7 +511,7 @@
             if (absensi) {
                 const jamKeluar = new Date().toTimeString().slice(0, 5);
                 Data.update(Data.KEYS.ABSENSI, absensi.id, { jamKeluar });
-                App.showToast(`Check-out berhasil di lokasi Authorized!`, 'success');
+                App.showToast(`Check-out berhasil!`, 'success');
                 checkTodayAttendance();
                 loadAbsensi();
             }

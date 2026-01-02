@@ -297,83 +297,9 @@ const App = {
         return badges[status] || `<span class="badge badge-secondary">${status}</span>`;
     },
 
-    // Authorized office locations
-    OFFICE_LOCATIONS: [
-        { name: 'Sukasari (Pajajaran)', lat: -6.617769, lon: 106.813873 },
-        { name: 'Cibuluh (Simpang Pomad)', lat: -6.55113, lon: 106.81285 },
-        { name: 'Yasmin (Bogor Barat)', lat: -6.556270, lon: 106.779770 }
-    ],
-
-    MAX_DISTANCE: 15, // 15 meters
-
-    // Haversine formula to calculate distance in meters
-    calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Earth radius in meters
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c;
-    },
-
+    // Simplified location validation (Always allowed as requested)
     async validateLocation() {
-        return new Promise((resolve) => {
-            if (!navigator.geolocation) {
-                this.showToast('Geolocation tidak didukung oleh browser ini.', 'danger');
-                return resolve(false);
-            }
-
-            this.showToast('Sedang memverifikasi lokasi...', 'info');
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude, accuracy } = position.coords;
-                    console.log(`User Lat: ${latitude}, Lon: ${longitude}, Accuracy: ${accuracy}`);
-
-                    if (accuracy > 100) {
-                        this.showToast('Akurasi GPS terlalu rendah. Pastikan Anda berada di luar ruangan.', 'warning');
-                    }
-
-                    let isWithinAnyRange = false;
-                    let minDistance = Infinity;
-
-                    this.OFFICE_LOCATIONS.forEach(office => {
-                        const dist = this.calculateDistance(latitude, longitude, office.lat, office.lon);
-                        if (dist <= this.MAX_DISTANCE) {
-                            isWithinAnyRange = true;
-                        }
-                        if (dist < minDistance) minDistance = dist;
-                    });
-
-                    if (!isWithinAnyRange) {
-                        this.showToast(`Anda berada diluar radius absensi (${Math.round(minDistance)}m dari lokasi terdekat).`, 'danger');
-                        return resolve(false);
-                    }
-
-                    resolve(true);
-                },
-                (error) => {
-                    let msg = 'Gagal mendapatkan lokasi.';
-                    if (error.code === error.PERMISSION_DENIED) msg = 'Izin lokasi ditolak.';
-                    else if (error.code === error.POSITION_UNAVAILABLE) msg = 'Informasi lokasi tidak tersedia.';
-                    else if (error.code === error.TIMEOUT) msg = 'Waktu permintaan lokasi habis.';
-
-                    this.showToast(msg, 'danger');
-                    resolve(false);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        });
+        return true;
     },
 
     // Confirm dialog
