@@ -86,106 +86,17 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        onclick="App.closeModal('familyModal')">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" id="deleteBtn" class="btn btn-danger d-none"
+                        onclick="deleteMember()">Hapus</button>
+                    <div class="footer-right">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="App.closeModal('familyModal')">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-
-    <script src="js/data.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/app.js"></script>
-    <script>
-        if (!Auth.requireAuth()) { }
-
-        const user = Auth.getCurrentUser();
-        const pegawai = Data.getPegawai().find(p => p.userId === user.id);
-
-        function loadFamily() {
-            if (!pegawai) return;
-            const families = Data.getAll(Data.KEYS.KELUARGA).filter(f => f.pegawaiId === pegawai.id);
-            const container = document.getElementById('familyList');
-
-            if (families.length === 0) {
-                container.innerHTML = '<div class="empty-state-dash">-</div>';
-                return;
-            }
-
-            container.innerHTML = families.map(f => `
-                <div class="family-card" onclick="editMember(${f.id})">
-                    <span class="badge badge-${f.hubungan.toLowerCase()}">${f.hubungan.toUpperCase()}</span>
-                    <h3 class="member-name">${f.nama}</h3>
-                    <div class="member-info">
-                        <p><i class="icon-gender"></i> ${f.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
-                        <p><i class="icon-calendar"></i> ${f.tanggalLahir ? App.formatDate(f.tanggalLahir) : '-'}</p>
-                        <p><i class="icon-job"></i> ${f.pekerjaan || '-'}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Tambah Keluarga';
-            document.getElementById('familyForm').reset();
-            document.getElementById('memberId').value = '';
-            App.openModal('familyModal');
-        }
-
-        function editMember(id) {
-            const f = Data.getById(Data.KEYS.KELUARGA, id);
-            if (!f) return;
-
-            document.getElementById('modalTitle').textContent = 'Edit Keluarga';
-            document.getElementById('memberId').value = f.id;
-            document.getElementById('nama').value = f.nama;
-            document.getElementById('hubungan').value = f.hubungan;
-            document.getElementById('jenisKelamin').value = f.jenisKelamin;
-            document.getElementById('tanggalLahir').value = f.tanggalLahir || '';
-            document.getElementById('pekerjaan').value = f.pekerjaan || '';
-
-            App.openModal('familyModal');
-        }
-
-        function deleteMember() {
-            const id = document.getElementById('memberId').value;
-            if (!id) return;
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                Data.delete(Data.KEYS.KELUARGA, id);
-                App.showToast('Data berhasil dihapus', 'success');
-                App.closeModal('familyModal');
-                loadFamily();
-            }
-        }
-
-        document.getElementById('familyForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const id = document.getElementById('memberId').value;
-            const data = {
-                pegawaiId: pegawai.id,
-                nama: document.getElementById('nama').value,
-                hubungan: document.getElementById('hubungan').value,
-                jenisKelamin: document.getElementById('jenisKelamin').value,
-                tanggalLahir: document.getElementById('tanggalLahir').value,
-                pekerjaan: document.getElementById('pekerjaan').value
-            };
-
-            if (id) {
-                Data.update(Data.KEYS.KELUARGA, id, data);
-                App.showToast('Data berhasil diperbarui', 'success');
-            } else {
-                Data.create(Data.KEYS.KELUARGA, data);
-                App.showToast('Data berhasil ditambahkan', 'success');
-            }
-
-            App.closeModal('familyModal');
-            loadFamily();
-        });
-
-        loadFamily();
-    </script>
-    <!-- Add a delete button in the modal footer for when editing -->
     <style>
         .modal-footer {
             display: flex;
@@ -198,28 +109,127 @@
             gap: 0.5rem;
         }
     </style>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
     <script>
-        // Update modal footer to include delete button
-        const modalFooter = document.querySelector('.modal-footer');
-        modalFooter.innerHTML = `
-            <button type="button" id="deleteBtn" class="btn btn-danger d-none" onclick="deleteMember()">Hapus</button>
-            <div class="footer-right">
-                <button type="button" class="btn btn-secondary" onclick="App.closeModal('familyModal')">Batal</button>
-                <button type="submit" form="familyForm" class="btn btn-primary">Simpan</button>
-            </div>
-        `;
+        if (!Auth.requireAuth()) { }
 
-        const originalOpenAddModal = openAddModal;
-        openAddModal = function () {
-            originalOpenAddModal();
+        const user = Auth.getCurrentUser();
+        let currentPegawaiId = null;
+
+        async function loadFamily() {
+            try {
+                // 1. Get Pegawai ID safely
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id === user.id);
+
+                if (!p) {
+                    document.getElementById('familyList').innerHTML = '<div class="empty-state-dash">Data pegawai tidak ditemukan</div>';
+                    return;
+                }
+                currentPegawaiId = p.id;
+
+                // 2. Get Data
+                const allData = await Data.getKeluarga();
+                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId);
+                const container = document.getElementById('familyList');
+
+                if (myData.length === 0) {
+                    container.innerHTML = '<div class="empty-state-dash">-</div>';
+                    return;
+                }
+
+                container.innerHTML = myData.map(f => `
+                    <div class="family-card" onclick="editMember('${f.id}')">
+                        <span class="badge badge-${f.hubungan.toLowerCase()}">${f.hubungan.toUpperCase()}</span>
+                        <h3 class="member-name">${f.nama}</h3>
+                        <div class="member-info">
+                            <p><i class="icon-gender"></i> ${f.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
+                            <p><i class="icon-calendar"></i> ${f.tanggal_lahir ? App.formatDate(f.tanggal_lahir) : '-'}</p>
+                            <p><i class="icon-job"></i> ${f.pekerjaan || '-'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'error');
+            }
+        }
+
+        function openAddModal() {
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai belum tersedia', 'error');
+                return;
+            }
+            document.getElementById('modalTitle').textContent = 'Tambah Keluarga';
+            document.getElementById('familyForm').reset();
+            document.getElementById('memberId').value = '';
             document.getElementById('deleteBtn').classList.add('d-none');
-        };
+            App.openModal('familyModal');
+        }
 
-        const originalEditMember = editMember;
-        editMember = function (id) {
-            originalEditMember(id);
+        async function editMember(id) {
+            const f = await Data.getById(Data.KEYS.KELUARGA, id);
+            if (!f) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Keluarga';
+            document.getElementById('memberId').value = f.id;
+
+            // Map keys
+            document.getElementById('nama').value = f.nama;
+            document.getElementById('hubungan').value = f.hubungan;
+            document.getElementById('jenisKelamin').value = f.jenis_kelamin;
+            document.getElementById('tanggalLahir').value = f.tanggal_lahir || '';
+            document.getElementById('pekerjaan').value = f.pekerjaan || '';
+
             document.getElementById('deleteBtn').classList.remove('d-none');
-        };
+            App.openModal('familyModal');
+        }
+
+        async function deleteMember() {
+            const id = document.getElementById('memberId').value;
+            if (!id) return;
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                await Data.delete(Data.KEYS.KELUARGA, id);
+                App.showToast('Data berhasil dihapus', 'success');
+                App.closeModal('familyModal');
+                loadFamily();
+            }
+        }
+
+        document.getElementById('familyForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!currentPegawaiId) return;
+
+            const id = document.getElementById('memberId').value;
+            const data = {
+                pegawai_id: currentPegawaiId,
+                nama: document.getElementById('nama').value,
+                hubungan: document.getElementById('hubungan').value,
+                jenis_kelamin: document.getElementById('jenisKelamin').value,
+                tanggal_lahir: document.getElementById('tanggalLahir').value,
+                pekerjaan: document.getElementById('pekerjaan').value
+            };
+
+            try {
+                if (id) {
+                    await Data.update(Data.KEYS.KELUARGA, id, data);
+                    App.showToast('Data berhasil diperbarui', 'success');
+                } else {
+                    await Data.create(Data.KEYS.KELUARGA, data);
+                    App.showToast('Data berhasil ditambahkan', 'success');
+                }
+                App.closeModal('familyModal');
+                loadFamily();
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data', 'error');
+            }
+        });
+
+        window.addEventListener('load', () => setTimeout(loadFamily, 500));
     </script>
 </body>
 

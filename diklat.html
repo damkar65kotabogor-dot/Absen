@@ -144,37 +144,57 @@
         if (!Auth.requireAuth()) { }
 
         const user = Auth.getCurrentUser();
-        const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+        let currentPegawaiId = null;
 
-        function loadDiklat() {
-            if (!pegawai) return;
-            const records = Data.getAll(Data.KEYS.DIKLAT).filter(r => r.pegawaiId === pegawai.id);
-            const container = document.getElementById('diklatList');
+        async function loadDiklat() {
+            try {
+                // 1. Get Pegawai ID safely
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id === user.id); // snake_case user_id
 
-            if (records.length === 0) {
-                container.innerHTML = '<div class="empty-state-dash">-</div>';
-                return;
+                if (!p) {
+                    document.getElementById('diklatList').innerHTML = '<div class="empty-state-dash">Data pegawai tidak ditemukan</div>';
+                    return;
+                }
+                currentPegawaiId = p.id;
+
+                // 2. Get Data
+                const allData = await Data.getDiklat();
+                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId); // snake_case
+                const container = document.getElementById('diklatList');
+
+                if (myData.length === 0) {
+                    container.innerHTML = '<div class="empty-state-dash">-</div>';
+                    return;
+                }
+
+                // Sort by year descending
+                myData.sort((a, b) => b.tahun - a.tahun);
+
+                container.innerHTML = myData.map(r => `
+                    <div class="diklat-card" onclick="editDiklat('${r.id}')">
+                        <div class="diklat-header">
+                            <span class="diklat-name">${r.nama_diklat}</span>
+                            <span class="diklat-tahun">Tahun: ${r.tahun}</span>
+                        </div>
+                        <div class="diklat-info">
+                            <p><strong>Penyelenggara:</strong> ${r.penyelenggara || '-'}</p>
+                            <p><strong>Sertifikat:</strong> ${r.no_sertifikat || '-'}</p>
+                            ${r.keterangan ? `<p class="mt-2 text-muted italic">${r.keterangan}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'error');
             }
-
-            // Sort by year descending
-            records.sort((a, b) => b.tahun - a.tahun);
-
-            container.innerHTML = records.map(r => `
-                <div class="diklat-card" onclick="editDiklat(${r.id})">
-                    <div class="diklat-header">
-                        <span class="diklat-name">${r.namaDiklat}</span>
-                        <span class="diklat-tahun">Tahun: ${r.tahun}</span>
-                    </div>
-                    <div class="diklat-info">
-                        <p><strong>Penyelenggara:</strong> ${r.penyelenggara || '-'}</p>
-                        <p><strong>Sertifikat:</strong> ${r.noSertifikat || '-'}</p>
-                        ${r.keterangan ? `<p class="mt-2 text-muted italic">${r.keterangan}</p>` : ''}
-                    </div>
-                </div>
-            `).join('');
         }
 
         function openAddModal() {
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai belum tersedia', 'error');
+                return;
+            }
             document.getElementById('modalTitle').textContent = 'Tambah Riwayat Diklat';
             document.getElementById('diklatForm').reset();
             document.getElementById('diklatId').value = '';
@@ -182,58 +202,66 @@
             App.openModal('diklatModal');
         }
 
-        function editDiklat(id) {
-            const r = Data.getById(Data.KEYS.DIKLAT, id);
+        async function editDiklat(id) {
+            const r = await Data.getById(Data.KEYS.DIKLAT, id);
             if (!r) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Riwayat Diklat';
             document.getElementById('diklatId').value = r.id;
-            document.getElementById('namaDiklat').value = r.namaDiklat;
+
+            // Map keys
+            document.getElementById('namaDiklat').value = r.nama_diklat;
             document.getElementById('tahun').value = r.tahun;
             document.getElementById('penyelenggara').value = r.penyelenggara || '';
-            document.getElementById('noSertifikat').value = r.noSertifikat || '';
+            document.getElementById('noSertifikat').value = r.no_sertifikat || '';
             document.getElementById('keterangan').value = r.keterangan || '';
 
             document.getElementById('deleteBtn').classList.remove('d-none');
             App.openModal('diklatModal');
         }
 
-        function deleteDiklat() {
+        async function deleteDiklat() {
             const id = document.getElementById('diklatId').value;
             if (!id) return;
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                Data.delete(Data.KEYS.DIKLAT, id);
+                await Data.delete(Data.KEYS.DIKLAT, id);
                 App.showToast('Data berhasil dihapus', 'success');
                 App.closeModal('diklatModal');
                 loadDiklat();
             }
         }
 
-        document.getElementById('diklatForm').addEventListener('submit', function (e) {
+        document.getElementById('diklatForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            if (!currentPegawaiId) return;
+
             const id = document.getElementById('diklatId').value;
             const data = {
-                pegawaiId: pegawai.id,
-                namaDiklat: document.getElementById('namaDiklat').value,
+                pegawai_id: currentPegawaiId,
+                nama_diklat: document.getElementById('namaDiklat').value,
                 tahun: document.getElementById('tahun').value,
                 penyelenggara: document.getElementById('penyelenggara').value,
-                noSertifikat: document.getElementById('noSertifikat').value,
+                no_sertifikat: document.getElementById('noSertifikat').value,
                 keterangan: document.getElementById('keterangan').value
             };
 
-            if (id) {
-                Data.update(Data.KEYS.DIKLAT, id, data);
-                App.showToast('Data berhasil diperbarui', 'success');
-            } else {
-                Data.create(Data.KEYS.DIKLAT, data);
-                App.showToast('Data berhasil ditambahkan', 'success');
+            try {
+                if (id) {
+                    await Data.update(Data.KEYS.DIKLAT, id, data);
+                    App.showToast('Data berhasil diperbarui', 'success');
+                } else {
+                    await Data.create(Data.KEYS.DIKLAT, data);
+                    App.showToast('Data berhasil ditambahkan', 'success');
+                }
+                App.closeModal('diklatModal');
+                loadDiklat();
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data', 'error');
             }
-
-            App.closeModal('diklatModal');
-            loadDiklat();
         });
 
-        loadDiklat();
+        window.addEventListener('load', () => setTimeout(loadDiklat, 500));
     </script>
 </body>
 

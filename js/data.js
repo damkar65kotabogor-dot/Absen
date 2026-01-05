@@ -1,7 +1,14 @@
 const Data = {
     // Storage keys (still used for some local state if needed)
     KEYS: {
-        CURRENT_USER: 'simpeg_current_user'
+        CURRENT_USER: 'simpeg_current_user',
+        PENDIDIKAN: 'pendidikan',
+        RIWAYAT_JABATAN: 'riwayat_jabatan',
+        RIWAYAT_PANGKAT: 'riwayat_pangkat',
+        DIKLAT: 'diklat',
+        KGB: 'kgb',
+        SKP: 'skp',
+        KELUARGA: 'keluarga'
     },
 
     // Initialize - Migrates data if necessary
@@ -110,6 +117,13 @@ const Data = {
     async getUnitKerja() { return this.getAll('unit_kerja'); },
     async getAbsensi() { return this.getAll('absensi'); },
     async getCuti() { return this.getAll('cuti'); },
+    async getPendidikan() { return this.getAll(this.KEYS.PENDIDIKAN); },
+    async getKeluarga() { return this.getAll(this.KEYS.KELUARGA); },
+    async getRiwayatJabatan() { return this.getAll(this.KEYS.RIWAYAT_JABATAN); },
+    async getRiwayatPangkat() { return this.getAll(this.KEYS.RIWAYAT_PANGKAT); },
+    async getDiklat() { return this.getAll(this.KEYS.DIKLAT); },
+    async getKgb() { return this.getAll(this.KEYS.KGB); },
+    async getSkp() { return this.getAll(this.KEYS.SKP); },
 
     // Get pegawai with related data
     async getPegawaiWithRelations() {

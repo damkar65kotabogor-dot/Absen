@@ -143,37 +143,57 @@
         if (!Auth.requireAuth()) { }
 
         const user = Auth.getCurrentUser();
-        const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+        let currentPegawaiId = null;
 
-        function loadKGB() {
-            if (!pegawai) return;
-            const records = Data.getAll(Data.KEYS.KGB).filter(r => r.pegawaiId === pegawai.id);
-            const container = document.getElementById('kgbList');
+        async function loadKGB() {
+            try {
+                // 1. Get Pegawai ID safely
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id === user.id);
 
-            if (records.length === 0) {
-                container.innerHTML = '<div class="empty-state-dash">-</div>';
-                return;
+                if (!p) {
+                    document.getElementById('kgbList').innerHTML = '<div class="empty-state-dash">Data pegawai tidak ditemukan</div>';
+                    return;
+                }
+                currentPegawaiId = p.id;
+
+                // 2. Get Data
+                const allData = await Data.getKgb();
+                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId);
+                const container = document.getElementById('kgbList');
+
+                if (myData.length === 0) {
+                    container.innerHTML = '<div class="empty-state-dash">-</div>';
+                    return;
+                }
+
+                // Sort by TMT descending
+                myData.sort((a, b) => new Date(b.tmt_kgb) - new Date(a.tmt_kgb));
+
+                container.innerHTML = myData.map(r => `
+                    <div class="kgb-card" onclick="editKGB('${r.id}')">
+                        <div class="kgb-header">
+                            <span class="kgb-tmt">TMT: ${App.formatDate(r.tmt_kgb)}</span>
+                            <span class="kgb-gaji">Rp ${parseInt(r.gaji_pokok).toLocaleString('id-ID')}</span>
+                        </div>
+                        <div class="kgb-info">
+                            <p><strong>No SK:</strong> ${r.nomor_sk || '-'}</p>
+                            <p><strong>Tgl SK:</strong> ${r.tanggal_sk ? App.formatDate(r.tanggal_sk) : '-'}</p>
+                            ${r.keterangan ? `<p class="mt-2 text-muted italic">${r.keterangan}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'error');
             }
-
-            // Sort by TMT descending
-            records.sort((a, b) => new Date(b.tmt) - new Date(a.tmt));
-
-            container.innerHTML = records.map(r => `
-                <div class="kgb-card" onclick="editKGB(${r.id})">
-                    <div class="kgb-header">
-                        <span class="kgb-tmt">TMT: ${App.formatDate(r.tmt)}</span>
-                        <span class="kgb-gaji">Rp ${parseInt(r.gajiPokok).toLocaleString('id-ID')}</span>
-                    </div>
-                    <div class="kgb-info">
-                        <p><strong>No SK:</strong> ${r.noSK || '-'}</p>
-                        <p><strong>Tgl SK:</strong> ${r.tglSK ? App.formatDate(r.tglSK) : '-'}</p>
-                        ${r.keterangan ? `<p class="mt-2 text-muted italic">${r.keterangan}</p>` : ''}
-                    </div>
-                </div>
-            `).join('');
         }
 
         function openAddModal() {
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai belum tersedia', 'error');
+                return;
+            }
             document.getElementById('modalTitle').textContent = 'Tambah Riwayat KGB';
             document.getElementById('kgbForm').reset();
             document.getElementById('kgbId').value = '';
@@ -181,58 +201,65 @@
             App.openModal('kgbModal');
         }
 
-        function editKGB(id) {
-            const r = Data.getById(Data.KEYS.KGB, id);
+        async function editKGB(id) {
+            const r = await Data.getById(Data.KEYS.KGB, id);
             if (!r) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Riwayat KGB';
             document.getElementById('kgbId').value = r.id;
-            document.getElementById('tmt').value = r.tmt;
-            document.getElementById('gajiPokok').value = r.gajiPokok;
-            document.getElementById('noSK').value = r.noSK || '';
-            document.getElementById('tglSK').value = r.tglSK || '';
+
+            document.getElementById('tmt').value = r.tmt_kgb;
+            document.getElementById('gajiPokok').value = r.gaji_pokok;
+            document.getElementById('noSK').value = r.nomor_sk || '';
+            document.getElementById('tglSK').value = r.tanggal_sk || '';
             document.getElementById('keterangan').value = r.keterangan || '';
 
             document.getElementById('deleteBtn').classList.remove('d-none');
             App.openModal('kgbModal');
         }
 
-        function deleteKGB() {
+        async function deleteKGB() {
             const id = document.getElementById('kgbId').value;
             if (!id) return;
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                Data.delete(Data.KEYS.KGB, id);
+                await Data.delete(Data.KEYS.KGB, id);
                 App.showToast('Data berhasil dihapus', 'success');
                 App.closeModal('kgbModal');
                 loadKGB();
             }
         }
 
-        document.getElementById('kgbForm').addEventListener('submit', function (e) {
+        document.getElementById('kgbForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            if (!currentPegawaiId) return;
+
             const id = document.getElementById('kgbId').value;
             const data = {
-                pegawaiId: pegawai.id,
-                tmt: document.getElementById('tmt').value,
-                gajiPokok: document.getElementById('gajiPokok').value,
-                noSK: document.getElementById('noSK').value,
-                tglSK: document.getElementById('tglSK').value,
+                pegawai_id: currentPegawaiId,
+                tmt_kgb: document.getElementById('tmt').value,
+                gaji_pokok: document.getElementById('gajiPokok').value,
+                nomor_sk: document.getElementById('noSK').value,
+                tanggal_sk: document.getElementById('tglSK').value,
                 keterangan: document.getElementById('keterangan').value
             };
 
-            if (id) {
-                Data.update(Data.KEYS.KGB, id, data);
-                App.showToast('Data berhasil diperbarui', 'success');
-            } else {
-                Data.create(Data.KEYS.KGB, data);
-                App.showToast('Data berhasil ditambahkan', 'success');
+            try {
+                if (id) {
+                    await Data.update(Data.KEYS.KGB, id, data);
+                    App.showToast('Data berhasil diperbarui', 'success');
+                } else {
+                    await Data.create(Data.KEYS.KGB, data);
+                    App.showToast('Data berhasil ditambahkan', 'success');
+                }
+                App.closeModal('kgbModal');
+                loadKGB();
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data', 'error');
             }
-
-            App.closeModal('kgbModal');
-            loadKGB();
         });
 
-        loadKGB();
+        window.addEventListener('load', () => setTimeout(loadKGB, 500));
     </script>
 </body>
 

@@ -23,20 +23,304 @@
                 </svg>
             </a>
             <h2 class="mobile-page-title">Riwayat SKP</h2>
+            <button class="mobile-action-btn" onclick="openAddModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Tambah
+            </button>
         </header>
 
-        <!-- Main Content (Empty State Dash) -->
         <main class="mobile-content">
-            <div class="empty-state-dash">-</div>
-        </main>
-
+            <div id="skpList" class="skp-list">
+                <!-- Rendered by JS -->
+            </div>
         </main>
     </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="skpModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Riwayat SKP</h3>
+                <button class="modal-close" onclick="App.closeModal('skpModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="skpForm">
+                <div class="modal-body">
+                    <input type="hidden" id="skpId">
+                    <div class="form-group">
+                        <label class="form-label">Tahun *</label>
+                        <input type="number" class="form-control" id="tahun" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nilai SKP/Prestasi Kerja *</label>
+                        <input type="number" step="0.01" class="form-control" id="nilai" required>
+                    </div>
+
+                    <div class="form-divider">Atribut Penilaian (Opsional)</div>
+
+                    <div class="row">
+                        <div class="col-6" style="flex:1; margin-right: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Orientasi Pelayanan</label>
+                                <input type="number" step="0.01" class="form-control" id="orientasiPelayanan">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Integritas</label>
+                                <input type="number" step="0.01" class="form-control" id="integritas">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Komitmen</label>
+                                <input type="number" step="0.01" class="form-control" id="komitmen">
+                            </div>
+                        </div>
+                        <div class="col-6" style="flex:1; margin-left: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Disiplin</label>
+                                <input type="number" step="0.01" class="form-control" id="disiplin">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Kerjasama</label>
+                                <input type="number" step="0.01" class="form-control" id="kerjasama">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Kepemimpinan</label>
+                                <input type="number" step="0.01" class="form-control" id="kepemimpinan">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Pejabat Penilai</label>
+                        <input type="text" class="form-control" id="pejabatPenilai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Atasan Pejabat Penilai</label>
+                        <input type="text" class="form-control" id="atasanPejabatPenilai">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="deleteBtn" class="btn btn-danger d-none"
+                        onclick="deleteSKP()">Hapus</button>
+                    <div class="footer-right">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="App.closeModal('skpModal')">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .form-divider {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            margin: 1rem 0 0.5rem 0;
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: 0.25rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .skp-card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-100);
+        }
+
+        .skp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .skp-tahun {
+            font-weight: 700;
+            color: var(--primary-600);
+            font-size: 1.125rem;
+        }
+
+        .skp-nilai {
+            font-weight: 600;
+            color: var(--gray-900);
+            background: var(--gray-100);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .skp-info {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        .skp-info p {
+            margin-bottom: 0.25rem;
+        }
+    </style>
 
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
-    <script>if (!Auth.requireAuth()) { }</script>
+    <script>
+        if (!Auth.requireAuth()) { }
+
+        const user = Auth.getCurrentUser();
+        let currentPegawaiId = null;
+
+        async function loadSKP() {
+            try {
+                // 1. Get Pegawai ID safely
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id === user.id);
+
+                if (!p) {
+                    document.getElementById('skpList').innerHTML = '<div class="empty-state-dash">Data pegawai tidak ditemukan</div>';
+                    return;
+                }
+                currentPegawaiId = p.id;
+
+                // 2. Get Data
+                const allData = await Data.getSkp();
+                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId);
+                const container = document.getElementById('skpList');
+
+                if (myData.length === 0) {
+                    container.innerHTML = '<div class="empty-state-dash">-</div>';
+                    return;
+                }
+
+                // Sort by Tahun descending
+                myData.sort((a, b) => b.tahun - a.tahun);
+
+                container.innerHTML = myData.map(r => `
+                    <div class="skp-card" onclick="editSKP('${r.id}')">
+                        <div class="skp-header">
+                            <span class="skp-tahun">Tahun ${r.tahun}</span>
+                            <span class="skp-nilai">Nilai: ${r.nilai_skp || r.nilai_prestasi_kerja || '-'}</span>
+                        </div>
+                        <div class="skp-info">
+                            <p><strong>Pejabat Penilai:</strong> ${r.pejabat_penilai || '-'}</p>
+                            <p><strong>Atasan Penilai:</strong> ${r.atasan_pejabat_penilai || '-'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'error');
+            }
+        }
+
+        function openAddModal() {
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai belum tersedia', 'error');
+                return;
+            }
+            document.getElementById('modalTitle').textContent = 'Tambah Riwayat SKP';
+            document.getElementById('skpForm').reset();
+            document.getElementById('skpId').value = '';
+            document.getElementById('deleteBtn').classList.add('d-none');
+            App.openModal('skpModal');
+        }
+
+        async function editSKP(id) {
+            const r = await Data.getById(Data.KEYS.SKP, id);
+            if (!r) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Riwayat SKP';
+            document.getElementById('skpId').value = r.id;
+
+            // Map keys
+            document.getElementById('tahun').value = r.tahun;
+            document.getElementById('nilai').value = r.nilai_skp || r.nilai_prestasi_kerja;
+
+            document.getElementById('orientasiPelayanan').value = r.orientasi_pelayanan || '';
+            document.getElementById('integritas').value = r.integritas || '';
+            document.getElementById('komitmen').value = r.komitmen || '';
+            document.getElementById('disiplin').value = r.disiplin || '';
+            document.getElementById('kerjasama').value = r.kerjasama || '';
+            document.getElementById('kepemimpinan').value = r.kepemimpinan || '';
+
+            document.getElementById('pejabatPenilai').value = r.pejabat_penilai || '';
+            document.getElementById('atasanPejabatPenilai').value = r.atasan_pejabat_penilai || '';
+
+
+            document.getElementById('deleteBtn').classList.remove('d-none');
+            App.openModal('skpModal');
+        }
+
+        async function deleteSKP() {
+            const id = document.getElementById('skpId').value;
+            if (!id) return;
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                await Data.delete(Data.KEYS.SKP, id);
+                App.showToast('Data berhasil dihapus', 'success');
+                App.closeModal('skpModal');
+                loadSKP();
+            }
+        }
+
+        document.getElementById('skpForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!currentPegawaiId) return;
+
+            const id = document.getElementById('skpId').value;
+            const data = {
+                pegawai_id: currentPegawaiId,
+                tahun: document.getElementById('tahun').value,
+                nilai_skp: document.getElementById('nilai').value, // or nilai_prestasi_kerja
+
+                orientasi_pelayanan: document.getElementById('orientasiPelayanan').value,
+                integritas: document.getElementById('integritas').value,
+                komitmen: document.getElementById('komitmen').value,
+                disiplin: document.getElementById('disiplin').value,
+                kerjasama: document.getElementById('kerjasama').value,
+                kepemimpinan: document.getElementById('kepemimpinan').value,
+
+                pejabat_penilai: document.getElementById('pejabatPenilai').value,
+                atasan_pejabat_penilai: document.getElementById('atasanPejabatPenilai').value
+            };
+
+            try {
+                if (id) {
+                    await Data.update(Data.KEYS.SKP, id, data);
+                    App.showToast('Data berhasil diperbarui', 'success');
+                } else {
+                    await Data.create(Data.KEYS.SKP, data);
+                    App.showToast('Data berhasil ditambahkan', 'success');
+                }
+                App.closeModal('skpModal');
+                loadSKP();
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data', 'error');
+            }
+        });
+
+        window.addEventListener('load', () => setTimeout(loadSKP, 500));
+    </script>
 </body>
 
 </html>

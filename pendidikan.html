@@ -178,73 +178,100 @@
     <script>
         if (!Auth.requireAuth()) { }
         const user = Auth.getCurrentUser();
+        let currentPegawaiId = null;
 
-        function loadPendidikan() {
-            if (!user.pegawaiId) return;
+        async function loadPendidikan() {
+            try {
+                // 1. Get Pegawai ID safely
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id === user.id);
 
-            const allPendidikan = Data.getPendidikan() || [];
-            const myPendidikan = allPendidikan.filter(p => p.pegawaiId === user.pegawaiId);
-            const container = document.querySelector('.card-body');
+                if (!p) {
+                    document.querySelector('.card-body').innerHTML = '<div class="alert alert-warning">Data kepegawaian tidak ditemukan. Silakan lengkapi biodata terlebih dahulu.</div>';
+                    return;
+                }
+                currentPegawaiId = p.id;
 
-            if (myPendidikan.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                            </svg>
-                        </div>
-                        <h3>Belum Ada Data</h3>
-                        <p>Data riwayat pendidikan belum tersedia</p>
-                    </div>`;
-            } else {
-                // Sort by year descending
-                myPendidikan.sort((a, b) => b.tahunLulus - a.tahunLulus);
+                // 2. Get Pendidikan Data
+                const allPendidikan = await Data.getPendidikan();
+                // Filter by pegawai_id (snake_case from DB)
+                const myPendidikan = (allPendidikan || []).filter(item => item.pegawai_id === currentPegawaiId);
+                const container = document.querySelector('.card-body');
 
-                let html = '<div class="list-group">';
-                myPendidikan.forEach(item => {
-                    html += `
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h4 class="mb-1">${item.tingkat} - ${item.namaSekolah}</h4>
-                                    <p class="mb-0 text-muted small">${item.jurusan ? item.jurusan + ' • ' : ''}Lulus Tahun ${item.tahunLulus}</p>
-                                    <p class="mb-0 text-muted small">No. Ijazah: ${item.noIjazah || '-'}</p>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal(${item.id})">Edit</button>
-                                    <button class="btn btn-sm btn-outline text-danger" onclick="deletePendidikan(${item.id})">Hapus</button>
+                if (myPendidikan.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                                </svg>
+                            </div>
+                            <h3>Belum Ada Data</h3>
+                            <p>Data riwayat pendidikan belum tersedia</p>
+                        </div>`;
+                } else {
+                    // Sort by year descending (use date or year field)
+                    myPendidikan.sort((a, b) => b.tahun_lulus - a.tahun_lulus);
+
+                    let html = '<div class="list-group">';
+                    myPendidikan.forEach(item => {
+                        // DB is snake_case, mapping to display
+                        const nama = item.nama_sekolah || item.namaSekolah; // fallback
+                        const jurusan = item.jurusan;
+                        const tahun = item.tahun_lulus || item.tahunLulus;
+                        const noIjz = item.no_ijazah || item.noIjazah;
+
+                        html += `
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-1">${item.tingkat} - ${nama}</h4>
+                                        <p class="mb-0 text-muted small">${jurusan ? jurusan + ' • ' : ''}Lulus Tahun ${tahun}</p>
+                                        <p class="mb-0 text-muted small">No. Ijazah: ${noIjz || '-'}</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                                        <button class="btn btn-sm btn-outline text-danger" onclick="deletePendidikan('${item.id}')">Hapus</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                container.innerHTML = html;
+                        `;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                }
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data pendidikan', 'error');
             }
         }
 
         // Modal Functions
         function openAddModal() {
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'error');
+                return;
+            }
             document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';
             document.getElementById('editId').value = '';
             document.getElementById('pendidikanForm').reset();
             document.getElementById('pendidikanModal').classList.add('show');
         }
 
-        function openEditModal(id) {
-            const item = Data.getById(Data.KEYS.PENDIDIKAN, id);
+        async function openEditModal(id) {
+            const item = await Data.getById(Data.KEYS.PENDIDIKAN, id);
             if (!item) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Pendidikan';
             document.getElementById('editId').value = item.id;
+
+            // Map DB snake_case keys to Form inputs
             document.getElementById('tingkat').value = item.tingkat;
-            document.getElementById('namaSekolah').value = item.namaSekolah;
+            document.getElementById('namaSekolah').value = item.nama_sekolah;
             document.getElementById('jurusan').value = item.jurusan || '';
-            document.getElementById('tahunLulus').value = item.tahunLulus;
-            document.getElementById('noIjazah').value = item.noIjazah || '';
+            document.getElementById('tahunLulus').value = item.tahun_lulus;
+            document.getElementById('noIjazah').value = item.no_ijazah || '';
 
             document.getElementById('pendidikanModal').classList.add('show');
         }
@@ -253,42 +280,57 @@
             document.getElementById('pendidikanModal').classList.remove('show');
         }
 
-        function deletePendidikan(id) {
+        async function deletePendidikan(id) {
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                Data.delete(Data.KEYS.PENDIDIKAN, id);
-                App.showToast('Data pendidikan berhasil dihapus', 'success');
-                loadPendidikan();
+                const success = await Data.delete(Data.KEYS.PENDIDIKAN, id);
+                if (success) {
+                    App.showToast('Data pendidikan berhasil dihapus', 'success');
+                    loadPendidikan();
+                } else {
+                    App.showToast('Gagal menghapus data', 'error');
+                }
             }
         }
 
         // Form Submit
-        document.getElementById('pendidikanForm').addEventListener('submit', function (e) {
+        document.getElementById('pendidikanForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            if (!currentPegawaiId) return;
+
             const id = document.getElementById('editId').value;
+
+            // Construct payload with SC_CASE keys for DB
             const data = {
-                pegawaiId: user.pegawaiId,
+                pegawai_id: currentPegawaiId,
                 tingkat: document.getElementById('tingkat').value,
-                namaSekolah: document.getElementById('namaSekolah').value,
+                nama_sekolah: document.getElementById('namaSekolah').value,
                 jurusan: document.getElementById('jurusan').value,
-                tahunLulus: parseInt(document.getElementById('tahunLulus').value),
-                noIjazah: document.getElementById('noIjazah').value
+                tahun_lulus: parseInt(document.getElementById('tahunLulus').value),
+                no_ijazah: document.getElementById('noIjazah').value
             };
 
-            if (id) {
-                Data.update(Data.KEYS.PENDIDIKAN, id, data);
-                App.showToast('Data pendidikan berhasil diperbarui', 'success');
-            } else {
-                Data.create(Data.KEYS.PENDIDIKAN, data);
-                App.showToast('Data pendidikan berhasil ditambahkan', 'success');
+            try {
+                if (id) {
+                    await Data.update(Data.KEYS.PENDIDIKAN, id, data);
+                    App.showToast('Data pendidikan berhasil diperbarui', 'success');
+                } else {
+                    await Data.create(Data.KEYS.PENDIDIKAN, data);
+                    App.showToast('Data pendidikan berhasil ditambahkan', 'success');
+                }
+                closeModal();
+                await loadPendidikan();
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data via Supabase', 'error');
             }
-
-            closeModal();
-            loadPendidikan();
         });
 
         // Load initially
-        loadPendidikan();
+        window.addEventListener('load', () => {
+            // slight delay to ensure Data.init() might have run or at least auth is ready
+            setTimeout(loadPendidikan, 500);
+        });
     </script>
 </body>
 

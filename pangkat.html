@@ -145,37 +145,57 @@
         if (!Auth.requireAuth()) { }
 
         const user = Auth.getCurrentUser();
-        const pegawai = Data.getPegawai().find(p => p.userId === user.id);
+        let currentPegawaiId = null;
 
-        function loadPangkat() {
-            if (!pegawai) return;
-            const records = Data.getAll(Data.KEYS.PANGKAT).filter(r => r.pegawaiId === pegawai.id);
-            const container = document.getElementById('pangkatList');
+        async function loadPangkat() {
+            try {
+                // 1. Get Pegawai ID safely
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id === user.id);
 
-            if (records.length === 0) {
-                container.innerHTML = '<div class="empty-state-dash">-</div>';
-                return;
+                if (!p) {
+                    document.getElementById('pangkatList').innerHTML = '<div class="empty-state-dash">Data pegawai tidak ditemukan</div>';
+                    return;
+                }
+                currentPegawaiId = p.id;
+
+                // 2. Get Data
+                const allData = await Data.getRiwayatPangkat();
+                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId);
+                const container = document.getElementById('pangkatList');
+
+                if (myData.length === 0) {
+                    container.innerHTML = '<div class="empty-state-dash">-</div>';
+                    return;
+                }
+
+                // Sort by TMT descending
+                myData.sort((a, b) => new Date(b.tmt_pangkat) - new Date(a.tmt_pangkat));
+
+                container.innerHTML = myData.map(r => `
+                    <div class="pangkat-card" onclick="editPangkat('${r.id}')">
+                        <div class="pangkat-header">
+                            <span class="pangkat-name">${r.golongan || r.pangkat}</span>
+                            <span class="pangkat-tmt">TMT: ${App.formatDate(r.tmt_pangkat)}</span>
+                        </div>
+                        <div class="pangkat-info">
+                            <p><strong>No SK:</strong> ${r.nomor_sk || '-'}</p>
+                            <p><strong>Tgl SK:</strong> ${r.tanggal_sk ? App.formatDate(r.tanggal_sk) : '-'}</p>
+                            <p><strong>Pejabat:</strong> ${r.pejabat_penetap || '-'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'error');
             }
-
-            // Sort by TMT descending
-            records.sort((a, b) => new Date(b.tmt) - new Date(a.tmt));
-
-            container.innerHTML = records.map(r => `
-                <div class="pangkat-card" onclick="editPangkat(${r.id})">
-                    <div class="pangkat-header">
-                        <span class="pangkat-name">${r.golongan}</span>
-                        <span class="pangkat-tmt">TMT: ${App.formatDate(r.tmt)}</span>
-                    </div>
-                    <div class="pangkat-info">
-                        <p><strong>No SK:</strong> ${r.noSK || '-'}</p>
-                        <p><strong>Tgl SK:</strong> ${r.tglSK ? App.formatDate(r.tglSK) : '-'}</p>
-                        <p><strong>Pejabat:</strong> ${r.pejabat || '-'}</p>
-                    </div>
-                </div>
-            `).join('');
         }
 
         function openAddModal() {
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai belum tersedia', 'error');
+                return;
+            }
             document.getElementById('modalTitle').textContent = 'Tambah Riwayat Kepangkatan';
             document.getElementById('pangkatForm').reset();
             document.getElementById('pangkatId').value = '';
@@ -183,58 +203,66 @@
             App.openModal('pangkatModal');
         }
 
-        function editPangkat(id) {
-            const r = Data.getById(Data.KEYS.PANGKAT, id);
+        async function editPangkat(id) {
+            const r = await Data.getById(Data.KEYS.RIWAYAT_PANGKAT, id);
             if (!r) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Riwayat Kepangkatan';
             document.getElementById('pangkatId').value = r.id;
-            document.getElementById('golongan').value = r.golongan;
-            document.getElementById('tmt').value = r.tmt;
-            document.getElementById('noSK').value = r.noSK || '';
-            document.getElementById('tglSK').value = r.tglSK || '';
-            document.getElementById('pejabat').value = r.pejabat || '';
+
+            // Map keys
+            document.getElementById('golongan').value = r.golongan || r.pangkat;
+            document.getElementById('tmt').value = r.tmt_pangkat;
+            document.getElementById('noSK').value = r.nomor_sk || '';
+            document.getElementById('tglSK').value = r.tanggal_sk || '';
+            document.getElementById('pejabat').value = r.pejabat_penetap || '';
 
             document.getElementById('deleteBtn').classList.remove('d-none');
             App.openModal('pangkatModal');
         }
 
-        function deletePangkat() {
+        async function deletePangkat() {
             const id = document.getElementById('pangkatId').value;
             if (!id) return;
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                Data.delete(Data.KEYS.PANGKAT, id);
+                await Data.delete(Data.KEYS.RIWAYAT_PANGKAT, id);
                 App.showToast('Data berhasil dihapus', 'success');
                 App.closeModal('pangkatModal');
                 loadPangkat();
             }
         }
 
-        document.getElementById('pangkatForm').addEventListener('submit', function (e) {
+        document.getElementById('pangkatForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            if (!currentPegawaiId) return;
+
             const id = document.getElementById('pangkatId').value;
             const data = {
-                pegawaiId: pegawai.id,
+                pegawai_id: currentPegawaiId,
                 golongan: document.getElementById('golongan').value,
-                tmt: document.getElementById('tmt').value,
-                noSK: document.getElementById('noSK').value,
-                tglSK: document.getElementById('tglSK').value,
-                pejabat: document.getElementById('pejabat').value
+                tmt_pangkat: document.getElementById('tmt').value,
+                nomor_sk: document.getElementById('noSK').value,
+                tanggal_sk: document.getElementById('tglSK').value,
+                pejabat_penetap: document.getElementById('pejabat').value
             };
 
-            if (id) {
-                Data.update(Data.KEYS.PANGKAT, id, data);
-                App.showToast('Data berhasil diperbarui', 'success');
-            } else {
-                Data.create(Data.KEYS.PANGKAT, data);
-                App.showToast('Data berhasil ditambahkan', 'success');
+            try {
+                if (id) {
+                    await Data.update(Data.KEYS.RIWAYAT_PANGKAT, id, data);
+                    App.showToast('Data berhasil diperbarui', 'success');
+                } else {
+                    await Data.create(Data.KEYS.RIWAYAT_PANGKAT, data);
+                    App.showToast('Data berhasil ditambahkan', 'success');
+                }
+                App.closeModal('pangkatModal');
+                loadPangkat();
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data', 'error');
             }
-
-            App.closeModal('pangkatModal');
-            loadPangkat();
         });
 
-        loadPangkat();
+        window.addEventListener('load', () => setTimeout(loadPangkat, 500));
     </script>
 </body>
 
