@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insert Pegawai Data (Auto)</title>
+    <title>Insert Pegawai Data (Versi Stabil)</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -24,12 +24,6 @@
         h1 {
             margin-top: 0;
             color: #333;
-        }
-
-        #status {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 15px;
         }
 
         #log {
@@ -86,8 +80,15 @@
 
 <body>
     <div class="card">
-        <h1>🚀 Insert Data Pegawai (Otomatis)</h1>
-        <div id="status">Menginisialisasi...</div>
+        <h1>🚀 Insert Data Pegawai (Manual)</h1>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <!-- Tombol LANGSUNG DITAMPILKAN tanpa display:none -->
+            <button id="manualBtn" onclick="runScript()"
+                style="padding: 15px 30px; background: #2563eb; color: white; border:none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold;">
+                ▶️ KLIK TOMBOL INI UNTUK MULAI
+            </button>
+        </div>
 
         <div class="stats">
             <div class="stat-item">Total Data: <span id="totalCount">27</span></div>
@@ -99,33 +100,17 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
 
-        <div id="log">Log dimulai...</div>
+        <div id="status" style="margin-bottom: 10px; font-weight: bold;">Menunggu perintah...</div>
+        <div id="log">Log system ready...</div>
     </div>
 
-    <!-- Gunakan versi UMD agar lebih reliable di browser tanpa build step - Multiple sources -->
+    <!-- Script Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-    <!-- Fallback Manual Button -->
-    <div style="text-align: center; margin-top: 20px;">
-        <button id="manualBtn" onclick="initAndProcess()"
-            style="padding: 10px 20px; background: #ea580c; color: white; border:none; border-radius: 5px; cursor: pointer; display: none;">
-            ⚠️ Klik Disini Jika Macet
-        </button>
-    </div>
 
     <script>
         const SUPABASE_URL = 'https://nkkszblyffksojkizomh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ra3N6Ymx5ZmZrc29qa2l6b21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTgwMDUsImV4cCI6MjA4Mjg3NDAwNX0.qfHVnczBIIvRELkykBWHFlpVpvm6e7EhXDDzp4zMRu0';
-
-        let supabase = null;
-
-        function log(msg) {
-            const div = document.getElementById('log');
-            const time = new Date().toLocaleTimeString();
-            div.textContent += `[${time}] ${msg}\n`;
-            div.scrollTop = div.scrollHeight;
-        }
 
         // Data provided by user
         const rawData = [
@@ -158,142 +143,90 @@
             ['199303242025211140', 'Rm.Rangga Putra', 'rangga.putra@dpkp.bogor.go.id', '081234567027', 'Bogor', '1993-03-24', 'L', '2025-01-01', 'aktif']
         ];
 
-        async function initAndProcess() {
-            try {
-                if (typeof window.supabase === 'undefined') {
-                    throw new Error("Library Supabase belum termuat. Cek koneksi internet.");
-                }
-
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                log("Supabase Client Init OK.");
-                document.getElementById('status').textContent = "Sedang Memproses...";
-                document.getElementById('status').style.color = "blue";
-
-                await processData();
-
-            } catch (e) {
-                log("FATAL ERROR INIT: " + e.message);
-                document.getElementById('status').textContent = "GAGAL START: " + e.message;
-                document.getElementById('status').style.color = "red";
-            }
+        function log(msg) {
+            const div = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            div.textContent += `[${time}] ${msg}\n`;
+            div.scrollTop = div.scrollHeight;
         }
 
-        async function processData() {
-            let success = 0;
-            let fail = 0;
+        async function runScript() {
+            const btn = document.getElementById('manualBtn');
+            const status = document.getElementById('status');
 
-            log("--- MEMULAI PROSES SINKRONISASI PEGAWAI ---");
+            btn.disabled = true;
+            btn.textContent = "⏳ SEDANG MEMPROSES...";
+            status.textContent = "Menginisialisasi koneksi...";
 
             try {
-                // 1. Fetch Users untuk Map Username -> ID
-                log("Mengambil data user dari database...");
-                const { data: users, error: userError } = await supabase.from('users').select('id, username');
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error("Library Supabase belum termuat. Mohon refresh halaman.");
+                }
 
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                status.textContent = "✅ Koneksi OK. Memulai insert...";
+                log("Mulai sync data...");
+
+                // 1. Fetch Users
+                const { data: users, error: userError } = await supabase.from('users').select('id, username');
                 if (userError) throw userError;
 
                 const userMap = {};
                 users.forEach(u => userMap[u.username] = u.id);
-                log(`Berhasil mengambil ${users.length} data user.`);
+                log(`Database user loaded: ${users.length} items.`);
 
-                // 2. Loop insert
+                // 2. Loop
+                let success = 0;
+                let fail = 0;
+
                 for (let i = 0; i < rawData.length; i++) {
                     const row = rawData[i];
                     const nip = row[0];
                     const userId = userMap[nip];
 
-                    // Update progress UI
+                    // UI Bar
                     const pct = Math.round(((i + 1) / rawData.length) * 100);
                     document.getElementById('progressFill').style.width = `${pct}%`;
 
                     if (!userId) {
-                        log(`❌ SKIP: User dengan NIP ${nip} tidak ditemukan di tabel users!`);
+                        log(`SKIP: User ${nip} tidak ditemukan.`);
                         fail++;
                         continue;
                     }
 
                     const pegawaiData = {
-                        nip: row[0],
-                        nama: row[1],
-                        email: row[2],
-                        telepon: row[3],
-                        alamat: row[4],
-                        tanggal_lahir: row[5],
-                        jenis_kelamin: row[6],
-                        tanggal_masuk: row[7],
-                        status: row[8],
-                        user_id: userId
+                        nip: row[0], nama: row[1], email: row[2],
+                        telepon: row[3], alamat: row[4], tanggal_lahir: row[5],
+                        jenis_kelamin: row[6], tanggal_masuk: row[7],
+                        status: row[8], user_id: userId
                     };
 
-                    log(`🔄 Memproses: ${pegawaiData.nama}`);
-
-                    // Cek exist by NIP
-                    const { data: existing, error: checkErr } = await supabase
-                        .from('pegawai')
-                        .select('id')
-                        .eq('nip', nip)
-                        .maybeSingle();
+                    // Upsert logic
+                    const { data: existing } = await supabase.from('pegawai').select('id').eq('nip', nip).maybeSingle();
 
                     if (existing) {
-                        // Update
-                        const { error: updateErr } = await supabase
-                            .from('pegawai')
-                            .update(pegawaiData)
-                            .eq('id', existing.id);
-
-                        if (updateErr) {
-                            log(`   ❌ Gagal Update: ${updateErr.message}`);
-                            fail++;
-                        } else {
-                            log(`   ✅ Berhasil Update Data`);
-                            success++;
-                        }
+                        await supabase.from('pegawai').update(pegawaiData).eq('id', existing.id);
+                        log(`✅ Updated: ${pegawaiData.nama}`);
                     } else {
-                        // Insert
-                        const { error: insertErr } = await supabase
-                            .from('pegawai')
-                            .insert(pegawaiData);
-
-                        if (insertErr) {
-                            log(`   ❌ Gagal Insert: ${insertErr.message}`);
-                            fail++;
-                        } else {
-                            log(`   ✅ Berhasil Insert Data Baru`);
-                            success++;
-                        }
+                        await supabase.from('pegawai').insert(pegawaiData);
+                        log(`✅ Inserted: ${pegawaiData.nama}`);
                     }
+                    success++;
 
                     document.getElementById('successCount').textContent = success;
                     document.getElementById('failCount').textContent = fail;
                 }
 
-            } catch (err) {
-                log(`⛔ FATAL ERROR: ${err.message}`);
-            }
+                status.textContent = "🎉 SELESAI!";
+                btn.textContent = "✅ SUKSES";
 
-            log("--- PROSES SELESAI ---");
-            if (fail === 0) {
-                log("🎉 SEMUA DATA BERHASIL DISINKRONKAN!");
-                document.getElementById('status').textContent = "✅ SELESAI (Semua Sukses)";
-                document.getElementById('status').style.color = "green";
-            } else {
-                log("⚠️ Ada data yang gagal, periksa log di atas.");
-                document.getElementById('status').textContent = "⚠️ Selesai dengan Error";
-                document.getElementById('status').style.color = "orange";
+            } catch (e) {
+                log("ERROR: " + e.message);
+                status.textContent = "❌ ERROR: " + e.message;
+                btn.textContent = "⚠️ Gagal - Coba Refresh";
+                btn.disabled = false;
             }
         }
-
-        // Auto start with delay and fallback
-        window.addEventListener('load', () => {
-            log("Page loaded. Waiting 1s...");
-            setTimeout(() => {
-                document.getElementById('manualBtn').style.display = 'inline-block';
-                if (typeof window.supabase !== 'undefined') {
-                    initAndProcess();
-                } else {
-                    log("Supabase lib belum siap. Klik tombol orange.");
-                }
-            }, 1000);
-        });
     </script>
 </body>
 
