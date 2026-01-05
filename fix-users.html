@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Users - SIMPEG PPPK</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .warning {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        .btn.check {
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🔧 Perbaiki 11 User yang Gagal Login</h1>
+        <p>Script ini akan mengecek dan memperbaiki 11 user yang masih belum bisa login.</p>
+
+        <button class="btn check" onclick="checkUsers()">🔍 Cek Status di Database</button>
+        <button class="btn" onclick="fixUsers()">🛠️ Perbaiki Semua User</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Username (NIP)</th>
+                    <th>Password Seharusnya</th>
+                    <th>Nama</th>
+                    <th>Status di DB</th>
+                    <th>Password di DB</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>📋 Log Proses</h3>
+        <div id="log">Klik "Cek Status di Database" untuk memulai diagnosa...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://nkkszblyffksojkizomh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ra3N6Ymx5ZmZrc29qa2l6b21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTgwMDUsImV4cCI6MjA4Mjg3NDAwNX0.qfHVnczBIIvRELkykBWHFlpVpvm6e7EhXDDzp4zMRu0';
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 11 user yang gagal login (dari screenshot)
+        const failedUsers = [
+            { username: '197502102025211030', password: '1975', name: 'Agus Suhaeri' },
+            { username: '199703202025211056', password: '1997', name: 'Chaeril Hari Mugeni' },
+            { username: '199911262025211039', password: '1999', name: 'Deni Bachtiar' },
+            { username: '199808232025211048', password: '1998', name: 'Erdinda Sukmadinata' },
+            { username: '199705212025211051', password: '1997', name: 'Fajar Triadi' },
+            { username: '199511032025211069', password: '1995', name: 'Novaldi Setiawan' },
+            { username: '199811162025212048', password: '1998', name: 'Raden Yunita' },
+            { username: '199406192025212073', password: '1994', name: 'Sri Handayani' },
+            { username: '199902042025211036', password: '1999', name: 'Vareski Nalfaredo' },
+            { username: '199701052025212061', password: '1997', name: 'Vivi Hastuti' },
+            { username: '197812202025211041', password: '1978', name: 'Wellem Aufa' }
+        ];
+
+        const userInfo = {};
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `\n[${timestamp}] ${message}`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('userTable');
+            tbody.innerHTML = failedUsers.map((user, idx) => {
+                const info = userInfo[user.username] || {};
+                let statusClass = '';
+                let statusText = '⏳ Belum dicek';
+                let dbPassword = '-';
+
+                if (info.checked) {
+                    if (info.exists) {
+                        if (info.passwordMatch) {
+                            statusClass = 'success';
+                            statusText = '✅ OK';
+                        } else {
+                            statusClass = 'warning';
+                            statusText = '⚠️ Password beda';
+                        }
+                        dbPassword = info.dbPassword || '?';
+                    } else {
+                        statusClass = 'error';
+                        statusText = '❌ Tidak ada';
+                    }
+                }
+
+                return `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><code>${user.username}</code></td>
+                        <td><strong>${user.password}</strong></td>
+                        <td>${user.name}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                        <td><code>${dbPassword}</code></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function checkUsers() {
+            document.getElementById('log').textContent = 'Memulai pengecekan...';
+
+            for (const user of failedUsers) {
+                log(`Mengecek: ${user.username} (${user.name})...`);
+
+                try {
+                    // Cek apakah username ada di database
+                    const { data, error } = await supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('username', user.username);
+
+                    if (error) {
+                        log(`  ❌ Error: ${error.message}`);
+                        userInfo[user.username] = { checked: true, exists: false };
+                        continue;
+                    }
+
+                    if (!data || data.length === 0) {
+                        log(`  ❌ User tidak ditemukan di database!`);
+                        userInfo[user.username] = { checked: true, exists: false };
+                    } else if (data.length > 1) {
+                        log(`  ⚠️ DUPLIKAT! Ditemukan ${data.length} record dengan username yang sama`);
+                        data.forEach((d, i) => {
+                            log(`     Record ${i + 1}: id=${d.id}, password="${d.password}", name="${d.name}"`);
+                        });
+                        userInfo[user.username] = {
+                            checked: true,
+                            exists: true,
+                            duplicate: true,
+                            dbPassword: data.map(d => d.password).join(', '),
+                            passwordMatch: data.some(d => d.password === user.password)
+                        };
+                    } else {
+                        const dbUser = data[0];
+                        const passwordMatch = dbUser.password === user.password;
+                        log(`  📦 Ditemukan: password="${dbUser.password}" ${passwordMatch ? '✅ Match!' : '❌ Tidak match!'}`);
+                        userInfo[user.username] = {
+                            checked: true,
+                            exists: true,
+                            dbPassword: dbUser.password,
+                            passwordMatch: passwordMatch,
+                            dbId: dbUser.id
+                        };
+                    }
+                } catch (err) {
+                    log(`  ❌ Exception: ${err.message}`);
+                    userInfo[user.username] = { checked: true, exists: false };
+                }
+
+                renderTable();
+            }
+
+            log('');
+            log('========================================');
+            log('PENGECEKAN SELESAI!');
+            log('Klik "Perbaiki Semua User" untuk memperbaiki yang bermasalah.');
+            log('========================================');
+        }
+
+        async function fixUsers() {
+            document.getElementById('log').textContent = 'Memulai perbaikan...';
+
+            for (const user of failedUsers) {
+                const info = userInfo[user.username];
+                log(`Memproses: ${user.username} (${user.name})...`);
+
+                try {
+                    if (!info || !info.exists) {
+                        // User tidak ada, tambahkan baru
+                        log(`  ➕ Menambahkan user baru...`);
+                        const { data, error } = await supabaseClient
+                            .from('users')
+                            .insert({
+                                username: user.username,
+                                password: user.password,
+                                name: user.name,
+                                role: 'pegawai'
+                            })
+                            .select()
+                            .single();
+
+                        if (error) {
+                            log(`  ❌ Gagal insert: ${error.message}`);
+                        } else {
+                            log(`  ✅ Berhasil ditambahkan dengan id=${data.id}`);
+                            userInfo[user.username] = { checked: true, exists: true, passwordMatch: true, dbPassword: user.password };
+                        }
+                    } else if (!info.passwordMatch) {
+                        // Password tidak cocok, update password
+                        log(`  🔄 Mengupdate password dari "${info.dbPassword}" ke "${user.password}"...`);
+
+                        const { error } = await supabaseClient
+                            .from('users')
+                            .update({ password: user.password })
+                            .eq('username', user.username);
+
+                        if (error) {
+                            log(`  ❌ Gagal update: ${error.message}`);
+                        } else {
+                            log(`  ✅ Password berhasil diupdate!`);
+                            userInfo[user.username].passwordMatch = true;
+                            userInfo[user.username].dbPassword = user.password;
+                        }
+                    } else {
+                        log(`  ✅ Sudah benar, skip...`);
+                    }
+                } catch (err) {
+                    log(`  ❌ Exception: ${err.message}`);
+                }
+
+                renderTable();
+            }
+
+            log('');
+            log('========================================');
+            log('PERBAIKAN SELESAI!');
+            log('Silakan test login lagi untuk memverifikasi.');
+            log('========================================');
+        }
+
+        renderTable();
+    </script>
+</body>
+
+</html>
