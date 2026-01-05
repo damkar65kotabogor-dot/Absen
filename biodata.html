@@ -193,32 +193,52 @@
     <script>
         if (!Auth.requireAuth()) { }
         const user = Auth.getCurrentUser();
+        let currentPegawaiId = null;
 
         async function loadBiodata() {
-            if (!user.pegawaiId) { window.location.href = 'profil.html'; return; }
-            const employees = await Data.getPegawaiWithRelations();
-            const p = employees.find(x => x.id === user.pegawaiId);
-            if (!p) { window.location.href = 'profil.html'; return; }
+            // Find pegawai by user.id freshly from database to handle stale session
+            try {
+                const employees = await Data.getPegawaiWithRelations();
+                const p = employees.find(x => x.user_id === user.id);
 
-            const items = [
-                { label: 'NIP', value: p.nip },
-                { label: 'Nama Lengkap', value: p.nama },
-                { label: 'Tempat Lahir', value: p.tempat_lahir || '-' },
-                { label: 'Tanggal Lahir', value: p.tanggal_lahir ? App.formatDate(p.tanggal_lahir) : '-' },
-                { label: 'Jenis Kelamin', value: p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
-                { label: 'Agama', value: p.agama || '-' },
-                { label: 'Status Pernikahan', value: p.status_nikah || '-' },
-                { label: 'Email', value: p.email || '-' },
-                { label: 'Telepon', value: p.telepon || '-' },
-                { label: 'Alamat', value: p.alamat || '-' }
-            ];
+                if (!p) {
+                    console.error("Pegawai record not found for user", user.id);
+                    document.getElementById('biodataContent').innerHTML = '<div class="alert alert-danger">Data pegawai belum ditemukan. Hubungi admin.</div>';
+                    return;
+                }
 
-            document.getElementById('biodataContent').innerHTML = items.map(i => `
-                <div class="profile-detail-item">
-                    <span class="detail-label">${i.label}</span>
-                    <span class="detail-value">${i.value}</span>
-                </div>
-            `).join('');
+                // Update session if needed
+                if (!user.pegawaiId) {
+                    user.pegawaiId = p.id;
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                }
+
+                currentPegawaiId = p.id; // Store for edit function
+
+                const items = [
+                    { label: 'NIP', value: p.nip },
+                    { label: 'Nama Lengkap', value: p.nama },
+                    { label: 'Tempat Lahir', value: p.tempat_lahir || '-' },
+                    { label: 'Tanggal Lahir', value: p.tanggal_lahir ? App.formatDate(p.tanggal_lahir) : '-' },
+                    { label: 'Jenis Kelamin', value: p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' },
+                    { label: 'Agama', value: p.agama || '-' },
+                    { label: 'Status Pernikahan', value: p.status_nikah || '-' },
+                    { label: 'Email', value: p.email || '-' },
+                    { label: 'Telepon', value: p.telepon || '-' },
+                    { label: 'Alamat', value: p.alamat || '-' }
+                ];
+
+                document.getElementById('biodataContent').innerHTML = items.map(i => `
+                    <div class="profile-detail-item">
+                        <span class="detail-label">${i.label}</span>
+                        <span class="detail-value">${i.value}</span>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'danger');
+            }
         }
 
         // Initialize
@@ -228,22 +248,26 @@
 
         // Edit Functionality
         async function openEditBiodata() {
-            const employees = await Data.getPegawaiWithRelations();
-            const p = employees.find(x => x.id === user.pegawaiId);
-            if (!p) return;
+            if (!currentPegawaiId) return;
 
-            document.getElementById('editNama').value = p.nama;
-            document.getElementById('editNip').value = p.nip;
-            document.getElementById('editTempatLahir').value = p.tempat_lahir || '';
-            document.getElementById('editTanggalLahir').value = p.tanggal_lahir || '';
-            document.getElementById('editJenisKelamin').value = p.jenis_kelamin;
-            document.getElementById('editAgama').value = p.agama || 'Islam';
-            document.getElementById('editStatusNikah').value = p.status_nikah || 'Belum Menikah';
-            document.getElementById('editTelepon').value = p.telepon || '';
-            document.getElementById('editEmail').value = p.email || '';
-            document.getElementById('editAlamat').value = p.alamat || '';
+            try {
+                const employees = await Data.getPegawaiWithRelations();
+                const p = employees.find(x => x.id === currentPegawaiId);
+                if (!p) return;
 
-            document.getElementById('editBiodataModal').classList.add('show');
+                document.getElementById('editNama').value = p.nama;
+                document.getElementById('editNip').value = p.nip;
+                document.getElementById('editTempatLahir').value = p.tempat_lahir || '';
+                document.getElementById('editTanggalLahir').value = p.tanggal_lahir || '';
+                document.getElementById('editJenisKelamin').value = p.jenis_kelamin;
+                document.getElementById('editAgama').value = p.agama || 'Islam';
+                document.getElementById('editStatusNikah').value = p.status_nikah || 'Belum Menikah';
+                document.getElementById('editTelepon').value = p.telepon || '';
+                document.getElementById('editEmail').value = p.email || '';
+                document.getElementById('editAlamat').value = p.alamat || '';
+
+                document.getElementById('editBiodataModal').classList.add('show');
+            } catch (err) { console.error(err); }
         }
 
         function closeEditModal() {
@@ -252,6 +276,7 @@
 
         document.getElementById('editBiodataForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            if (!currentPegawaiId) return;
 
             const updates = {
                 nama: document.getElementById('editNama').value,
@@ -266,13 +291,18 @@
                 alamat: document.getElementById('editAlamat').value
             };
 
-            // Update data
-            await Data.update('pegawai', user.pegawaiId, updates);
+            try {
+                // Update data
+                await Data.update('pegawai', currentPegawaiId, updates);
 
-            // Show feedback and reload
-            App.showToast('Biodata berhasil diperbarui!', 'success');
-            closeEditModal();
-            await loadBiodata();
+                // Show feedback and reload
+                App.showToast('Biodata berhasil diperbarui!', 'success');
+                closeEditModal();
+                await loadBiodata();
+            } catch (err) {
+                App.showToast('Gagal menyimpan perubahan!', 'danger');
+                console.error(err);
+            }
         });
     </script>
     </script>
