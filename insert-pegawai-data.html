@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insert Pegawai Data</title>
+    <title>Insert Pegawai Data (Auto)</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -26,24 +26,10 @@
             color: #333;
         }
 
-        .btn {
-            background: #2563eb;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background: #1d4ed8;
-        }
-
-        .btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
+        #status {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
         }
 
         #log {
@@ -59,9 +45,9 @@
         }
 
         .progress-bar {
-            height: 6px;
+            height: 20px;
             background: #e2e8f0;
-            border-radius: 3px;
+            border-radius: 10px;
             margin: 20px 0;
             overflow: hidden;
         }
@@ -100,9 +86,8 @@
 
 <body>
     <div class="card">
-        <h1>🚀 Insert Data Pegawai Lengkap</h1>
-        <p>Script ini akan memasukkan data lengkap 27 pegawai (Biodata, NIP, dll) dan menghubungkannya dengan User ID
-            yang sesuai.</p>
+        <h1>🚀 Insert Data Pegawai (Otomatis)</h1>
+        <div id="status">Menginisialisasi...</div>
 
         <div class="stats">
             <div class="stat-item">Total Data: <span id="totalCount">27</span></div>
@@ -114,16 +99,23 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
 
-        <button class="btn" id="startBtn" onclick="processData()">▶️ Mulai Proses Insert Data</button>
-
-        <div id="log">Siap menunggu perintah...</div>
+        <div id="log">Log dimulai...</div>
     </div>
 
+    <!-- Gunakan versi UMD agar lebih reliable di browser tanpa build step -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://nkkszblyffksojkizomh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ra3N6Ymx5ZmZrc29qa2l6b21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTgwMDUsImV4cCI6MjA4Mjg3NDAwNX0.qfHVnczBIIvRELkykBWHFlpVpvm6e7EhXDDzp4zMRu0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let supabase = null;
+
+        function log(msg) {
+            const div = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            div.textContent += `[${time}] ${msg}\n`;
+            div.scrollTop = div.scrollHeight;
+        }
 
         // Data provided by user
         const rawData = [
@@ -156,21 +148,27 @@
             ['199303242025211140', 'Rm.Rangga Putra', 'rangga.putra@dpkp.bogor.go.id', '081234567027', 'Bogor', '1993-03-24', 'L', '2025-01-01', 'aktif']
         ];
 
-        function log(msg) {
-            const div = document.getElementById('log');
-            const time = new Date().toLocaleTimeString();
-            div.textContent += `[${time}] ${msg}\n`;
-            div.scrollTop = div.scrollHeight;
+        async function initAndProcess() {
+            try {
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error("Library Supabase belum termuat. Cek koneksi internet.");
+                }
+
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                log("Supabase Client Init OK.");
+                document.getElementById('status').textContent = "Sedang Memproses...";
+                document.getElementById('status').style.color = "blue";
+
+                await processData();
+
+            } catch (e) {
+                log("FATAL ERROR INIT: " + e.message);
+                document.getElementById('status').textContent = "GAGAL START: " + e.message;
+                document.getElementById('status').style.color = "red";
+            }
         }
 
         async function processData() {
-            const btn = document.getElementById('startBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Sedang Memproses...';
-
-            document.getElementById('successCount').textContent = '0';
-            document.getElementById('failCount').textContent = '0';
-
             let success = 0;
             let fail = 0;
 
@@ -265,15 +263,17 @@
             log("--- PROSES SELESAI ---");
             if (fail === 0) {
                 log("🎉 SEMUA DATA BERHASIL DISINKRONKAN!");
-                btn.textContent = '✅ Selesai (Semua Sukses)';
-                btn.style.background = '#16a34a';
+                document.getElementById('status').textContent = "✅ SELESAI (Semua Sukses)";
+                document.getElementById('status').style.color = "green";
             } else {
                 log("⚠️ Ada data yang gagal, periksa log di atas.");
-                btn.textContent = '⚠️ Selesai dengan Error';
-                btn.style.background = '#ca8a04';
+                document.getElementById('status').textContent = "⚠️ Selesai dengan Error";
+                document.getElementById('status').style.color = "orange";
             }
-            btn.disabled = false;
         }
+
+        // Auto start
+        window.onload = initAndProcess;
     </script>
 </body>
 
