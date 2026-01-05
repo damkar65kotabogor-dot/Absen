@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Check Pegawai Data</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Check Missing Pegawai Records</h1>
+    <button onclick="checkData()">Run Diagnostic</button>
+    <div id="status"></div>
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username (NIP)</th>
+                <th>Name</th>
+                <th>Pegawai Record?</th>
+                <th>Action Needed</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://nkkszblyffksojkizomh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ra3N6Ymx5ZmZrc29qa2l6b21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTgwMDUsImV4cCI6MjA4Mjg3NDAwNX0.qfHVnczBIIvRELkykBWHFlpVpvm6e7EhXDDzp4zMRu0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function checkData() {
+            const status = document.getElementById('status');
+            const tbody = document.querySelector('#resultTable tbody');
+            status.textContent = "Loading data...";
+            tbody.innerHTML = "";
+
+            try {
+                // Fetch all users
+                const { data: users, error: errUsers } = await supabase.from('users').select('*');
+                if (errUsers) throw errUsers;
+
+                // Fetch all pegawai
+                const { data: pegawai, error: errPegawai } = await supabase.from('pegawai').select('*');
+                if (errPegawai) throw errPegawai;
+
+                let missingCount = 0;
+
+                users.forEach(user => {
+                    const existingPegawai = pegawai.find(p => p.user_id === user.id);
+                    const isMissing = !existingPegawai;
+                    if (isMissing) missingCount++;
+
+                    const row = `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.name}</td>
+                            <td class="${isMissing ? 'error' : 'success'}">${isMissing ? 'MISSING' : 'FOUND'}</td>
+                            <td>${isMissing ? 'Create Record' : '-'}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+                status.innerHTML = ` Diagnostic Complete. Found <strong>${missingCount}</strong> users with missing pegawai records.`;
+
+            } catch (err) {
+                status.textContent = "Error: " + err.message;
+            }
+        }
+    </script>
+</body>
+
+</html>
