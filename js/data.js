@@ -19,9 +19,15 @@ const Data = {
             const { data: pegawai, error: pegError } = await supabaseClient.from('pegawai').select('id').limit(1);
 
             if (userError || pegError) {
+                const isTableMissing = (userError?.code === '42P01' || pegError?.code === '42P01');
                 console.error('Supabase connection error:', userError?.message || pegError?.message);
+
                 if (typeof App !== 'undefined' && App.showToast) {
-                    App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
+                    if (isTableMissing) {
+                        App.showToast('Tabel database belum dibuat! Silakan jalankan script SQL yang diberikan.', 'danger');
+                    } else {
+                        App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
+                    }
                 }
                 return;
             }
