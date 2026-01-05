@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pegawai - SIMPEG PPPK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+
+        .tab-item {
+            padding: 0.5rem 1rem;
+            color: var(--gray-500);
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -4px;
+        }
+
+        .tab-item:hover {
+            color: var(--primary-600);
+        }
+
+        .tab-item.active {
+            color: var(--primary-600);
+            border-bottom-color: var(--primary-600);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .profile-header-card {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            border: 1px solid var(--gray-100);
+        }
+
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gray-100);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar will be loaded here via JS if needed, or we can just keep basic admin layout -->
+        <!-- For simplicity, I will duplicate the sidebar code or simple nav for now as we are in admin -->
+        <aside class="sidebar">
+            <button class="sidebar-close" onclick="App.closeMobileSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="sidebar-brand">
+                    <h1>SIMPEG</h1><span>PPPK Paruh Waktu</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav"></nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="toggle-sidebar" id="toggleSidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="page-title">
+                        <h2>Detail Pegawai</h2>
+                        <p>Kelola data lengkap pegawai</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <a href="pegawai.html" class="btn btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Kembali
+                    </a>
+                </div>
+            </header>
+
+            <div class="profile-header-card" id="headerInfo">
+                <!-- Loaded by JS -->
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab-item active" onclick="showTab('biodata')">Biodata</div>
+                <div class="tab-item" onclick="showTab('pendidikan')">Pendidikan</div>
+                <div class="tab-item" onclick="showTab('jabatan')">Riwayat Jabatan</div>
+                <div class="tab-item" onclick="showTab('pangkat')">Riwayat Pangkat</div>
+                <div class="tab-item" onclick="showTab('diklat')">Diklat</div>
+                <div class="tab-item" onclick="showTab('kgb')">KGB</div>
+                <div class="tab-item" onclick="showTab('keluarga')">Keluarga</div>
+                <div class="tab-item" onclick="showTab('skp')">SKP</div>
+            </div>
+
+            <!-- BIODATA TAB -->
+            <div id="biodata" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Data Diri</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openEditBiodata()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="description-grid" id="biodataView">
+                            <!-- Loaded by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PENDIDIKAN TAB -->
+            <div id="pendidikan" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Riwayat Pendidikan</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openPendidikanModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tingkat</th>
+                                    <th>Nama Sekolah</th>
+                                    <th>Jurusan</th>
+                                    <th>Tahun Lulus</th>
+                                    <th>No. Ijazah</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendidikanList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JABATAN TAB -->
+            <div id="jabatan" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Riwayat Jabatan</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openJabatanModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Jabatan</th>
+                                    <th>Unit Kerja</th>
+                                    <th>TMT</th>
+                                    <th>No. SK</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jabatanList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANGKAT TAB -->
+            <div id="pangkat" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Riwayat Pangkat</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openPangkatModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Golongan</th>
+                                    <th>TMT</th>
+                                    <th>No. SK</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Pejabat</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pangkatList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIKLAT TAB -->
+            <div id="diklat" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Riwayat Diklat</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openDiklatModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Diklat</th>
+                                    <th>Tahun</th>
+                                    <th>Penyelenggara</th>
+                                    <th>No. Sertifikat</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diklatList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KGB TAB -->
+            <div id="kgb" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Riwayat KGB</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openKgbModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>TMT</th>
+                                    <th>Gaji Pokok</th>
+                                    <th>No. SK</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Ket</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kgbList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KELUARGA TAB -->
+            <div id="keluarga" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Data Keluarga</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openKeluargaModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Hubungan</th>
+                                    <th>L/P</th>
+                                    <th>Tgl Lahir</th>
+                                    <th>Pekerjaan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keluargaList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SKP TAB -->
+            <div id="skp" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Riwayat SKP</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openSkpModal()">Tambahkan</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tahun</th>
+                                    <th>Nilai</th>
+                                    <th>Pejabat Penilai</th>
+                                    <th>Atasan Penilai</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="skpList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </div>
+
+    </main>
+    </div>
+
+    </div>
+
+    <!-- PENDIDIKAN MODAL -->
+    <div class="modal-overlay" id="pendidikanModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="pendidikanModalTitle">Tambah Pendidikan</h3>
+                <button class="modal-close" onclick="App.closeModal('pendidikanModal')"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="pendidikanForm">
+                <div class="modal-body">
+                    <input type="hidden" id="pendidikanId">
+                    <div class="form-group"><label class="form-label">Tingkat Pendidikan *</label>
+                        <select class="form-control" id="tingkat" required>
+                            <option value="SD">SD</option>
+                            <option value="SMP">SMP</option>
+                            <option value="SMA">SMA/SMK</option>
+                            <option value="D3">D3</option>
+                            <option value="S1">S1/D4</option>
+                            <option value="S2">S2</option>
+                            <option value="S3">S3</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Nama Sekolah/Universitas *</label><input
+                            type="text" class="form-control" id="namaSekolah" required></div>
+                    <div class="form-group"><label class="form-label">Jurusan/Prodi</label><input type="text"
+                            class="form-control" id="jurusan"></div>
+                    <div class="form-group"><label class="form-label">Tahun Lulus *</label><input type="number"
+                            class="form-control" id="tahunLulus" required></div>
+                    <div class="form-group"><label class="form-label">Nomor Ijazah</label><input type="text"
+                            class="form-control" id="noIjazah"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="App.closeModal('pendidikanModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JABATAN MODAL -->
+    <div class="modal-overlay" id="jabatanModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="jabatanModalTitle">Tambah Riwayat Jabatan</h3>
+                <button class="modal-close" onclick="App.closeModal('jabatanModal')"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="jabatanForm">
+                <div class="modal-body">
+                    <input type="hidden" id="riwayatJabatanId">
+                    <div class="form-group"><label class="form-label">Nama Jabatan *</label><input type="text"
+                            class="form-control" id="namaJabatan" required></div>
+                    <div class="form-group"><label class="form-label">Unit Kerja *</label><input type="text"
+                            class="form-control" id="unitKerjaTab" required></div>
+                    <div class="form-group"><label class="form-label">TMT Jabatan *</label><input type="date"
+                            class="form-control" id="tmtJabatan" required></div>
+                    <div class="form-group"><label class="form-label">Nomor SK</label><input type="text"
+                            class="form-control" id="noSKJabatan"></div>
+                    <div class="form-group"><label class="form-label">Tanggal SK</label><input type="date"
+                            class="form-control" id="tglSKJabatan"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="App.closeModal('jabatanModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PANGKAT MODAL -->
+    <div class="modal-overlay" id="pangkatModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="pangkatModalTitle">Tambah Riwayat Pangkat</h3>
+                <button class="modal-close" onclick="App.closeModal('pangkatModal')"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="pangkatForm">
+                <div class="modal-body">
+                    <input type="hidden" id="pangkatId">
+                    <div class="form-group"><label class="form-label">Golongan/Pangkat *</label><input type="text"
+                            class="form-control" id="golongan" required></div>
+                    <div class="form-group"><label class="form-label">TMT Pangkat *</label><input type="date"
+                            class="form-control" id="tmtPangkat" required></div>
+                    <div class="form-group"><label class="form-label">Nomor SK</label><input type="text"
+                            class="form-control" id="noSKPangkat"></div>
+                    <div class="form-group"><label class="form-label">Tanggal SK</label><input type="date"
+                            class="form-control" id="tglSKPangkat"></div>
+                    <div class="form-group"><label class="form-label">Pejabat Penetap</label><input type="text"
+                            class="form-control" id="pejabatPangkat"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="App.closeModal('pangkatModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DIKLAT MODAL -->
+    <div class="modal-overlay" id="diklatModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="diklatModalTitle">Tambah Riwayat Diklat</h3>
+                <button class="modal-close" onclick="App.closeModal('diklatModal')"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="diklatForm">
+                <div class="modal-body">
+                    <input type="hidden" id="diklatId">
+                    <div class="form-group"><label class="form-label">Nama Diklat *</label><input type="text"
+                            class="form-control" id="namaDiklat" required></div>
+                    <div class="form-group"><label class="form-label">Tahun *</label><input type="number"
+                            class="form-control" id="tahunDiklat" required></div>
+                    <div class="form-group"><label class="form-label">Penyelenggara</label><input type="text"
+                            class="form-control" id="penyelenggara Diklat"></div>
+                    <div class="form-group"><label class="form-label">Nomor Sertifikat</label><input type="text"
+                            class="form-control" id="noSertifikat"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="App.closeModal('diklatModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KGB MODAL -->
+    <div class="modal-overlay" id="kgbModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="kgbModalTitle">Tambah Riwayat KGB</h3>
+                <button class="modal-close" onclick="App.closeModal('kgbModal')"><svg xmlns="http://www.w3.org/2000/svg"
+                        width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="kgbForm">
+                <div class="modal-body">
+                    <input type="hidden" id="kgbId">
+                    <div class="form-group"><label class="form-label">TMT KGB *</label><input type="date"
+                            class="form-control" id="tmtKgb" required></div>
+                    <div class="form-group"><label class="form-label">Gaji Pokok *</label><input type="number"
+                            class="form-control" id="gajiPokok" required></div>
+                    <div class="form-group"><label class="form-label">Nomor SK</label><input type="text"
+                            class="form-control" id="noSKKgb"></div>
+                    <div class="form-group"><label class="form-label">Tanggal SK</label><input type="date"
+                            class="form-control" id="tglSKKgb"></div>
+                    <div class="form-group"><label class="form-label">Keterangan</label><input type="text"
+                            class="form-control" id="keteranganKgb"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="App.closeModal('kgbModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KELUARGA MODAL -->
+    <div class="modal-overlay" id="keluargaModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="keluargaModalTitle">Tambah Keluarga</h3>
+                <button class="modal-close" onclick="App.closeModal('keluargaModal')"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="keluargaForm">
+                <div class="modal-body">
+                    <input type="hidden" id="memberId">
+                    <div class="form-group"><label class="form-label">Nama Lengkap *</label><input type="text"
+                            class="form-control" id="namaKeluarga" required></div>
+                    <div class="form-group"><label class="form-label">Hubungan *</label>
+                        <select class="form-control" id="hubungan" required>
+                            <option value="Suami">Suami</option>
+                            <option value="Istri">Istri</option>
+                            <option value="Anak">Anak</option>
+                            <option value="Ayah">Ayah</option>
+                            <option value="Ibu">Ibu</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Jenis Kelamin</label>
+                        <select class="form-control" id="jkKeluarga">
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Tanggal Lahir</label><input type="date"
+                            class="form-control" id="tglLahirKeluarga"></div>
+                    <div class="form-group"><label class="form-label">Pekerjaan</label><input type="text"
+                            class="form-control" id="pekerjaanKeluarga"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="App.closeModal('keluargaModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SKP MODAL -->
+    <div class="modal-overlay" id="skpModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="skpModalTitle">Tambah SKP</h3>
+                <button class="modal-close" onclick="App.closeModal('skpModal')"><svg xmlns="http://www.w3.org/2000/svg"
+                        width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg></button>
+            </div>
+            <form id="skpForm">
+                <div class="modal-body">
+                    <input type="hidden" id="skpId">
+                    <div class="form-group"><label class="form-label">Tahun *</label><input type="number"
+                            class="form-control" id="tahunSkp" required></div>
+                    <div class="form-group"><label class="form-label">Nilai SKP/Prestasi Kerja *</label><input
+                            type="number" step="0.01" class="form-control" id="nilaiSkp" required></div>
+                    <div class="form-group"><label class="form-label">Pejabat Penilai</label><input type="text"
+                            class="form-control" id="pejabatSkp"></div>
+                    <div class="form-group"><label class="form-label">Atasan Pejabat Penilai</label><input type="text"
+                            class="form-control" id="atasanSkp"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="App.closeModal('skpModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Check Auth
+        if (!Auth.requireRole(['admin', 'pimpinan'])) { }
+
+        // Get ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const pegawaiId = parseInt(urlParams.get('id'));
+
+        if (!pegawaiId) {
+            window.location.href = 'pegawai.html';
+        }
+
+        let currentPegawai = null;
+
+        // Tabs Logic
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Find tab element based on onclick attribute or text
+            const tabs = document.querySelectorAll('.tab-item');
+            tabs.forEach(t => {
+                if (t.getAttribute('onclick').includes(tabId)) {
+                    t.classList.add('active');
+                }
+            });
+
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // LOAD MASTER DATA
+        async function loadDetail() {
+            try {
+                const all = await Data.getPegawaiWithRelations();
+                currentPegawai = all.find(p => p.id === pegawaiId);
+
+                if (!currentPegawai) {
+                    alert('Data pegawai tidak ditemukan');
+                    window.location.href = 'pegawai.html';
+                    return;
+                }
+
+                renderHeader();
+                renderBiodata();
+
+                // Load all related data
+                await Promise.all([
+                    loadPendidikan(),
+                    loadJabatan(),
+                    loadPangkat(),
+                    loadDiklat(),
+                    loadKgb(),
+                    loadKeluarga(),
+                    loadSkp()
+                ]);
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memuat data', 'error');
+            }
+        }
+
+        // PENDIDIKAN
+        async function loadPendidikan() {
+            const data = await Data.getPendidikan();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('pendidikanList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${r.tingkat}</td>
+                    <td>${r.nama_sekolah}</td>
+                    <td>${r.jurusan || '-'}</td>
+                    <td>${r.tahun_lulus}</td>
+                    <td>${r.no_ijazah || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editPendidikan('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePendidikan('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        // JABATAN
+        async function loadJabatan() {
+            const data = await Data.getRiwayatJabatan();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('jabatanList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${r.nama_jabatan}</td>
+                    <td>${r.unit_kerja}</td>
+                    <td>${App.formatDate(r.tmt_jabatan)}</td>
+                    <td>${r.nomor_sk || '-'}</td>
+                    <td>${App.formatDate(r.tanggal_sk)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editJabatan('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteJabatan('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        // PANGKAT
+        async function loadPangkat() {
+            const data = await Data.getRiwayatPangkat();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('pangkatList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${r.golongan}</td>
+                    <td>${App.formatDate(r.tmt_pangkat)}</td>
+                    <td>${r.nomor_sk || '-'}</td>
+                    <td>${App.formatDate(r.tanggal_sk)}</td>
+                    <td>${r.pejabat_penetap || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editPangkat('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePangkat('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        // DIKLAT
+        async function loadDiklat() {
+            const data = await Data.getDiklat();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('diklatList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${r.nama_diklat}</td>
+                    <td>${r.tahun}</td>
+                    <td>${r.penyelenggara || '-'}</td>
+                    <td>${r.no_sertifikat || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editDiklat('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteDiklat('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        // KGB
+        async function loadKgb() {
+            const data = await Data.getKgb();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('kgbList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${App.formatDate(r.tmt_kgb)}</td>
+                    <td>${App.formatCurrency(r.gaji_pokok)}</td>
+                    <td>${r.nomor_sk || '-'}</td>
+                    <td>${App.formatDate(r.tanggal_sk)}</td>
+                    <td>${r.keterangan || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editKgb('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteKgb('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        // KELUARGA
+        async function loadKeluarga() {
+            const data = await Data.getKeluarga();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('keluargaList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${r.nama}</td>
+                    <td>${r.hubungan}</td>
+                    <td>${r.jenis_kelamin}</td>
+                    <td>${App.formatDate(r.tanggal_lahir)}</td>
+                    <td>${r.pekerjaan || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editKeluarga('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteKeluarga('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        // SKP
+        async function loadSkp() {
+            const data = await Data.getSkp();
+            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const container = document.getElementById('skpList');
+            container.innerHTML = filtered.length ? filtered.map(r => `
+                <tr>
+                    <td>${r.tahun}</td>
+                    <td>${r.nilai_skp || r.nilai_prestasi_kerja}</td>
+                    <td>${r.pejabat_penilai || '-'}</td>
+                    <td>${r.atasan_pejabat_penilai || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editSkp('${r.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSkp('${r.id}')">Hapus</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="text-center text-muted p-4">Tidak ada data</td></tr>';
+        }
+
+        function renderHeader() {
+            const p = currentPegawai;
+            const photoUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=random&size=128`;
+
+            document.getElementById('headerInfo').innerHTML = `
+                <img src="${photoUrl}" class="profile-img">
+                <div>
+                    <h2 style="margin:0 0 0.25rem 0; font-size: 1.5rem;">${p.nama}</h2>
+                    <div class="text-muted">${p.nip} • ${p.jabatan?.nama || '-'} • ${p.unit_kerja?.nama || '-'}</div>
+                    <span class="badge badge-${p.status === 'aktif' ? 'success' : 'danger'}" style="margin-top:0.5rem; display:inline-block;">${p.status.toUpperCase()}</span>
+                </div>
+            `;
+        }
+
+        function renderBiodata() {
+            const p = currentPegawai;
+            const grid = document.getElementById('biodataView');
+            grid.innerHTML = `
+                <div class="desc-item"><div class="label">NIK</div><div class="value">${p.nik || '-'}</div></div>
+                <div class="desc-item"><div class="label">NIP</div><div class="value">${p.nip || '-'}</div></div>
+                <div class="desc-item"><div class="label">Nama Lengkap</div><div class="value">${p.nama}</div></div>
+                <div class="desc-item"><div class="label">Gelar</div><div class="value">${p.gelar_depan || ''} ${p.gelar_belakang || ''}</div></div>
+                <div class="desc-item"><div class="label">TTL</div><div class="value">${p.tempat_lahir || '-'}, ${App.formatDate(p.tanggal_lahir)}</div></div>
+                <div class="desc-item"><div class="label">Jenis Kelamin</div><div class="value">${p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</div></div>
+                <div class="desc-item"><div class="label">Agama</div><div class="value">${p.agama || '-'}</div></div>
+                <div class="desc-item"><div class="label">Status Nikah</div><div class="value">${p.status_nikah || '-'}</div></div>
+                <div class="desc-item"><div class="label">Email</div><div class="value">${p.email || '-'}</div></div>
+                <div class="desc-item"><div class="label">No. HP</div><div class="value">${p.telepon || '-'}</div></div>
+                <div class="desc-item full-width"><div class="label">Alamat</div><div class="value">${p.alamat || '-'}</div></div>
+             `;
+        }
+
+        // BIODATA ACTIONS
+        function openEditBiodata() {
+            const p = currentPegawai;
+            document.getElementById('nik').value = p.nik || '';
+            document.getElementById('nip').value = p.nip || '';
+            document.getElementById('nama').value = p.nama || '';
+            document.getElementById('gelarDepan').value = p.gelar_depan || '';
+            document.getElementById('gelarBelakang').value = p.gelar_belakang || '';
+            document.getElementById('tempatLahir').value = p.tempat_lahir || '';
+            document.getElementById('tanggalLahir').value = p.tanggal_lahir || '';
+            document.getElementById('jenisKelamin').value = p.jenis_kelamin || 'L';
+            document.getElementById('agama').value = p.agama || 'Islam';
+            document.getElementById('statusNikah').value = p.status_nikah || 'Belum Menikah';
+            document.getElementById('alamat').value = p.alamat || '';
+            document.getElementById('telepon').value = p.telepon || '';
+            document.getElementById('email').value = p.email || '';
+            document.getElementById('tanggalMasuk').value = p.tanggal_masuk || '';
+
+            App.openModal('editModal');
+        }
+
+        document.getElementById('biodataForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const updates = {
+                nik: document.getElementById('nik').value,
+                nip: document.getElementById('nip').value,
+                nama: document.getElementById('nama').value,
+                gelar_depan: document.getElementById('gelarDepan').value,
+                gelar_belakang: document.getElementById('gelarBelakang').value,
+                tempat_lahir: document.getElementById('tempatLahir').value,
+                tanggal_lahir: document.getElementById('tanggalLahir').value,
+                jenis_kelamin: document.getElementById('jenisKelamin').value,
+                agama: document.getElementById('agama').value,
+                status_nikah: document.getElementById('statusNikah').value,
+                alamat: document.getElementById('alamat').value,
+                telepon: document.getElementById('telepon').value,
+                email: document.getElementById('email').value,
+                tanggal_masuk: document.getElementById('tanggalMasuk').value
+            };
+
+            try {
+                await Data.update('pegawai', pegawaiId, updates);
+                App.showToast('Biodata berhasil diperbarui', 'success');
+                App.closeModal('editModal');
+                loadDetail(); // Reload
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal memperbarui biodata', 'error');
+            }
+        });
+
+        // OPEN MODALS
+        function openPendidikanModal() {
+            document.getElementById('pendidikanModalTitle').textContent = 'Tambah Pendidikan';
+            document.getElementById('pendidikanForm').reset();
+            document.getElementById('pendidikanId').value = '';
+            App.openModal('pendidikanModal');
+        }
+        function openJabatanModal() {
+            document.getElementById('jabatanModalTitle').textContent = 'Tambah Riwayat Jabatan';
+            document.getElementById('jabatanForm').reset();
+            document.getElementById('riwayatJabatanId').value = '';
+            App.openModal('jabatanModal');
+        }
+        function openPangkatModal() {
+            document.getElementById('pangkatModalTitle').textContent = 'Tambah Riwayat Pangkat';
+            document.getElementById('pangkatForm').reset();
+            document.getElementById('pangkatId').value = '';
+            App.openModal('pangkatModal');
+        }
+        function openDiklatModal() {
+            document.getElementById('diklatModalTitle').textContent = 'Tambah Riwayat Diklat';
+            document.getElementById('diklatForm').reset();
+            document.getElementById('diklatId').value = '';
+            App.openModal('diklatModal');
+        }
+        function openKgbModal() {
+            document.getElementById('kgbModalTitle').textContent = 'Tambah Riwayat KGB';
+            document.getElementById('kgbForm').reset();
+            document.getElementById('kgbId').value = '';
+            App.openModal('kgbModal');
+        }
+        function openKeluargaModal() {
+            document.getElementById('keluargaModalTitle').textContent = 'Tambah Keluarga';
+            document.getElementById('keluargaForm').reset();
+            document.getElementById('memberId').value = '';
+            App.openModal('keluargaModal');
+        }
+        function openSkpModal() {
+            document.getElementById('skpModalTitle').textContent = 'Tambah SKP';
+            document.getElementById('skpForm').reset();
+            document.getElementById('skpId').value = '';
+            App.openModal('skpModal');
+        }
+
+        // EDIT ACTIONS
+        async function editPendidikan(id) {
+            const r = await Data.getById(Data.KEYS.PENDIDIKAN, id);
+            if (!r) return;
+            document.getElementById('pendidikanId').value = r.id;
+            document.getElementById('tingkat').value = r.tingkat;
+            document.getElementById('namaSekolah').value = r.nama_sekolah;
+            document.getElementById('jurusan').value = r.jurusan || '';
+            document.getElementById('tahunLulus').value = r.tahun_lulus;
+            document.getElementById('noIjazah').value = r.no_ijazah || '';
+            App.openModal('pendidikanModal');
+        }
+        // ... similar for others, I will implement all here for brevity in logic
+        async function editJabatan(id) {
+            const r = await Data.getById(Data.KEYS.RIWAYAT_JABATAN, id);
+            if (!r) return;
+            document.getElementById('riwayatJabatanId').value = r.id;
+            document.getElementById('namaJabatan').value = r.nama_jabatan;
+            document.getElementById('unitKerjaTab').value = r.unit_kerja;
+            document.getElementById('tmtJabatan').value = r.tmt_jabatan;
+            document.getElementById('noSKJabatan').value = r.nomor_sk || '';
+            document.getElementById('tglSKJabatan').value = r.tanggal_sk || '';
+            App.openModal('jabatanModal');
+        }
+        async function editPangkat(id) {
+            const r = await Data.getById(Data.KEYS.RIWAYAT_PANGKAT, id);
+            if (!r) return;
+            document.getElementById('pangkatId').value = r.id;
+            document.getElementById('golongan').value = r.golongan;
+            document.getElementById('tmtPangkat').value = r.tmt_pangkat;
+            document.getElementById('noSKPangkat').value = r.nomor_sk || '';
+            document.getElementById('tglSKPangkat').value = r.tanggal_sk || '';
+            document.getElementById('pejabatPangkat').value = r.pejabat_penetap || '';
+            App.openModal('pangkatModal');
+        }
+        async function editDiklat(id) {
+            const r = await Data.getById(Data.KEYS.DIKLAT, id);
+            if (!r) return;
+            document.getElementById('diklatId').value = r.id;
+            document.getElementById('namaDiklat').value = r.nama_diklat;
+            document.getElementById('tahunDiklat').value = r.tahun;
+            document.getElementById('penyelenggara Diklat').value = r.penyelenggara || '';
+            document.getElementById('noSertifikat').value = r.no_sertifikat || '';
+            App.openModal('diklatModal');
+        }
+        async function editKgb(id) {
+            const r = await Data.getById(Data.KEYS.KGB, id);
+            if (!r) return;
+            document.getElementById('kgbId').value = r.id;
+            document.getElementById('tmtKgb').value = r.tmt_kgb;
+            document.getElementById('gajiPokok').value = r.gaji_pokok;
+            document.getElementById('noSKKgb').value = r.nomor_sk || '';
+            document.getElementById('tglSKKgb').value = r.tanggal_sk || '';
+            document.getElementById('keteranganKgb').value = r.keterangan || '';
+            App.openModal('kgbModal');
+        }
+        async function editKeluarga(id) {
+            const r = await Data.getById(Data.KEYS.KELUARGA, id);
+            if (!r) return;
+            document.getElementById('memberId').value = r.id;
+            document.getElementById('namaKeluarga').value = r.nama;
+            document.getElementById('hubungan').value = r.hubungan;
+            document.getElementById('jkKeluarga').value = r.jenis_kelamin;
+            document.getElementById('tglLahirKeluarga').value = r.tanggal_lahir || '';
+            document.getElementById('pekerjaanKeluarga').value = r.pekerjaan || '';
+            App.openModal('keluargaModal');
+        }
+        async function editSkp(id) {
+            const r = await Data.getById(Data.KEYS.SKP, id);
+            if (!r) return;
+            document.getElementById('skpId').value = r.id;
+            document.getElementById('tahunSkp').value = r.tahun;
+            document.getElementById('nilaiSkp').value = r.nilai_skp || r.nilai_prestasi_kerja;
+            document.getElementById('pejabatSkp').value = r.pejabat_penilai || '';
+            document.getElementById('atasanSkp').value = r.atasan_pejabat_penilai || '';
+            App.openModal('skpModal');
+        }
+
+        // DELETE ACTIONS
+        async function deletePendidikan(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.PENDIDIKAN, id); loadPendidikan(); } }
+        async function deleteJabatan(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.RIWAYAT_JABATAN, id); loadJabatan(); } }
+        async function deletePangkat(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.RIWAYAT_PANGKAT, id); loadPangkat(); } }
+        async function deleteDiklat(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.DIKLAT, id); loadDiklat(); } }
+        async function deleteKgb(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.KGB, id); loadKgb(); } }
+        async function deleteKeluarga(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.KELUARGA, id); loadKeluarga(); } }
+        async function deleteSkp(id) { if (confirm('Hapus data ini?')) { await Data.delete(Data.KEYS.SKP, id); loadSkp(); } }
+
+        // FORM SUBMITS
+        document.getElementById('pendidikanForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('pendidikanId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                tingkat: document.getElementById('tingkat').value,
+                nama_sekolah: document.getElementById('namaSekolah').value,
+                jurusan: document.getElementById('jurusan').value,
+                tahun_lulus: document.getElementById('tahunLulus').value,
+                no_ijazah: document.getElementById('noIjazah').value
+            };
+            if (id) await Data.update(Data.KEYS.PENDIDIKAN, id, data);
+            else await Data.create(Data.KEYS.PENDIDIKAN, data);
+            App.closeModal('pendidikanModal');
+            loadPendidikan();
+        });
+
+        document.getElementById('jabatanForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('riwayatJabatanId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                nama_jabatan: document.getElementById('namaJabatan').value,
+                unit_kerja: document.getElementById('unitKerjaTab').value,
+                tmt_jabatan: document.getElementById('tmtJabatan').value,
+                nomor_sk: document.getElementById('noSKJabatan').value,
+                tanggal_sk: document.getElementById('tglSKJabatan').value
+            };
+            if (id) await Data.update(Data.KEYS.RIWAYAT_JABATAN, id, data);
+            else await Data.create(Data.KEYS.RIWAYAT_JABATAN, data);
+            App.closeModal('jabatanModal');
+            loadJabatan();
+        });
+
+        document.getElementById('pangkatForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('pangkatId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                golongan: document.getElementById('golongan').value,
+                tmt_pangkat: document.getElementById('tmtPangkat').value,
+                nomor_sk: document.getElementById('noSKPangkat').value,
+                tanggal_sk: document.getElementById('tglSKPangkat').value,
+                pejabat_penetap: document.getElementById('pejabatPangkat').value
+            };
+            if (id) await Data.update(Data.KEYS.RIWAYAT_PANGKAT, id, data);
+            else await Data.create(Data.KEYS.RIWAYAT_PANGKAT, data);
+            App.closeModal('pangkatModal');
+            loadPangkat();
+        });
+
+        document.getElementById('diklatForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('diklatId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                nama_diklat: document.getElementById('namaDiklat').value,
+                tahun: document.getElementById('tahunDiklat').value,
+                penyelenggara: document.getElementById('penyelenggara Diklat').value,
+                no_sertifikat: document.getElementById('noSertifikat').value
+            };
+            if (id) await Data.update(Data.KEYS.DIKLAT, id, data);
+            else await Data.create(Data.KEYS.DIKLAT, data);
+            App.closeModal('diklatModal');
+            loadDiklat();
+        });
+
+        document.getElementById('kgbForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('kgbId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                tmt_kgb: document.getElementById('tmtKgb').value,
+                gaji_pokok: document.getElementById('gajiPokok').value,
+                nomor_sk: document.getElementById('noSKKgb').value,
+                tanggal_sk: document.getElementById('tglSKKgb').value,
+                keterangan: document.getElementById('keteranganKgb').value
+            };
+            if (id) await Data.update(Data.KEYS.KGB, id, data);
+            else await Data.create(Data.KEYS.KGB, data);
+            App.closeModal('kgbModal');
+            loadKgb();
+        });
+
+        document.getElementById('keluargaForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('memberId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                nama: document.getElementById('namaKeluarga').value,
+                hubungan: document.getElementById('hubungan').value,
+                jenis_kelamin: document.getElementById('jkKeluarga').value,
+                tanggal_lahir: document.getElementById('tglLahirKeluarga').value,
+                pekerjaan: document.getElementById('pekerjaanKeluarga').value
+            };
+            if (id) await Data.update(Data.KEYS.KELUARGA, id, data);
+            else await Data.create(Data.KEYS.KELUARGA, data);
+            App.closeModal('keluargaModal');
+            loadKeluarga();
+        });
+
+        document.getElementById('skpForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('skpId').value;
+            const data = {
+                pegawai_id: pegawaiId,
+                tahun: document.getElementById('tahunSkp').value,
+                nilai_skp: document.getElementById('nilaiSkp').value,
+                pejabat_penilai: document.getElementById('pejabatSkp').value,
+                atasan_pejabat_penilai: document.getElementById('atasanSkp').value
+            };
+            if (id) await Data.update(Data.KEYS.SKP, id, data);
+            else await Data.create(Data.KEYS.SKP, data);
+            App.closeModal('skpModal');
+            loadSkp();
+        });
+
+        // Initialize
+        loadDetail();
+    </script>
+</body>
+
+</html>

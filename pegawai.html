@@ -418,37 +418,8 @@
         }
 
         // View pegawai
-        async function viewPegawai(id) {
-            const employees = await Data.getPegawaiWithRelations();
-            const p = employees.find(x => x.id === id);
-            if (!p) return;
-
-            const photoUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=random&size=128`;
-
-            document.getElementById('viewContent').innerHTML = `
-        <div class="text-center mb-4">
-            <img src="${photoUrl}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #f0f2f5;">
-            <h4 class="mt-2 mb-0">${p.nama}</h4>
-            <p class="text-muted small">${p.nip}</p>
-        </div>
-        <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
-          <div><strong>NIP:</strong><br>${p.nip}</div>
-          <div><strong>Nama:</strong><br>${p.nama}</div>
-          <div><strong>Email:</strong><br>${p.email || '-'}</div>
-          <div><strong>Telepon:</strong><br>${p.telepon || '-'}</div>
-          <div><strong>Tempat/Tgl Lahir:</strong><br>${p.tempat_lahir || '-'}, ${App.formatDate(p.tanggal_lahir)}</div>
-          <div><strong>Jenis Kelamin:</strong><br>${p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</div>
-          <div><strong>Agama:</strong><br>${p.agama || '-'}</div>
-          <div><strong>Status Nikah:</strong><br>${p.status_nikah || '-'}</div>
-          <div><strong>Jabatan:</strong><br>${p.jabatan?.nama || '-'}</div>
-          <div><strong>Unit Kerja:</strong><br>${p.unit_kerja?.nama || '-'}</div>
-          <div><strong>Tanggal Masuk:</strong><br>${App.formatDate(p.tanggal_masuk)}</div>
-          <div><strong>Status:</strong><br>${App.getStatusBadge(p.status)}</div>
-        </div>
-        <div class="mt-4"><strong>Alamat:</strong><br>${p.alamat || '-'}</div>
-      `;
-
-            App.openModal('viewModal');
+        function viewPegawai(id) {
+            window.location.href = `admin-pegawai-detail.html?id=${id}`;
         }
 
         // Delete pegawai
