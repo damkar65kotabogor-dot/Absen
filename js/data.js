@@ -11,36 +11,51 @@ const Data = {
         KELUARGA: 'keluarga'
     },
 
+    // Internal ready promise
+    _ready: null,
+
+    isReady() {
+        return this._ready;
+    },
+
     // Initialize - Migrates data if necessary
     async init() {
-        try {
-            console.log('Initializing SIMPEG Data Layer...');
-            const { data: users, error: userError } = await supabaseClient.from('users').select('id').limit(1);
-            const { data: pegawai, error: pegError } = await supabaseClient.from('pegawai').select('id').limit(1);
+        if (this._ready) return this._ready;
 
-            if (userError || pegError) {
-                const isTableMissing = (userError?.code === '42P01' || pegError?.code === '42P01');
-                console.error('Supabase connection error:', userError?.message || pegError?.message);
+        this._ready = (async () => {
+            try {
+                console.log('Initializing SIMPEG Data Layer...');
+                const { data: users, error: userError } = await supabaseClient.from('users').select('id').limit(1);
+                const { data: pegawai, error: pegError } = await supabaseClient.from('pegawai').select('id').limit(1);
 
-                if (typeof App !== 'undefined' && App.showToast) {
-                    if (isTableMissing) {
-                        App.showToast('Tabel database belum dibuat! Silakan jalankan script SQL yang diberikan.', 'danger');
-                    } else {
-                        App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
+                if (userError || pegError) {
+                    const isTableMissing = (userError?.code === '42P01' || pegError?.code === '42P01');
+                    console.error('Supabase connection error:', userError?.message || pegError?.message);
+
+                    if (typeof App !== 'undefined' && App.showToast) {
+                        if (isTableMissing) {
+                            App.showToast('Tabel database belum dibuat! Silakan jalankan script SQL yang diberikan.', 'danger');
+                        } else {
+                            // Silently fail init if it's just a network issue, let specific calls handle errors
+                        }
                     }
+                    return false;
                 }
-                return;
-            }
 
-            if (users.length === 0 || pegawai.length === 0) {
-                console.log('Essential data missing, seeding initial data...');
-                await this.seedData();
-            } else {
-                console.log('Database connected and ready.');
+                if (users.length === 0 || pegawai.length === 0) {
+                    console.log('Essential data missing, seeding initial data...');
+                    await this.seedData();
+                } else {
+                    console.log('Database connected and ready.');
+                }
+                return true;
+            } catch (err) {
+                console.error('Unexpected error during initialization:', err);
+                return false;
             }
-        } catch (err) {
-            console.error('Unexpected error during initialization:', err);
-        }
+        })();
+
+        return this._ready;
     },
 
     // Seed initial data to Supabase

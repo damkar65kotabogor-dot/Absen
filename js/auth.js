@@ -49,7 +49,7 @@ const Auth = {
     async syncPegawaiId(userObj) {
         try {
             const pegawaiData = await Data.getPegawai();
-            const pegawai = pegawaiData.find(p => p.user_id === userObj.id);
+            const pegawai = pegawaiData.find(p => p.user_id == userObj.id);
             if (pegawai) {
                 userObj.pegawaiId = pegawai.id;
                 userObj.nip = pegawai.nip;

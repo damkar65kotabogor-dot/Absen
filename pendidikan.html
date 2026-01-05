@@ -182,9 +182,12 @@
 
         async function loadPendidikan() {
             try {
+                // Wait for Data to be ready (seeding might be in progress)
+                await Data.isReady();
+
                 // 1. Get Pegawai ID safely
                 const employees = await Data.getPegawai();
-                const p = employees.find(x => x.user_id === user.id);
+                const p = employees.find(x => x.user_id == user.id); // Loose comparison for string/number
 
                 if (!p) {
                     document.querySelector('.card-body').innerHTML = `
@@ -344,11 +347,9 @@
         });
 
         // Load initially
-        window.addEventListener('load', () => {
-            // slight delay to ensure Data.init() might have run or at least auth is ready
-            setTimeout(loadPendidikan, 500);
-        });
+        window.addEventListener('load', () => loadPendidikan());
     </script>
 </body>
 
 </html>
+```

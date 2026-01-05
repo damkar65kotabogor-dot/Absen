@@ -147,9 +147,12 @@
 
         async function loadKGB() {
             try {
+                // Wait for Data to be ready
+                await Data.isReady();
+
                 // 1. Get Pegawai ID safely
                 const employees = await Data.getPegawai();
-                const p = employees.find(x => x.user_id === user.id);
+                const p = employees.find(x => x.user_id == user.id); // Loose comparison for string/number
 
                 if (!p) {
                     document.getElementById('kgbList').innerHTML = `
@@ -276,7 +279,7 @@
             }
         });
 
-        window.addEventListener('load', () => setTimeout(loadKGB, 500));
+        window.addEventListener('load', () => loadKGB());
     </script>
 </body>
 
