@@ -163,9 +163,11 @@ CREATE TABLE IF NOT EXISTS cuti (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Row Level Security (RLS) Example
--- Enable RLS
+-- Row Level Security (RLS) - Permit All for simplicity in this project
+-- ENABLE RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE unit_kerja ENABLE ROW LEVEL SECURITY;
+ALTER TABLE jabatan ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pegawai ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pendidikan ENABLE ROW LEVEL SECURITY;
 ALTER TABLE riwayat_jabatan ENABLE ROW LEVEL SECURITY;
@@ -177,7 +179,42 @@ ALTER TABLE keluarga ENABLE ROW LEVEL SECURITY;
 ALTER TABLE absensi ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cuti ENABLE ROW LEVEL SECURITY;
 
--- Note: In a real Supabase environment, you would use auth.uid() 
--- matching with user_id to restrict access. Since this app uses a custom 
--- 'users' table and local authentication simulation, policies would typically 
--- allow authenticated roles if using Supabase Auth.
+-- CREATE POLICIES (Allow all for anon role)
+DROP POLICY IF EXISTS "Permit All" ON users;
+CREATE POLICY "Permit All" ON users FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON unit_kerja;
+CREATE POLICY "Permit All" ON unit_kerja FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON jabatan;
+CREATE POLICY "Permit All" ON jabatan FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON pegawai;
+CREATE POLICY "Permit All" ON pegawai FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON pendidikan;
+CREATE POLICY "Permit All" ON pendidikan FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON riwayat_jabatan;
+CREATE POLICY "Permit All" ON riwayat_jabatan FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON riwayat_pangkat;
+CREATE POLICY "Permit All" ON riwayat_pangkat FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON diklat;
+CREATE POLICY "Permit All" ON diklat FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON kgb;
+CREATE POLICY "Permit All" ON kgb FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON skp;
+CREATE POLICY "Permit All" ON skp FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON keluarga;
+CREATE POLICY "Permit All" ON keluarga FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON absensi;
+CREATE POLICY "Permit All" ON absensi FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Permit All" ON cuti;
+CREATE POLICY "Permit All" ON cuti FOR ALL TO anon USING (true) WITH CHECK (true);

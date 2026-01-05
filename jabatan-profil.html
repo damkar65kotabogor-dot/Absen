@@ -167,9 +167,26 @@
                 const p = employees.find(x => x.user_id === user.id);
 
                 if (!p) {
-                    document.querySelector('.card-body').innerHTML = '<div class="alert alert-warning">Data kepegawaian tidak ditemukan.</div>';
+                    document.querySelector('.card-body').innerHTML = `
+                        <div class="alert alert-warning">
+                            <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
+                            <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu agar dapat mengelola data jabatan.</p>
+                            <div class="mt-3">
+                                <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
+                            </div>
+                        </div>`;
+                    // Hide add button if record not found
+                    const addBtn = document.querySelector('button[onclick="openAddModal()"]');
+                    if (addBtn) addBtn.style.display = 'none';
                     return;
                 }
+
+                // Update session if needed
+                if (!user.pegawaiId) {
+                    user.pegawaiId = p.id;
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                }
+
                 currentPegawaiId = p.id;
 
                 // 2. Get Data
@@ -220,7 +237,10 @@
         }
 
         function openAddModal() {
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai belum siap. Silakan muat ulang halaman.', 'error');
+                return;
+            }
             document.getElementById('modalTitle').textContent = 'Tambah Jabatan';
             document.getElementById('editId').value = '';
             document.getElementById('dataForm').reset();
