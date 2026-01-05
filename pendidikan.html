@@ -190,6 +190,13 @@
                     document.querySelector('.card-body').innerHTML = '<div class="alert alert-warning">Data kepegawaian tidak ditemukan. Silakan lengkapi biodata terlebih dahulu.</div>';
                     return;
                 }
+
+                // Update session if needed
+                if (!user.pegawaiId) {
+                    user.pegawaiId = p.id;
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                }
+
                 currentPegawaiId = p.id;
 
                 // 2. Get Pendidikan Data

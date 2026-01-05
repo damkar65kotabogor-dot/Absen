@@ -4,11 +4,15 @@
 
 const App = {
     // Initialize application
-    init() {
-        Data.init();
-        this.setupEventListeners();
-        this.renderSidebar();
-        this.updateUserInfo();
+    async init() {
+        try {
+            await Data.init();
+            this.setupEventListeners();
+            this.renderSidebar();
+            await this.updateUserInfo();
+        } catch (err) {
+            console.error('App initialization failed:', err);
+        }
     },
 
     // Setup global event listeners
@@ -196,7 +200,7 @@ const App = {
     },
 
     // Update user info in sidebar
-    updateUserInfo() {
+    async updateUserInfo() {
         const user = Auth.getCurrentUser();
         if (!user) return;
 
@@ -211,15 +215,21 @@ const App = {
         }
 
         if (userAvatar) {
-            // Check if user has a profile photo in pegawai data
-            const pegawai = Data.getPegawai().find(p => p.userId === user.id);
-            if (pegawai && pegawai.foto) {
-                userAvatar.innerHTML = `<img src="${pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-                userAvatar.style.background = 'none';
-            } else {
-                userAvatar.textContent = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                userAvatar.style.background = ''; // Restore default background
-                userAvatar.innerHTML = userAvatar.textContent; // Clear any img
+            try {
+                // Check if user has a profile photo in pegawai data
+                const pegawaiData = await Data.getPegawai();
+                const pegawai = pegawaiData.find(p => p.user_id === user.id);
+                if (pegawai && pegawai.foto) {
+                    userAvatar.innerHTML = `<img src="${pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                    userAvatar.style.background = 'none';
+                } else {
+                    const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    userAvatar.textContent = initials;
+                    userAvatar.style.background = ''; // Restore default background
+                    userAvatar.innerHTML = initials; // Clear any img
+                }
+            } catch (err) {
+                console.warn('Failed to update avatar:', err);
             }
         }
     },
@@ -309,6 +319,6 @@ const App = {
 };
 
 // Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    App.init();
+document.addEventListener('DOMContentLoaded', async () => {
+    await App.init();
 });

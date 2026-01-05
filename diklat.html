@@ -156,6 +156,13 @@
                     document.getElementById('diklatList').innerHTML = '<div class="empty-state-dash">Data pegawai tidak ditemukan</div>';
                     return;
                 }
+
+                // Update session if needed
+                if (!user.pegawaiId) {
+                    user.pegawaiId = p.id;
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                }
+
                 currentPegawaiId = p.id;
 
                 // 2. Get Data
