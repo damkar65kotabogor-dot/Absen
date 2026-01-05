@@ -15,18 +15,19 @@ const Data = {
     async init() {
         try {
             console.log('Initializing SIMPEG Data Layer...');
-            const { data: users, error } = await supabaseClient.from('users').select('id').limit(1);
+            const { data: users, error: userError } = await supabaseClient.from('users').select('id').limit(1);
+            const { data: pegawai, error: pegError } = await supabaseClient.from('pegawai').select('id').limit(1);
 
-            if (error) {
-                console.error('Supabase connection error:', error.message);
+            if (userError || pegError) {
+                console.error('Supabase connection error:', userError?.message || pegError?.message);
                 if (typeof App !== 'undefined' && App.showToast) {
                     App.showToast('Koneksi database gagal! Periksa konfigurasi.', 'danger');
                 }
                 return;
             }
 
-            if (users.length === 0) {
-                console.log('Database empty, seeding initial data...');
+            if (users.length === 0 || pegawai.length === 0) {
+                console.log('Essential data missing, seeding initial data...');
                 await this.seedData();
             } else {
                 console.log('Database connected and ready.');
@@ -38,30 +39,64 @@ const Data = {
 
     // Seed initial data to Supabase
     async seedData() {
-        // ... (Existing seed data arrays go here, but we insert them into Supabase)
-        // Note: For brevity, I will only insert the core data if not exists.
+        console.log('Seeding initial data...');
 
-        // Users
-        const users = [
+        // 1. Users
+        const initialUsers = [
             { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrator' },
             { username: 'pimpinan', password: 'pimpinan123', role: 'pimpinan', name: 'Kepala Dinas' }
         ];
-        await supabaseClient.from('users').insert(users);
 
-        // Unit Kerja
+        const { data: createdUsers, error: userError } = await supabaseClient
+            .from('users')
+            .insert(initialUsers)
+            .select();
+
+        if (userError) {
+            console.error('Error seeding users:', userError);
+            return;
+        }
+
+        const adminUser = createdUsers.find(u => u.username === 'admin');
+        const pimpinanUser = createdUsers.find(u => u.username === 'pimpinan');
+
+        // 2. Unit Kerja
         const unitKerja = [
             { kode: 'DPKP', nama: 'Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor', kepala: 'Kepala Dinas' }
         ];
-        await supabaseClient.from('unit_kerja').insert(unitKerja);
+        const { data: createdUnits } = await supabaseClient.from('unit_kerja').insert(unitKerja).select();
+        const unitId = createdUnits[0].id;
 
-        // Jabatan
+        // 3. Jabatan
         const jabatan = [
             { kode: 'J001', nama: 'Operator Layanan Operasional', golongan: '-', tunjangan: 0 },
             { kode: 'J002', nama: 'Pengelola Umum Operasional', golongan: '-', tunjangan: 0 }
         ];
-        await supabaseClient.from('jabatan').insert(jabatan);
+        const { data: createdJabatan } = await supabaseClient.from('jabatan').insert(jabatan).select();
+        const jabatanId = createdJabatan[0].id;
 
-        // Pegawai and Absensi seeding logic could be added here as well
+        // 4. Pegawai (Link to users)
+        const pegawai = [
+            {
+                user_id: adminUser.id,
+                nip: '197001012023011001',
+                nama: 'Administrator',
+                unit_kerja_id: unitId,
+                jabatan_id: jabatanId,
+                status: 'aktif'
+            },
+            {
+                user_id: pimpinanUser.id,
+                nip: '197505052023011002',
+                nama: 'Kepala Dinas',
+                unit_kerja_id: unitId,
+                jabatan_id: jabatanId,
+                status: 'aktif'
+            }
+        ];
+        await supabaseClient.from('pegawai').insert(pegawai);
+
+        console.log('Seeding completed successfully.');
     },
 
     // Generic CRUD operations using Supabase

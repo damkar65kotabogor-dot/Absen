@@ -203,7 +203,12 @@
 
                 if (!p) {
                     console.error("Pegawai record not found for user", user.id);
-                    document.getElementById('biodataContent').innerHTML = '<div class="alert alert-danger">Data pegawai belum ditemukan. Hubungi admin.</div>';
+                    document.getElementById('biodataContent').innerHTML = `
+                        <div class="alert alert-info">
+                            <h4 class="alert-title">Profil Belum Lengkap</h4>
+                            <p>Anda belum memiliki data profil pegawai. Klik tombol di bawah ini untuk membuat profil awal Anda.</p>
+                            <button onclick="createInitialPegawai()" class="btn btn-primary mt-3">Buat Profil Sekarang</button>
+                        </div>`;
                     return;
                 }
 
@@ -304,6 +309,29 @@
                 console.error(err);
             }
         });
+
+        async function createInitialPegawai() {
+            try {
+                const newPegawai = {
+                    user_id: user.id,
+                    nama: user.name || 'Pegawai Baru',
+                    nip: 'PEGAWAI-' + Date.now().toString().slice(-6),
+                    status: 'aktif'
+                };
+
+                const created = await Data.create('pegawai', newPegawai);
+                if (created) {
+                    App.showToast('Profil awal berhasil dibuat!', 'success');
+                    await loadBiodata();
+                    // Sync to Auth too
+                    await Auth.syncPegawaiId(user);
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                }
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal membuat profil', 'danger');
+            }
+        }
     </script>
     </script>
 </body>

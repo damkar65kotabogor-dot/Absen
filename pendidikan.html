@@ -187,7 +187,17 @@
                 const p = employees.find(x => x.user_id === user.id);
 
                 if (!p) {
-                    document.querySelector('.card-body').innerHTML = '<div class="alert alert-warning">Data kepegawaian tidak ditemukan. Silakan lengkapi biodata terlebih dahulu.</div>';
+                    document.querySelector('.card-body').innerHTML = `
+                        <div class="alert alert-warning">
+                            <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
+                            <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu agar dapat mengelola data pendidikan.</p>
+                            <div class="mt-3">
+                                <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
+                            </div>
+                        </div>`;
+                    // Hide add button if record not found
+                    const addBtn = document.querySelector('button[onclick="openAddModal()"]');
+                    if (addBtn) addBtn.style.display = 'none';
                     return;
                 }
 
@@ -257,7 +267,7 @@
         // Modal Functions
         function openAddModal() {
             if (!currentPegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'error');
+                App.showToast('Data pegawai belum siap. Silakan muat ulang halaman.', 'error');
                 return;
             }
             document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';

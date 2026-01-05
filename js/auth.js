@@ -18,8 +18,6 @@ const Auth = {
 
         try {
             users = await Data.getUsers();
-            console.log('Users from DB:', users);
-            console.log('Looking for:', { username, password });
             if (users.length === 0) throw new Error('DB_EMPTY');
         } catch (err) {
             console.warn('Cloud login failed, checking LocalStorage fallback...');
@@ -37,22 +35,33 @@ const Auth = {
             const { password: _, ...userWithoutPassword } = user;
             userWithoutPassword.authSource = source;
 
-            try {
-                const pegawaiData = await Data.getPegawai();
-                const pegawai = pegawaiData.find(p => p.user_id === user.id);
-                if (pegawai) {
-                    userWithoutPassword.pegawaiId = pegawai.id;
-                    userWithoutPassword.pegawaiData = pegawai;
-                }
-            } catch (err) {
-                console.warn('Could not fetch linked pegawai data from cloud.');
-            }
+            // Ensure we have pegawaiId
+            await this.syncPegawaiId(userWithoutPassword);
 
             localStorage.setItem(Data.KEYS.CURRENT_USER, JSON.stringify(userWithoutPassword));
             return { success: true, user: userWithoutPassword };
         }
 
         return { success: false, message: 'Username atau password salah!' };
+    },
+
+    // Sync pegawaiId from database
+    async syncPegawaiId(userObj) {
+        try {
+            const pegawaiData = await Data.getPegawai();
+            const pegawai = pegawaiData.find(p => p.user_id === userObj.id);
+            if (pegawai) {
+                userObj.pegawaiId = pegawai.id;
+                userObj.nip = pegawai.nip;
+                console.log('Synced pegawaiId:', pegawai.id);
+                return true;
+            }
+            console.warn('No pegawai record found for user_id:', userObj.id);
+            return false;
+        } catch (err) {
+            console.error('Error syncing pegawaiId:', err);
+            return false;
+        }
     },
 
     // Logout
