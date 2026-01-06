@@ -227,6 +227,15 @@
 
     <!-- Action Menu Popover -->
     <div class="action-menu-popover" id="actionMenuPopover">
+        <a href="#" class="action-menu-item" onclick="editAbsensi()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Data
+        </a>
+        <hr style="margin: 4px 0; border: 0; border-top: 1px solid var(--gray-100);">
         <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -235,6 +244,65 @@
             </svg>
             Hapus Data
         </a>
+    </div>
+
+    <!-- Edit Absensi Modal -->
+    <div class="modal-overlay" id="editAbsensiModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Absensi</h3>
+                <button class="modal-close" onclick="closeEditModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form id="editAbsensiForm">
+                <input type="hidden" id="editAbsensiId">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Pegawai</label>
+                        <select class="form-control" id="editPegawai" required disabled>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="editTanggal" required>
+                    </div>
+                    <div class="row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label">Jam Masuk</label>
+                            <input type="time" class="form-control" id="editJamMasuk" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label">Jam Keluar</label>
+                            <input type="time" class="form-control" id="editJamKeluar">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" id="editStatus">
+                            <option value="tepat_waktu">Tepat Waktu</option>
+                            <option value="terlambat">Terlambat</option>
+                            <option value="izin">Izin</option>
+                            <option value="sakit">Sakit</option>
+                            <option value="cuti">Cuti</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Keterangan</label>
+                        <textarea class="form-control" id="editKeterangan" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -248,12 +316,6 @@
             // Redirected
         }
 
-        const user = Auth.getCurrentUser();
-        const isPegawai = user.role === 'pegawai';
-
-        // Set current date
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
 
         // Set default month filter
         const now = new Date();
@@ -309,46 +371,50 @@
 
         // Load absensi data
         async function loadAbsensi() {
-            const filterMonth = document.getElementById('filterMonth').value;
-            const filterPegawai = document.getElementById('filterPegawai').value;
-            const filterStatus = document.getElementById('filterStatus').value;
+            try {
+                // Ensure data layer is ready
+                await Data.isReady();
 
-            let absensi = await Data.getAbsensiWithPegawai();
+                const filterMonth = document.getElementById('filterMonth').value;
+                const filterPegawai = document.getElementById('filterPegawai').value;
+                const filterStatus = document.getElementById('filterStatus').value;
 
-            // Filter by pegawai (for pegawai role)
-            if (isPegawai && user.pegawaiId) {
-                absensi = absensi.filter(a => a.pegawai_id === user.pegawaiId);
-            }
+                let absensi = await Data.getAbsensiWithPegawai();
 
-            // Apply filters
-            if (filterMonth) {
-                absensi = absensi.filter(a => a.tanggal.startsWith(filterMonth));
-            }
-            if (filterPegawai) {
-                absensi = absensi.filter(a => a.pegawai_id == filterPegawai);
-            }
-            if (filterStatus) {
-                absensi = absensi.filter(a => a.status === filterStatus);
-            }
+                // Filter by pegawai (for pegawai role)
+                if (isPegawai && user.pegawaiId) {
+                    absensi = absensi.filter(a => a.pegawai_id === user.pegawaiId);
+                }
 
-            // Sort by date desc
-            absensi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                // Apply filters
+                if (filterMonth) {
+                    absensi = absensi.filter(a => a.tanggal.startsWith(filterMonth));
+                }
+                if (filterPegawai) {
+                    absensi = absensi.filter(a => a.pegawai_id == filterPegawai);
+                }
+                if (filterStatus) {
+                    absensi = absensi.filter(a => a.status === filterStatus);
+                }
 
-            // Update stats
-            const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
-            const terlambat = absensi.filter(a => a.status === 'terlambat').length;
-            document.getElementById('statTepatWaktu').textContent = tepatWaktu;
-            document.getElementById('statTerlambat').textContent = terlambat;
-            document.getElementById('statTotal').textContent = absensi.length;
+                // Sort by date desc
+                absensi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-            // Render table
-            const html = absensi.length > 0 ? absensi.map(a => {
-                const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
-                const avatarDisplay = a.pegawai?.foto ?
-                    `<img src="${a.pegawai.foto}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` :
-                    `<div style="width:24px;height:24px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#64748b;">${initials}</div>`;
+                // Update stats
+                const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
+                const terlambat = absensi.filter(a => a.status === 'terlambat').length;
+                document.getElementById('statTepatWaktu').textContent = tepatWaktu;
+                document.getElementById('statTerlambat').textContent = terlambat;
+                document.getElementById('statTotal').textContent = absensi.length;
 
-                return `
+                // Render table
+                const html = absensi.length > 0 ? absensi.map(a => {
+                    const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+                    const avatarDisplay = a.pegawai?.foto ?
+                        `<img src="${a.pegawai.foto}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` :
+                        `<div style="width:24px;height:24px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#64748b;">${initials}</div>`;
+
+                    return `
                     <tr>
                     ${!isPegawai ? `<td><input type="checkbox" class="row-checkbox" value="${a.id}" onclick="updateBulkActionVisibility()"></td>` : ''}
                     <td>${App.formatDate(a.tanggal)}</td>
@@ -376,10 +442,14 @@
                         </td>` : ''}
                     </tr>
                 `;
-            }).join('') : `<tr><td colspan="${isPegawai ? 5 : 8}" class="text-center text-muted">Tidak ada data absensi</td></tr>`;
+                }).join('') : `<tr><td colspan="${isPegawai ? 5 : 8}" class="text-center text-muted">Tidak ada data absensi</td></tr>`;
 
-            document.getElementById('absensiTable').innerHTML = html;
-            updateBulkActionVisibility();
+                document.getElementById('absensiTable').innerHTML = html;
+                updateBulkActionVisibility();
+            } catch (err) {
+                console.error('Error loading absensi:', err);
+                App.showToast('Gagal memuat data absensi', 'danger');
+            }
         }
 
         // ========= Selection & Bulk Action Logic =========
@@ -447,6 +517,54 @@
             popover.style.left = `${left}px`;
             popover.classList.add('show');
         }
+
+        async function editAbsensi() {
+            if (!currentAbsensiId) return;
+
+            const attendance = await Data.getAbsensi();
+            const a = attendance.find(x => x.id === currentAbsensiId);
+            if (!a) return;
+
+            // Populate Pegawai list if not already there (admin only usually)
+            const pegawai = await Data.getPegawai();
+            const select = document.getElementById('editPegawai');
+            if (select) {
+                select.innerHTML = pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
+            }
+
+            document.getElementById('editAbsensiId').value = a.id;
+            document.getElementById('editPegawai').value = a.pegawai_id;
+            document.getElementById('editTanggal').value = a.tanggal;
+            document.getElementById('editJamMasuk').value = a.jam_masuk || '';
+            document.getElementById('editJamKeluar').value = a.jam_keluar || '';
+            document.getElementById('editStatus').value = a.status;
+            document.getElementById('editKeterangan').value = a.keterangan || '';
+
+            // Hide popover and show modal
+            document.getElementById('actionMenuPopover').classList.remove('show');
+            document.getElementById('editAbsensiModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editAbsensiModal').classList.remove('show');
+        }
+
+        document.getElementById('editAbsensiForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('editAbsensiId').value;
+            const data = {
+                tanggal: document.getElementById('editTanggal').value,
+                jam_masuk: document.getElementById('editJamMasuk').value,
+                jam_keluar: document.getElementById('editJamKeluar').value || null,
+                status: document.getElementById('editStatus').value,
+                keterangan: document.getElementById('editKeterangan').value
+            };
+
+            await Data.update('absensi', id, data);
+            App.showToast('Data absensi berhasil diperbarui', 'success');
+            closeEditModal();
+            await loadAbsensi();
+        });
 
         async function deleteAbsensi() {
             if (!currentAbsensiId) return;

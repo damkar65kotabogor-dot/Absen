@@ -650,6 +650,9 @@
         // LOAD MASTER DATA
         async function loadDetail() {
             try {
+                // Ensure data layer is ready
+                await Data.isReady();
+
                 const all = await Data.getPegawaiWithRelations();
                 currentPegawai = all.find(p => p.id === pegawaiId);
 
@@ -691,8 +694,14 @@
                     <td>${r.tahun_lulus}</td>
                     <td>${r.no_ijazah || '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editPendidikan('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deletePendidikan('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'pendidikan')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -711,8 +720,14 @@
                     <td>${r.nomor_sk || '-'}</td>
                     <td>${App.formatDate(r.tanggal_sk)}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editJabatan('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteJabatan('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'jabatan')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -731,8 +746,14 @@
                     <td>${App.formatDate(r.tanggal_sk)}</td>
                     <td>${r.pejabat_penetap || '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editPangkat('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deletePangkat('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'pangkat')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -750,8 +771,14 @@
                     <td>${r.penyelenggara || '-'}</td>
                     <td>${r.no_sertifikat || '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editDiklat('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteDiklat('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'diklat')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="5" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -770,8 +797,14 @@
                     <td>${App.formatDate(r.tanggal_sk)}</td>
                     <td>${r.keterangan || '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editKgb('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteKgb('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'kgb')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -790,8 +823,14 @@
                     <td>${App.formatDate(r.tanggal_lahir)}</td>
                     <td>${r.pekerjaan || '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editKeluarga('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteKeluarga('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'keluarga')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="6" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -809,8 +848,14 @@
                     <td>${r.pejabat_penilai || '-'}</td>
                     <td>${r.atasan_pejabat_penilai || '-'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline" onclick="editSkp('${r.id}')">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteSkp('${r.id}')">Hapus</button>
+                        <button class="action-menu-btn" onclick="showActionMenu(event, '${r.id}', 'skp')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             `).join('') : '<tr><td colspan="5" class="text-center text-muted p-4">Tidak ada data</td></tr>';
@@ -1150,7 +1195,91 @@
 
         // Initialize
         loadDetail();
+
+        // Action Menu Functionality
+        let currentActiveId = null;
+        let currentActiveType = null;
+
+        function showActionMenu(event, id, type) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            currentActiveId = id;
+            currentActiveType = type;
+
+            const popover = document.getElementById('actionMenuPopover');
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
+
+            const popoverWidth = 160;
+            let top = rect.bottom + window.scrollY + 5;
+            let left = rect.left + window.scrollX - popoverWidth + rect.width;
+
+            if (left < 10) left = 10;
+
+            popover.style.top = `${top}px`;
+            popover.style.left = `${left}px`;
+            popover.classList.add('show');
+        }
+
+        function editCurrentItem() {
+            if (!currentActiveId || !currentActiveType) return;
+
+            switch (currentActiveType) {
+                case 'pendidikan': editPendidikan(currentActiveId); break;
+                case 'jabatan': editJabatan(currentActiveId); break;
+                case 'pangkat': editPangkat(currentActiveId); break;
+                case 'diklat': editDiklat(currentActiveId); break;
+                case 'kgb': editKgb(currentActiveId); break;
+                case 'keluarga': editKeluarga(currentActiveId); break;
+                case 'skp': editSkp(currentActiveId); break;
+            }
+            document.getElementById('actionMenuPopover').classList.remove('show');
+        }
+
+        async function deleteCurrentItem() {
+            if (!currentActiveId || !currentActiveType) return;
+
+            let success = false;
+            switch (currentActiveType) {
+                case 'pendidikan': await deletePendidikan(currentActiveId); break;
+                case 'jabatan': await deleteJabatan(currentActiveId); break;
+                case 'pangkat': await deletePangkat(currentActiveId); break;
+                case 'diklat': await deleteDiklat(currentActiveId); break;
+                case 'kgb': await deleteKgb(currentActiveId); break;
+                case 'keluarga': await deleteKeluarga(currentActiveId); break;
+                case 'skp': await deleteSkp(currentActiveId); break;
+            }
+            document.getElementById('actionMenuPopover').classList.remove('show');
+        }
+
+        // Close Popover when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-menu-btn') && !e.target.closest('.action-menu-popover')) {
+                document.getElementById('actionMenuPopover')?.classList.remove('show');
+            }
+        });
     </script>
+
+    <!-- Action Menu Popover -->
+    <div class="action-menu-popover" id="actionMenuPopover">
+        <a href="javascript:void(0)" class="action-menu-item" onclick="editCurrentItem()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Data
+        </a>
+        <a href="javascript:void(0)" class="action-menu-item text-danger" onclick="deleteCurrentItem()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Hapus Data
+        </a>
+    </div>
 </body>
 
 </html>

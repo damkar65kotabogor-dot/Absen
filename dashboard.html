@@ -500,36 +500,40 @@
 
           // Load dashboard data
           async function loadDashboard() {
-            const user = Auth.getCurrentUser();
-            const stats = await Data.getStats();
-            const totalPegawai = stats.totalPegawai;
+            try {
+              // Ensure data layer is ready
+              await Data.isReady();
 
-            // Update stats
-            document.getElementById('statTotalPegawai').textContent = totalPegawai;
-            document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
-            document.getElementById('statTerlambat').textContent = stats.terlambatHariIni;
-            document.getElementById('statTidakHadir').textContent = stats.tidakHadir;
-            document.getElementById('notifBadge').textContent = stats.cutiPending;
+              const user = Auth.getCurrentUser();
+              const stats = await Data.getStats();
+              const totalPegawai = stats.totalPegawai;
 
-            // Calculate percentages
-            const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
-            document.getElementById('statHadirPersen').textContent = hadirPersen;
-            document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
+              // Update stats
+              document.getElementById('statTotalPegawai').textContent = totalPegawai;
+              document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
+              document.getElementById('statTerlambat').textContent = stats.terlambatHariIni;
+              document.getElementById('statTidakHadir').textContent = stats.tidakHadir;
+              document.getElementById('notifBadge').textContent = stats.cutiPending;
 
-            // Load recent absensi with new format
-            const allAbsensi = await Data.getAbsensiWithPegawai();
-            const absensi = allAbsensi
-              .sort((a, b) => new Date(b.tanggal + ' ' + b.jam_masuk) - new Date(a.tanggal + ' ' + a.jam_masuk))
-              .slice(0, 5);
+              // Calculate percentages
+              const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
+              document.getElementById('statHadirPersen').textContent = hadirPersen;
+              document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
 
-            const absensiHtml = absensi.length > 0 ? absensi.map(a => {
-              const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
-              const avatarDisplay = a.pegawai?.foto ?
-                `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
-                initials;
-              const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
-              const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
-              return `
+              // Load recent absensi with new format
+              const allAbsensi = await Data.getAbsensiWithPegawai();
+              const absensi = allAbsensi
+                .sort((a, b) => new Date(b.tanggal + ' ' + b.jam_masuk) - new Date(a.tanggal + ' ' + a.jam_masuk))
+                .slice(0, 5);
+
+              const absensiHtml = absensi.length > 0 ? absensi.map(a => {
+                const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+                const avatarDisplay = a.pegawai?.foto ?
+                  `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
+                  initials;
+                const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
+                const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
+                return `
           <tr>
             <td><input type="checkbox" class="row-checkbox" value="${a.id}" onclick="updateBulkActionVisibility()"></td>
             <td>
@@ -565,47 +569,50 @@
             </td>
           </tr>
         `;
-            }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi</td></tr>';
+              }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi</td></tr>';
 
-            document.getElementById('recentAbsensi').innerHTML = absensiHtml;
-            updateBulkActionVisibility();
+              document.getElementById('recentAbsensi').innerHTML = absensiHtml;
+              updateBulkActionVisibility();
 
-            // Show different dashboard based on role
-            if (user.role === 'pegawai') {
-              // Hide search for pegawai
-              const headerSearch = document.getElementById('headerSearch');
-              if (headerSearch) headerSearch.style.display = 'none';
+              // Show different dashboard based on role
+              if (user.role === 'pegawai') {
+                // Hide search for pegawai
+                const headerSearch = document.getElementById('headerSearch');
+                if (headerSearch) headerSearch.style.display = 'none';
 
-              // Hide admin content for pegawai
-              document.querySelector('.stats-grid-new').style.display = 'none';
-              document.querySelector('.dashboard-grid').style.display = 'none';
-              document.querySelector('.attendance-table-card').style.display = 'none';
-              document.querySelector('.title-actions').style.display = 'none';
+                // Hide admin content for pegawai
+                document.querySelector('.stats-grid-new').style.display = 'none';
+                document.querySelector('.dashboard-grid').style.display = 'none';
+                document.querySelector('.attendance-table-card').style.display = 'none';
+                document.querySelector('.title-actions').style.display = 'none';
 
-              // Show simple pegawai menu
-              document.getElementById('pegawaiDashboard').classList.remove('d-none');
-              document.getElementById('pegawaiActions').classList.remove('d-none');
-              await checkTodayAttendance();
-            } else {
-              // Show search for admin/pimpinan
-              const headerSearch = document.getElementById('headerSearch');
-              if (headerSearch) headerSearch.style.display = '';
-              // Initialize chart for admin/pimpinan
-              try {
-                if (typeof Chart !== 'undefined') {
-                  await initChart();
-                } else {
-                  console.error('Chart.js not loaded');
+                // Show simple pegawai menu
+                document.getElementById('pegawaiDashboard').classList.remove('d-none');
+                document.getElementById('pegawaiActions').classList.remove('d-none');
+                await checkTodayAttendance();
+              } else {
+                // Show search for admin/pimpinan
+                const headerSearch = document.getElementById('headerSearch');
+                if (headerSearch) headerSearch.style.display = '';
+                // Initialize chart for admin/pimpinan
+                try {
+                  if (typeof Chart !== 'undefined') {
+                    await initChart();
+                  } else {
+                    console.error('Chart.js not loaded');
+                  }
+                } catch (e) {
+                  console.error('Error initializing chart:', e);
                 }
-              } catch (e) {
-                console.error('Error initializing chart:', e);
-              }
 
-              try {
-                renderCalendar();
-              } catch (e) {
-                console.error('Error rendering calendar:', e);
+                try {
+                  renderCalendar();
+                } catch (e) {
+                  console.error('Error rendering calendar:', e);
+                }
               }
+            } catch (err) {
+              console.error('Error loading dashboard:', err);
             }
           }
 
