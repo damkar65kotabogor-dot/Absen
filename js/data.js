@@ -224,7 +224,6 @@ const Data = {
         };
     },
 
-    // Get absensi with related data
     async getAbsensiWithPegawai() {
         const { data, error } = await supabaseClient
             .from('absensi')
@@ -237,6 +236,19 @@ const Data = {
         if (error) {
             console.error('Error fetching absensi with pegawai:', error);
             return [];
+        }
+        return data;
+    },
+
+    async getPegawaiByNip(nip) {
+        const { data, error } = await supabaseClient
+            .from('pegawai')
+            .select('*')
+            .eq('nip', nip)
+            .maybeSingle();
+        if (error) {
+            console.error('Error fetching pegawai by NIP:', error);
+            return null;
         }
         return data;
     }

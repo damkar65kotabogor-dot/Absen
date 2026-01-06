@@ -125,8 +125,15 @@
                 await Data.isReady();
 
                 // 1. Get Pegawai ID safely
-                const employees = await Data.getPegawai();
-                const p = employees.find(x => x.user_id == user.id); // Loose comparison for string/number
+                let p = null;
+                if (user.nip) {
+                    p = await Data.getPegawaiByNip(user.nip);
+                }
+
+                if (!p) {
+                    const employees = await Data.getPegawai();
+                    p = employees.find(x => x.user_id == user.id);
+                }
 
                 if (!p) {
                     document.getElementById('familyList').innerHTML = `
@@ -137,15 +144,14 @@
                                 <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
                             </div>
                         </div>`;
-                    // Hide add button if record not found
                     const addBtn = document.querySelector('.mobile-action-btn');
                     if (addBtn) addBtn.style.display = 'none';
                     return;
                 }
 
-                // Update session if needed
-                if (!user.pegawaiId) {
+                if (!user.pegawaiId || user.pegawaiId !== p.id) {
                     user.pegawaiId = p.id;
+                    user.nip = p.nip;
                     localStorage.setItem('simpeg_current_user', JSON.stringify(user));
                 }
 
@@ -178,10 +184,14 @@
             }
         }
 
-        function openAddModal() {
+        async function openAddModal() {
             if (!currentPegawaiId) {
-                App.showToast('Data pegawai belum siap. Silakan muat ulang halaman.', 'error');
-                return;
+                // Try one last time to load data
+                await loadFamily();
+                if (!currentPegawaiId) {
+                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'error');
+                    return;
+                }
             }
             document.getElementById('modalTitle').textContent = 'Tambah Keluarga';
             document.getElementById('familyForm').reset();
