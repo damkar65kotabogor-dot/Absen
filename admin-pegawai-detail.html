@@ -684,7 +684,7 @@
         // PENDIDIKAN
         async function loadPendidikan() {
             const data = await Data.getPendidikan();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('pendidikanList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -1088,14 +1088,22 @@
                     tahun_lulus: parseInt(document.getElementById('tahunLulus').value),
                     no_ijazah: document.getElementById('noIjazah').value
                 };
-                if (id) await Data.update(Data.KEYS.PENDIDIKAN, id, data);
-                else await Data.create(Data.KEYS.PENDIDIKAN, data);
-                App.showToast('Data pendidikan berhasil disimpan', 'success');
-                App.closeModal('pendidikanModal');
-                loadPendidikan();
+
+                let result;
+                if (id) {
+                    result = await Data.update('pendidikan', id, data);
+                    if (result) App.showToast('Data pendidikan berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('pendidikan', data);
+                    if (result) App.showToast('Data pendidikan berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('pendidikanModal');
+                    loadPendidikan();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data pendidikan', 'danger');
             }
         });
 
@@ -1111,14 +1119,22 @@
                     nomor_sk: document.getElementById('noSKJabatan').value,
                     tanggal_sk: document.getElementById('tglSKJabatan').value
                 };
-                if (id) await Data.update(Data.KEYS.RIWAYAT_JABATAN, id, data);
-                else await Data.create(Data.KEYS.RIWAYAT_JABATAN, data);
-                App.showToast('Data riwayat jabatan berhasil disimpan', 'success');
-                App.closeModal('jabatanModal');
-                loadJabatan();
+
+                let result;
+                if (id) {
+                    result = await Data.update('riwayat_jabatan', id, data);
+                    if (result) App.showToast('Data riwayat jabatan berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('riwayat_jabatan', data);
+                    if (result) App.showToast('Data riwayat jabatan berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('jabatanModal');
+                    loadJabatan();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data jabatan', 'danger');
             }
         });
 
@@ -1134,14 +1150,22 @@
                     tanggal_sk: document.getElementById('tglSKPangkat').value,
                     pejabat_penetap: document.getElementById('pejabatPangkat').value
                 };
-                if (id) await Data.update(Data.KEYS.RIWAYAT_PANGKAT, id, data);
-                else await Data.create(Data.KEYS.RIWAYAT_PANGKAT, data);
-                App.showToast('Data riwayat pangkat berhasil disimpan', 'success');
-                App.closeModal('pangkatModal');
-                loadPangkat();
+
+                let result;
+                if (id) {
+                    result = await Data.update('riwayat_pangkat', id, data);
+                    if (result) App.showToast('Data riwayat pangkat berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('riwayat_pangkat', data);
+                    if (result) App.showToast('Data riwayat pangkat berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('pangkatModal');
+                    loadPangkat();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data pangkat', 'danger');
             }
         });
 
@@ -1156,14 +1180,22 @@
                     penyelenggara: document.getElementById('penyelenggaraDiklat').value,
                     no_sertifikat: document.getElementById('noSertifikat').value
                 };
-                if (id) await Data.update(Data.KEYS.DIKLAT, id, data);
-                else await Data.create(Data.KEYS.DIKLAT, data);
-                App.showToast('Data diklat berhasil disimpan', 'success');
-                App.closeModal('diklatModal');
-                loadDiklat();
+
+                let result;
+                if (id) {
+                    result = await Data.update('diklat', id, data);
+                    if (result) App.showToast('Data diklat berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('diklat', data);
+                    if (result) App.showToast('Data diklat berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('diklatModal');
+                    loadDiklat();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data diklat', 'danger');
             }
         });
 
@@ -1179,14 +1211,22 @@
                     tanggal_sk: document.getElementById('tglSKKgb').value,
                     keterangan: document.getElementById('keteranganKgb').value
                 };
-                if (id) await Data.update(Data.KEYS.KGB, id, data);
-                else await Data.create(Data.KEYS.KGB, data);
-                App.showToast('Data KGB berhasil disimpan', 'success');
-                App.closeModal('kgbModal');
-                loadKgb();
+
+                let result;
+                if (id) {
+                    result = await Data.update('kgb', id, data);
+                    if (result) App.showToast('Data KGB berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('kgb', data);
+                    if (result) App.showToast('Data KGB berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('kgbModal');
+                    loadKgb();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data KGB', 'danger');
             }
         });
 
@@ -1202,14 +1242,22 @@
                     tanggal_lahir: document.getElementById('tglLahirKeluarga').value,
                     pekerjaan: document.getElementById('pekerjaanKeluarga').value
                 };
-                if (id) await Data.update(Data.KEYS.KELUARGA, id, data);
-                else await Data.create(Data.KEYS.KELUARGA, data);
-                App.showToast('Data keluarga berhasil disimpan', 'success');
-                App.closeModal('keluargaModal');
-                loadKeluarga();
+
+                let result;
+                if (id) {
+                    result = await Data.update('keluarga', id, data);
+                    if (result) App.showToast('Data keluarga berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('keluarga', data);
+                    if (result) App.showToast('Data keluarga berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('keluargaModal');
+                    loadKeluarga();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data keluarga', 'danger');
             }
         });
 
@@ -1224,14 +1272,22 @@
                     pejabat_penilai: document.getElementById('pejabatSkp').value,
                     atasan_pejabat_penilai: document.getElementById('atasanSkp').value
                 };
-                if (id) await Data.update(Data.KEYS.SKP, id, data);
-                else await Data.create(Data.KEYS.SKP, data);
-                App.showToast('Data SKP berhasil disimpan', 'success');
-                App.closeModal('skpModal');
-                loadSkp();
+
+                let result;
+                if (id) {
+                    result = await Data.update('skp', id, data);
+                    if (result) App.showToast('Data SKP berhasil diperbarui', 'success');
+                } else {
+                    result = await Data.create('skp', data);
+                    if (result) App.showToast('Data SKP berhasil ditambahkan', 'success');
+                }
+
+                if (result) {
+                    App.closeModal('skpModal');
+                    loadSkp();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data SKP', 'danger');
             }
         });
 
