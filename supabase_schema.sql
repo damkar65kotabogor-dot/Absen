@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS cuti (
     alasan TEXT,
     jumlah_hari INTEGER,
     tanggal_pengajuan DATE DEFAULT CURRENT_DATE,
-    approved_by TEXT,
+    approved_by TEXT, -- Stores the name of the approver
     approved_at DATE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -421,7 +421,7 @@
         async function approveCuti(id) {
             const result = await Data.update('cuti', id, {
                 status: 'approved',
-                approved_by: user.username, // Using username as simplified approver identity
+                approved_by: user.name, // Using name for better display
                 approved_at: new Date().toISOString().split('T')[0]
             });
             if (result) {
@@ -435,7 +435,7 @@
             if (confirm('Apakah Anda yakin ingin menolak pengajuan cuti ini?')) {
                 const result = await Data.update('cuti', id, {
                     status: 'rejected',
-                    approved_by: user.username,
+                    approved_by: user.name,
                     approved_at: new Date().toISOString().split('T')[0]
                 });
                 if (result) {
