@@ -15,6 +15,7 @@ const Data = {
     _ready: null,
 
     isReady() {
+        if (!this._ready) return this.init();
         return this._ready;
     },
 

@@ -133,7 +133,7 @@
 
                 if (!p) {
                     const employees = await Data.getPegawai();
-                    p = employees.find(x => x.user_id == user.id);
+                    p = (employees || []).find(x => x.user_id == user.id || x.user_id === String(user.id));
                 }
 
                 if (!p) {
@@ -150,7 +150,7 @@
                     return;
                 }
 
-                if (!user.pegawaiId || user.pegawaiId !== p.id) {
+                if (!user.pegawaiId || user.pegawaiId != p.id) {
                     user.pegawaiId = p.id;
                     user.nip = p.nip;
                     localStorage.setItem('simpeg_current_user', JSON.stringify(user));
@@ -160,7 +160,7 @@
 
                 // 2. Get Data
                 const allData = await Data.getKeluarga();
-                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId);
+                const myData = (allData || []).filter(r => String(r.pegawai_id) === String(currentPegawaiId));
                 const container = document.getElementById('familyList');
 
                 if (myData.length === 0) {
@@ -180,22 +180,22 @@
                     </div>
                 `).join('');
             } catch (err) {
-                console.error(err);
-                App.showToast('Gagal memuat data', 'error');
+                console.error('Error loading keluarga:', err);
+                App.showToast('Gagal memuat data', 'danger');
             }
         }
 
         async function openAddModal() {
             if (!currentPegawaiId) {
-                // Try one last time to load data
                 await loadFamily();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'error');
+                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
                     return;
                 }
             }
             document.getElementById('modalTitle').textContent = 'Tambah Keluarga';
-            document.getElementById('familyForm').reset();
+            const form = document.getElementById('familyForm');
+            if (form) form.reset();
             document.getElementById('memberId').value = '';
             document.getElementById('deleteBtn').classList.add('d-none');
             App.openModal('familyModal');

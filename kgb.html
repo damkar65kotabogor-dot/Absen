@@ -159,7 +159,7 @@
 
                 if (!p) {
                     const employees = await Data.getPegawai();
-                    p = employees.find(x => x.user_id == user.id);
+                    p = (employees || []).find(x => x.user_id == user.id || x.user_id === String(user.id));
                 }
 
                 if (!p) {
@@ -186,7 +186,7 @@
 
                 // 2. Get Data
                 const allData = await Data.getKgb();
-                const myData = (allData || []).filter(r => r.pegawai_id === currentPegawaiId);
+                const myData = (allData || []).filter(r => String(r.pegawai_id) === String(currentPegawaiId));
                 const container = document.getElementById('kgbList');
 
                 if (myData.length === 0) {
@@ -211,22 +211,22 @@
                     </div>
                 `).join('');
             } catch (err) {
-                console.error(err);
-                App.showToast('Gagal memuat data', 'error');
+                console.error('Error loading KGB:', err);
+                App.showToast('Gagal memuat data', 'danger');
             }
         }
 
         async function openAddModal() {
             if (!currentPegawaiId) {
-                // Try one last time to load data
                 await loadKGB();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'error');
+                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
                     return;
                 }
             }
             document.getElementById('modalTitle').textContent = 'Tambah Riwayat KGB';
-            document.getElementById('kgbForm').reset();
+            const form = document.getElementById('kgbForm');
+            if (form) form.reset();
             document.getElementById('kgbId').value = '';
             document.getElementById('deleteBtn').classList.add('d-none');
             App.openModal('kgbModal');

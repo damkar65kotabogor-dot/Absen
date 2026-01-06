@@ -195,7 +195,7 @@
 
                 if (!p) {
                     const employees = await Data.getPegawai();
-                    p = employees.find(x => x.user_id == user.id);
+                    p = (employees || []).find(x => x.user_id == user.id || x.user_id === String(user.id));
                 }
 
                 if (!p) {
@@ -212,7 +212,7 @@
                     return;
                 }
 
-                if (!user.pegawaiId || user.pegawaiId !== p.id) {
+                if (!user.pegawaiId || user.pegawaiId != p.id) {
                     user.pegawaiId = p.id;
                     user.nip = p.nip;
                     localStorage.setItem('simpeg_current_user', JSON.stringify(user));
@@ -222,8 +222,7 @@
 
                 // 2. Get Pendidikan Data
                 const allPendidikan = await Data.getPendidikan();
-                // Filter by pegawai_id (snake_case from DB)
-                const myPendidikan = (allPendidikan || []).filter(item => item.pegawai_id === currentPegawaiId);
+                const myPendidikan = (allPendidikan || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
                 const container = document.querySelector('.card-body');
 
                 if (myPendidikan.length === 0) {
@@ -270,8 +269,8 @@
                     container.innerHTML = html;
                 }
             } catch (err) {
-                console.error(err);
-                App.showToast('Gagal memuat data pendidikan', 'error');
+                console.error('Error loading pendidikan:', err);
+                App.showToast('Gagal memuat data pendidikan', 'danger');
             }
         }
 
@@ -281,14 +280,14 @@
                 // Try one last time to load data
                 await loadPendidikan();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'error');
+                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
                     return;
                 }
             }
             document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';
             document.getElementById('editId').value = '';
             document.getElementById('pendidikanForm').reset();
-            document.getElementById('pendidikanModal').classList.add('show');
+            App.openModal('pendidikanModal');
         }
 
         async function openEditModal(id) {

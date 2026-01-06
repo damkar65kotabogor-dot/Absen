@@ -190,7 +190,7 @@
                     return;
                 }
 
-                if (!user.pegawaiId || user.pegawaiId !== p.id) {
+                if (!user.pegawaiId || user.pegawaiId != p.id) {
                     user.pegawaiId = p.id;
                     user.nip = p.nip;
                     localStorage.setItem('simpeg_current_user', JSON.stringify(user));
@@ -200,7 +200,7 @@
 
                 // 2. Get Data
                 const allData = await Data.getRiwayatJabatan();
-                const myData = (allData || []).filter(item => item.pegawai_id === currentPegawaiId);
+                const myData = (allData || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
                 const container = document.querySelector('.card-body');
 
                 if (myData.length === 0) {
@@ -240,8 +240,8 @@
                     container.innerHTML = html;
                 }
             } catch (err) {
-                console.error(err);
-                App.showToast('Gagal memuat data', 'error');
+                console.error('Error loading jabatan:', err);
+                App.showToast('Gagal memuat data', 'danger');
             }
         }
 
@@ -250,14 +250,15 @@
                 // Try one last time to load data
                 await loadData();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'error');
+                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
                     return;
                 }
             }
             document.getElementById('modalTitle').textContent = 'Tambah Jabatan';
             document.getElementById('editId').value = '';
-            document.getElementById('dataForm').reset();
-            document.getElementById('formModal').classList.add('show');
+            const form = document.getElementById('dataForm');
+            if (form) form.reset();
+            App.openModal('formModal');
         }
 
         async function openEditModal(id) {
