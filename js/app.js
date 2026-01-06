@@ -322,3 +322,18 @@ const App = {
 document.addEventListener('DOMContentLoaded', async () => {
     await App.init();
 });
+// Global Error Handler to catch silent failures
+window.onerror = function (message, source, lineno, colno, error) {
+    console.error('Global Error:', message, error);
+    if (typeof App !== 'undefined' && App.showToast) {
+        App.showToast(`Error: ${message}`, 'danger');
+    }
+    return false;
+};
+
+window.onunhandledrejection = function (event) {
+    console.error('Unhandled Promise Rejection:', event.reason);
+    if (typeof App !== 'undefined' && App.showToast) {
+        App.showToast(`Database Error: ${event.reason.message || event.reason}`, 'danger');
+    }
+};

@@ -1080,14 +1080,23 @@
             e.preventDefault();
             try {
                 const id = document.getElementById('pendidikanId').value;
+                const tahunVal = parseInt(document.getElementById('tahunLulus').value);
+
+                if (isNaN(tahunVal)) {
+                    App.showToast('Tahun lulus harus berupa angka!', 'danger');
+                    return;
+                }
+
                 const data = {
                     pegawai_id: pegawaiId,
                     tingkat: document.getElementById('tingkat').value,
                     nama_sekolah: document.getElementById('namaSekolah').value,
                     jurusan: document.getElementById('jurusan').value,
-                    tahun_lulus: parseInt(document.getElementById('tahunLulus').value),
+                    tahun_lulus: tahunVal,
                     no_ijazah: document.getElementById('noIjazah').value
                 };
+
+                console.log('Saving pendidikan:', data);
 
                 let result;
                 if (id) {
@@ -1103,7 +1112,8 @@
                     loadPendidikan();
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Submit Error:', err);
+                App.showToast(`Gagal: ${err.message}`, 'danger');
             }
         });
 
@@ -1173,13 +1183,22 @@
             e.preventDefault();
             try {
                 const id = document.getElementById('diklatId').value;
+                const tahunVal = parseInt(document.getElementById('tahunDiklat').value);
+
+                if (isNaN(tahunVal)) {
+                    App.showToast('Tahun diklat harus berupa angka!', 'danger');
+                    return;
+                }
+
                 const data = {
                     pegawai_id: pegawaiId,
                     nama_diklat: document.getElementById('namaDiklat').value,
-                    tahun: parseInt(document.getElementById('tahunDiklat').value),
+                    tahun: tahunVal,
                     penyelenggara: document.getElementById('penyelenggaraDiklat').value,
                     no_sertifikat: document.getElementById('noSertifikat').value
                 };
+
+                console.log('Saving diklat:', data);
 
                 let result;
                 if (id) {
@@ -1195,7 +1214,8 @@
                     loadDiklat();
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Submit Error:', err);
+                App.showToast(`Gagal: ${err.message}`, 'danger');
             }
         });
 
@@ -1203,14 +1223,23 @@
             e.preventDefault();
             try {
                 const id = document.getElementById('kgbId').value;
+                const gajiVal = parseInt(document.getElementById('gajiPokok').value);
+
+                if (isNaN(gajiVal)) {
+                    App.showToast('Gaji pokok harus berupa angka!', 'danger');
+                    return;
+                }
+
                 const data = {
                     pegawai_id: pegawaiId,
                     tmt_kgb: document.getElementById('tmtKgb').value,
-                    gaji_pokok: parseInt(document.getElementById('gajiPokok').value),
+                    gaji_pokok: gajiVal,
                     nomor_sk: document.getElementById('noSKKgb').value,
                     tanggal_sk: document.getElementById('tglSKKgb').value,
                     keterangan: document.getElementById('keteranganKgb').value
                 };
+
+                console.log('Saving KGB:', data);
 
                 let result;
                 if (id) {
@@ -1265,13 +1294,23 @@
             e.preventDefault();
             try {
                 const id = document.getElementById('skpId').value;
+                const tahunVal = parseInt(document.getElementById('tahunSkp').value);
+                const nilaiVal = parseFloat(document.getElementById('nilaiSkp').value);
+
+                if (isNaN(tahunVal) || isNaN(nilaiVal)) {
+                    App.showToast('Tahun dan Nilai SKP harus berupa angka!', 'danger');
+                    return;
+                }
+
                 const data = {
                     pegawai_id: pegawaiId,
-                    tahun: parseInt(document.getElementById('tahunSkp').value),
-                    nilai_skp: parseFloat(document.getElementById('nilaiSkp').value),
+                    tahun: tahunVal,
+                    nilai_skp: nilaiVal,
                     pejabat_penilai: document.getElementById('pejabatSkp').value,
                     atasan_pejabat_penilai: document.getElementById('atasanSkp').value
                 };
+
+                console.log('Saving SKP:', data);
 
                 let result;
                 if (id) {
@@ -1287,7 +1326,8 @@
                     loadSkp();
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Submit Error:', err);
+                App.showToast(`Gagal: ${err.message}`, 'danger');
             }
         });
 

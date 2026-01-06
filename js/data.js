@@ -146,9 +146,9 @@ const Data = {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error(`Error creating in ${table}:`, error);
+            console.error(`Error creating in ${table}:`, JSON.stringify(error, null, 2));
             if (typeof App !== 'undefined' && App.showToast) {
-                App.showToast(`Gagal menyimpan data ke ${table}: ${error.message}`, 'danger');
+                App.showToast(`Gagal: ${error.message || error}`, 'danger');
             }
             return null;
         }
