@@ -316,10 +316,12 @@
             // Redirected
         }
 
+        const user = Auth.getCurrentUser() || {};
+        const isPegawai = user.role === 'pegawai';
 
-        // Set default month filter
-        const now = new Date();
-        document.getElementById('filterMonth').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        // Set current date
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
 
         // Setup UI based on role
         async function setupUI() {
@@ -340,6 +342,14 @@
 
         // Check today attendance for pegawai
         async function checkTodayAttendance() {
+            if (isPegawai && !user.pegawaiId) {
+                const employees = await Data.getPegawai();
+                const p = employees.find(x => x.user_id == user.id);
+                if (p) {
+                    user.pegawaiId = p.id;
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                }
+            }
             if (!user.pegawaiId) return;
 
             const today = new Date().toISOString().split('T')[0];
@@ -382,8 +392,18 @@
                 let absensi = await Data.getAbsensiWithPegawai();
 
                 // Filter by pegawai (for pegawai role)
-                if (isPegawai && user.pegawaiId) {
-                    absensi = absensi.filter(a => a.pegawai_id === user.pegawaiId);
+                if (isPegawai) {
+                    if (!user.pegawaiId) {
+                        const employees = await Data.getPegawai();
+                        const p = employees.find(x => x.user_id == user.id);
+                        if (p) {
+                            user.pegawaiId = p.id;
+                            localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                        }
+                    }
+                    if (user.pegawaiId) {
+                        absensi = absensi.filter(a => a.pegawai_id === user.pegawaiId);
+                    }
                 }
 
                 // Apply filters

@@ -521,7 +521,23 @@
               document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
 
               // Load recent absensi with new format
-              const allAbsensi = await Data.getAbsensiWithPegawai();
+              let allAbsensi = await Data.getAbsensiWithPegawai();
+
+              // Filter by pegawai if needed
+              if (user.role === 'pegawai') {
+                if (!user.pegawaiId) {
+                  const employees = await Data.getPegawai();
+                  const p = employees.find(x => x.user_id == user.id);
+                  if (p) {
+                    user.pegawaiId = p.id;
+                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
+                  }
+                }
+                if (user.pegawaiId) {
+                  allAbsensi = allAbsensi.filter(a => a.pegawai_id === user.pegawaiId);
+                }
+              }
+
               const absensi = allAbsensi
                 .sort((a, b) => new Date(b.tanggal + ' ' + b.jam_masuk) - new Date(a.tanggal + ' ' + a.jam_masuk))
                 .slice(0, 5);
