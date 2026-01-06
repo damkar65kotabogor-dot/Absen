@@ -710,7 +710,7 @@
         // JABATAN
         async function loadJabatan() {
             const data = await Data.getRiwayatJabatan();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('jabatanList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -736,7 +736,7 @@
         // PANGKAT
         async function loadPangkat() {
             const data = await Data.getRiwayatPangkat();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('pangkatList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -762,7 +762,7 @@
         // DIKLAT
         async function loadDiklat() {
             const data = await Data.getDiklat();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('diklatList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -787,7 +787,7 @@
         // KGB
         async function loadKgb() {
             const data = await Data.getKgb();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('kgbList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -813,7 +813,7 @@
         // KELUARGA
         async function loadKeluarga() {
             const data = await Data.getKeluarga();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('keluargaList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -839,7 +839,7 @@
         // SKP
         async function loadSkp() {
             const data = await Data.getSkp();
-            const filtered = (data || []).filter(r => r.pegawai_id === pegawaiId);
+            const filtered = (data || []).filter(r => String(r.pegawai_id) === String(pegawaiId));
             const container = document.getElementById('skpList');
             container.innerHTML = filtered.length ? filtered.map(r => `
                 <tr>
@@ -1029,7 +1029,7 @@
             document.getElementById('diklatId').value = r.id;
             document.getElementById('namaDiklat').value = r.nama_diklat;
             document.getElementById('tahunDiklat').value = r.tahun;
-            document.getElementById('penyelenggara Diklat').value = r.penyelenggara || '';
+            document.getElementById('penyelenggaraDiklat').value = r.penyelenggara || '';
             document.getElementById('noSertifikat').value = r.no_sertifikat || '';
             App.openModal('diklatModal');
         }

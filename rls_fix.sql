@@ -1,5 +1,6 @@
--- Comprehensive RLS Policies Fix
--- Run this in the Supabase SQL Editor
+-- SIMPEG PPPK - Comprehensive RLS Fix
+-- CARA MENJALANKAN: Salin seluruh kode ini dan jalankan di Supabase SQL Editor.
+-- Script ini akan membuka izin akses tabel untuk role 'anon' dan 'authenticated'.
 
 -- 1. Enable RLS for all tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -28,7 +29,7 @@ BEGIN
         AND table_name IN ('users', 'unit_kerja', 'jabatan', 'pegawai', 'pendidikan', 'diklat', 'keluarga', 'skp', 'riwayat_pangkat', 'riwayat_jabatan', 'kgb', 'absensi', 'cuti')
     LOOP
         EXECUTE format('DROP POLICY IF EXISTS "Permit All" ON %I', tab);
-        EXECUTE format('CREATE POLICY "Permit All" ON %I FOR ALL TO anon USING (true) WITH CHECK (true)', tab);
+        EXECUTE format('CREATE POLICY "Permit All" ON %I FOR ALL TO anon, authenticated USING (true) WITH CHECK (true)', tab);
     END LOOP;
 END $$;
 
