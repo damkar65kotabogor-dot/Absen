@@ -327,11 +327,12 @@
         document.getElementById('pendidikanForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
 
             const id = document.getElementById('editId').value;
-
-            // Construct payload with SC_CASE keys for DB
             const data = {
                 pegawai_id: currentPegawaiId,
                 tingkat: document.getElementById('tingkat').value,
@@ -342,18 +343,21 @@
             };
 
             try {
+                let result;
                 if (id) {
-                    await Data.update(Data.KEYS.PENDIDIKAN, id, data);
-                    App.showToast('Data pendidikan berhasil diperbarui', 'success');
+                    result = await Data.update('pendidikan', id, data);
+                    if (result) App.showToast('Data pendidikan berhasil diperbarui', 'success');
                 } else {
-                    await Data.create(Data.KEYS.PENDIDIKAN, data);
-                    App.showToast('Data pendidikan berhasil ditambahkan', 'success');
+                    result = await Data.create('pendidikan', data);
+                    if (result) App.showToast('Data pendidikan berhasil ditambahkan', 'success');
                 }
-                closeModal();
-                await loadPendidikan();
+
+                if (result) {
+                    closeModal();
+                    await loadPendidikan();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data via Supabase', 'error');
             }
         });
 

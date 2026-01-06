@@ -232,7 +232,10 @@
 
         document.getElementById('familyForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
 
             const id = document.getElementById('memberId').value;
             const data = {
@@ -245,18 +248,21 @@
             };
 
             try {
+                let result;
                 if (id) {
-                    await Data.update(Data.KEYS.KELUARGA, id, data);
-                    App.showToast('Data berhasil diperbarui', 'success');
+                    result = await Data.update('keluarga', id, data);
+                    if (result) App.showToast('Data berhasil diperbarui', 'success');
                 } else {
-                    await Data.create(Data.KEYS.KELUARGA, data);
-                    App.showToast('Data berhasil ditambahkan', 'success');
+                    result = await Data.create('keluarga', data);
+                    if (result) App.showToast('Data berhasil ditambahkan', 'success');
                 }
-                App.closeModal('familyModal');
-                loadFamily();
+
+                if (result) {
+                    App.closeModal('familyModal');
+                    await loadFamily();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data', 'error');
             }
         });
 

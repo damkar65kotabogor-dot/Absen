@@ -291,7 +291,10 @@
 
         document.getElementById('dataForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
 
             const id = document.getElementById('editId').value;
             const data = {
@@ -304,18 +307,21 @@
             };
 
             try {
+                let result;
                 if (id) {
-                    await Data.update(Data.KEYS.RIWAYAT_JABATAN, id, data);
-                    App.showToast('Berhasil diperbarui', 'success');
+                    result = await Data.update('riwayat_jabatan', id, data);
+                    if (result) App.showToast('Berhasil diperbarui', 'success');
                 } else {
-                    await Data.create(Data.KEYS.RIWAYAT_JABATAN, data);
-                    App.showToast('Berhasil ditambahkan', 'success');
+                    result = await Data.create('riwayat_jabatan', data);
+                    if (result) App.showToast('Berhasil ditambahkan', 'success');
                 }
-                closeModal();
-                loadData();
+
+                if (result) {
+                    closeModal();
+                    await loadData();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan', 'error');
             }
         });
 

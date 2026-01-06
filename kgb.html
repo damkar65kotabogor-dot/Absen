@@ -262,31 +262,37 @@
 
         document.getElementById('kgbForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
 
             const id = document.getElementById('kgbId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
                 tmt_kgb: document.getElementById('tmt').value,
-                gaji_pokok: document.getElementById('gajiPokok').value,
+                gaji_pokok: parseInt(document.getElementById('gajiPokok').value),
                 nomor_sk: document.getElementById('noSK').value,
                 tanggal_sk: document.getElementById('tglSK').value,
                 keterangan: document.getElementById('keterangan').value
             };
 
             try {
+                let result;
                 if (id) {
-                    await Data.update(Data.KEYS.KGB, id, data);
-                    App.showToast('Data berhasil diperbarui', 'success');
+                    result = await Data.update('kgb', id, data);
+                    if (result) App.showToast('Data berhasil diperbarui', 'success');
                 } else {
-                    await Data.create(Data.KEYS.KGB, data);
-                    App.showToast('Data berhasil ditambahkan', 'success');
+                    result = await Data.create('kgb', data);
+                    if (result) App.showToast('Data berhasil ditambahkan', 'success');
                 }
-                App.closeModal('kgbModal');
-                loadKGB();
+
+                if (result) {
+                    App.closeModal('kgbModal');
+                    await loadKGB();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data', 'error');
             }
         });
 

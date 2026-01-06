@@ -48,8 +48,14 @@ const Auth = {
     // Sync pegawaiId from database
     async syncPegawaiId(userObj) {
         try {
-            const pegawaiData = await Data.getPegawai();
-            const pegawai = pegawaiData.find(p => p.user_id == userObj.id);
+            const { data: pegawai, error } = await supabaseClient
+                .from('pegawai')
+                .select('id, nip')
+                .eq('user_id', userObj.id)
+                .maybeSingle();
+
+            if (error) throw error;
+
             if (pegawai) {
                 userObj.pegawaiId = pegawai.id;
                 userObj.nip = pegawai.nip;

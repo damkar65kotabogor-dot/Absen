@@ -315,38 +315,44 @@
 
         document.getElementById('skpForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
 
             const id = document.getElementById('skpId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                tahun: document.getElementById('tahun').value,
-                nilai_skp: document.getElementById('nilai').value, // or nilai_prestasi_kerja
+                tahun: parseInt(document.getElementById('tahun').value),
+                nilai_skp: parseFloat(document.getElementById('nilai').value),
 
-                orientasi_pelayanan: document.getElementById('orientasiPelayanan').value,
-                integritas: document.getElementById('integritas').value,
-                komitmen: document.getElementById('komitmen').value,
-                disiplin: document.getElementById('disiplin').value,
-                kerjasama: document.getElementById('kerjasama').value,
-                kepemimpinan: document.getElementById('kepemimpinan').value,
+                orientasi_pelayanan: parseFloat(document.getElementById('orientasiPelayanan').value) || 0,
+                integritas: parseFloat(document.getElementById('integritas').value) || 0,
+                komitmen: parseFloat(document.getElementById('komitmen').value) || 0,
+                disiplin: parseFloat(document.getElementById('disiplin').value) || 0,
+                kerjasama: parseFloat(document.getElementById('kerjasama').value) || 0,
+                kepemimpinan: parseFloat(document.getElementById('kepemimpinan').value) || 0,
 
                 pejabat_penilai: document.getElementById('pejabatPenilai').value,
                 atasan_pejabat_penilai: document.getElementById('atasanPejabatPenilai').value
             };
 
             try {
+                let result;
                 if (id) {
-                    await Data.update(Data.KEYS.SKP, id, data);
-                    App.showToast('Data berhasil diperbarui', 'success');
+                    result = await Data.update('skp', id, data);
+                    if (result) App.showToast('Data berhasil diperbarui', 'success');
                 } else {
-                    await Data.create(Data.KEYS.SKP, data);
-                    App.showToast('Data berhasil ditambahkan', 'success');
+                    result = await Data.create('skp', data);
+                    if (result) App.showToast('Data berhasil ditambahkan', 'success');
                 }
-                App.closeModal('skpModal');
-                loadSKP();
+
+                if (result) {
+                    App.closeModal('skpModal');
+                    await loadSKP();
+                }
             } catch (err) {
                 console.error(err);
-                App.showToast('Gagal menyimpan data', 'error');
             }
         });
 
