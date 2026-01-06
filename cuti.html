@@ -419,34 +419,40 @@
 
         // Approve cuti
         async function approveCuti(id) {
-            await Data.update('cuti', id, {
+            const result = await Data.update('cuti', id, {
                 status: 'approved',
                 approved_by: user.username, // Using username as simplified approver identity
                 approved_at: new Date().toISOString().split('T')[0]
             });
-            App.showToast('Cuti berhasil disetujui!', 'success');
-            await loadCuti();
+            if (result) {
+                App.showToast('Cuti berhasil disetujui!', 'success');
+                await loadCuti();
+            }
         }
 
         // Reject cuti
         async function rejectCuti(id) {
             if (confirm('Apakah Anda yakin ingin menolak pengajuan cuti ini?')) {
-                await Data.update('cuti', id, {
+                const result = await Data.update('cuti', id, {
                     status: 'rejected',
                     approved_by: user.username,
                     approved_at: new Date().toISOString().split('T')[0]
                 });
-                App.showToast('Cuti berhasil ditolak!', 'success');
-                await loadCuti();
+                if (result) {
+                    App.showToast('Cuti berhasil ditolak!', 'success');
+                    await loadCuti();
+                }
             }
         }
 
         // Cancel cuti (pegawai)
         async function cancelCuti(id) {
             if (confirm('Apakah Anda yakin ingin membatalkan pengajuan cuti ini?')) {
-                await Data.delete('cuti', id);
-                App.showToast('Pengajuan cuti berhasil dibatalkan!', 'success');
-                await loadCuti();
+                const result = await Data.delete('cuti', id);
+                if (result) {
+                    App.showToast('Pengajuan cuti berhasil dibatalkan!', 'success');
+                    await loadCuti();
+                }
             }
         }
 
@@ -488,10 +494,16 @@
                 approved_at: null
             };
 
-            await Data.create('cuti', cutiData);
-            App.showToast('Pengajuan cuti berhasil diajukan!', 'success');
-            App.closeModal('cutiModal');
-            await loadCuti();
+            try {
+                const result = await Data.create('cuti', cutiData);
+                if (result) {
+                    App.showToast('Pengajuan cuti berhasil diajukan!', 'success');
+                    App.closeModal('cutiModal');
+                    await loadCuti();
+                }
+            } catch (err) {
+                console.error('Error submitting cuti form:', err);
+            }
         });
 
         // Filter listeners

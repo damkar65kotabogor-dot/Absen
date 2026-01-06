@@ -141,30 +141,45 @@ const Data = {
     },
 
     async create(table, item) {
-        const { data, error } = await supabaseClient.from(table).insert(item).select().single();
-        if (error) {
+        try {
+            const { data, error } = await supabaseClient.from(table).insert(item).select().single();
+            if (error) throw error;
+            return data;
+        } catch (error) {
             console.error(`Error creating in ${table}:`, error);
+            if (typeof App !== 'undefined' && App.showToast) {
+                App.showToast(`Gagal menyimpan data ke ${table}: ${error.message}`, 'danger');
+            }
             return null;
         }
-        return data;
     },
 
     async update(table, id, updates) {
-        const { data, error } = await supabaseClient.from(table).update(updates).eq('id', id).select().single();
-        if (error) {
+        try {
+            const { data, error } = await supabaseClient.from(table).update(updates).eq('id', id).select().single();
+            if (error) throw error;
+            return data;
+        } catch (error) {
             console.error(`Error updating in ${table}:`, error);
+            if (typeof App !== 'undefined' && App.showToast) {
+                App.showToast(`Gagal memperbarui data di ${table}: ${error.message}`, 'danger');
+            }
             return null;
         }
-        return data;
     },
 
     async delete(table, id) {
-        const { error } = await supabaseClient.from(table).delete().eq('id', id);
-        if (error) {
+        try {
+            const { error } = await supabaseClient.from(table).delete().eq('id', id);
+            if (error) throw error;
+            return true;
+        } catch (error) {
             console.error(`Error deleting from ${table}:`, error);
+            if (typeof App !== 'undefined' && App.showToast) {
+                App.showToast(`Gagal menghapus data dari ${table}: ${error.message}`, 'danger');
+            }
             return false;
         }
-        return true;
     },
 
     // Specific Getters (Now asynchronous)

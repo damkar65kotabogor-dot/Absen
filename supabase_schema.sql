@@ -158,8 +158,10 @@ CREATE TABLE IF NOT EXISTS cuti (
     tanggal_mulai DATE NOT NULL,
     tanggal_selesai DATE NOT NULL,
     alasan TEXT,
-    status TEXT DEFAULT 'pending', -- pending, approved, rejected
-    keterangan_admin TEXT,
+    jumlah_hari INTEGER,
+    tanggal_pengajuan DATE DEFAULT CURRENT_DATE,
+    approved_by TEXT,
+    approved_at DATE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
