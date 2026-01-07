@@ -7,10 +7,14 @@ const Auth = {
     // Get current user
     getCurrentUser() {
         const user = localStorage.getItem(Data.KEYS.CURRENT_USER);
-        return user ? JSON.parse(user) : null;
+        try {
+            return user ? JSON.parse(user) : null;
+        } catch (e) {
+            return null;
+        }
     },
 
-    // Login (Now asynchronous)
+    // Login (Asynchronous)
     async login(username, password) {
         console.log(`Login attempt for user: ${username}`);
         let users = [];
@@ -18,7 +22,7 @@ const Auth = {
 
         try {
             users = await Data.getUsers();
-            if (users.length === 0) throw new Error('DB_EMPTY');
+            if (!users || users.length === 0) throw new Error('DB_EMPTY');
         } catch (err) {
             console.warn('Cloud login failed, checking LocalStorage fallback...');
             const localData = localStorage.getItem('simpeg_users');
@@ -31,11 +35,10 @@ const Auth = {
         const user = users.find(u => u.username === username && u.password === password);
 
         if (user) {
-            console.log(`User found via ${source}, role:`, user.role);
             const { password: _, ...userWithoutPassword } = user;
             userWithoutPassword.authSource = source;
 
-            // Ensure we have pegawaiId
+            // Sync data pegawai (NIP & ID) agar load data di halaman lain lancar
             await this.syncPegawaiId(userWithoutPassword);
 
             localStorage.setItem(Data.KEYS.CURRENT_USER, JSON.stringify(userWithoutPassword));
@@ -48,6 +51,7 @@ const Auth = {
     // Sync pegawaiId from database
     async syncPegawaiId(userObj) {
         try {
+            // Pastikan supabaseClient sudah siap
             const { data: pegawai, error } = await supabaseClient
                 .from('pegawai')
                 .select('id, nip')
@@ -59,10 +63,8 @@ const Auth = {
             if (pegawai) {
                 userObj.pegawaiId = pegawai.id;
                 userObj.nip = pegawai.nip;
-                console.log('Synced pegawaiId:', pegawai.id);
                 return true;
             }
-            console.warn('No pegawai record found for user_id:', userObj.id);
             return false;
         } catch (err) {
             console.error('Error syncing pegawaiId:', err);
@@ -70,37 +72,22 @@ const Auth = {
         }
     },
 
-    // Logout
     logout() {
         localStorage.removeItem(Data.KEYS.CURRENT_USER);
         window.location.href = 'index.html';
     },
 
-    // Check role
     hasRole(role) {
         const user = this.getCurrentUser();
         if (!user) return false;
-        if (Array.isArray(role)) {
-            return role.includes(user.role);
-        }
+        if (Array.isArray(role)) return role.includes(user.role);
         return user.role === role;
     },
 
-    // Require authentication
+    // PERBAIKAN: Gunakan ini dengan hati-hati
     requireAuth() {
         if (!this.isLoggedIn()) {
             window.location.href = 'index.html';
-            return false;
-        }
-        return true;
-    },
-
-    // Require specific role
-    requireRole(role) {
-        if (!this.requireAuth()) return false;
-        if (!this.hasRole(role)) {
-            alert('Anda tidak memiliki akses ke halaman ini!');
-            window.location.href = 'dashboard.html';
             return false;
         }
         return true;
