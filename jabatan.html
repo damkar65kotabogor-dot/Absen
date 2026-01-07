@@ -161,25 +161,37 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
+        // Inisialisasi variabel global
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
+        // --- 1. Fungsi Loading Data ---
         async function loadJabatan() {
             try {
                 await Data.isReady();
+
+                // Ambil data pegawai berdasarkan NIP atau User ID
                 let p = await Data.getPegawaiByNip(user.nip);
                 if (!p) {
                     const employees = await Data.getPegawai();
                     p = (employees || []).find(x => x.user_id == user.id);
                 }
-                if (!p) return;
+
+                // Jika pegawai tidak ditemukan, jangan lanjut
+                if (!p) {
+                    console.error("Data Pegawai tidak ditemukan");
+                    return; // Return di sini aman karena di dalam fungsi
+                }
+
                 currentPegawaiId = p.id;
 
                 const allData = await Data.getJabatan();
                 const myData = (allData || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
 
-                const container = document.getElementById('jabatanList'); // Pastikan ID ini ada di HTML
-                if (!myData.length) {
+                const container = document.getElementById('jabatanList');
+                if (!container) return;
+
+                if (myData.length === 0) {
                     container.innerHTML = '<p class="text-center text-muted">Belum ada data jabatan.</p>';
                     return;
                 }
@@ -201,46 +213,81 @@
                 </div>`;
                 });
                 container.innerHTML = html;
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error("Error loadJabatan:", err);
+            }
         }
 
+        // --- 2. Fungsi Modal & Form ---
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Jabatan';
             document.getElementById('editId').value = '';
-            document.getElementById('jabatanForm').reset();
+            const form = document.getElementById('jabatanForm');
+            if (form) form.reset();
             document.getElementById('jabatanModal').classList.add('show');
         }
 
         async function openEditModal(id) {
-            const item = await Data.getById(Data.KEYS.JABATAN, id);
-            if (!item) return;
-            document.getElementById('modalTitle').textContent = 'Edit Jabatan';
-            document.getElementById('editId').value = item.id;
-            document.getElementById('namaJabatan').value = item.nama_jabatan;
-            document.getElementById('nomorSk').value = item.nomor_sk;
-            document.getElementById('tmtJabatan').value = item.tmt_jabatan;
-            document.getElementById('jabatanModal').classList.add('show');
-        }
+            try {
+                const item = await Data.getById(Data.KEYS.JABATAN, id);
+                if (!item) return;
 
-        async function deleteJabatan(id) {
-            if (confirm('Hapus data jabatan ini?')) {
-                const success = await Data.delete(Data.KEYS.JABATAN, id);
-                if (success) { App.showToast('Berhasil dihapus'); loadJabatan(); }
+                document.getElementById('modalTitle').textContent = 'Edit Jabatan';
+                document.getElementById('editId').value = item.id;
+                document.getElementById('namaJabatan').value = item.nama_jabatan;
+                document.getElementById('nomorSk').value = item.nomor_sk;
+                document.getElementById('tmtJabatan').value = item.tmt_jabatan;
+                document.getElementById('jabatanModal').classList.add('show');
+            } catch (err) {
+                console.error("Error openEditModal:", err);
             }
         }
 
-        document.getElementById('jabatanForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editId').value;
-            const data = {
-                pegawai_id: currentPegawaiId,
-                nama_jabatan: document.getElementById('namaJabatan').value,
-                nomor_sk: document.getElementById('nomorSk').value,
-                tmt_jabatan: document.getElementById('tmtJabatan').value
-            };
-            const res = id ? await Data.update(Data.KEYS.JABATAN, id, data) : await Data.create(Data.KEYS.JABATAN, data);
-            if (res) { document.getElementById('jabatanModal').classList.remove('show'); loadJabatan(); }
-        });
+        function closeModal() {
+            document.getElementById('jabatanModal').classList.remove('show');
+        }
 
-        window.addEventListener('load', () => { if (Auth.requireAuth()) loadJabatan(); });
+        // --- 3. Fungsi Simpan & Hapus ---
+        async function deleteJabatan(id) {
+            if (confirm('Hapus data jabatan ini?')) {
+                const success = await Data.delete(Data.KEYS.JABATAN, id);
+                if (success) {
+                    if (window.App && App.showToast) App.showToast('Berhasil dihapus', 'success');
+                    loadJabatan();
+                }
+            }
+        }
+
+        // Jalankan init saat halaman siap
+        window.addEventListener('load', () => {
+            // Cek login
+            if (Auth.requireAuth()) {
+                loadJabatan();
+            }
+
+            // Pasang Event Listener Form secara aman
+            const jabatanForm = document.getElementById('jabatanForm');
+            if (jabatanForm) {
+                jabatanForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('editId').value;
+                    const data = {
+                        pegawai_id: currentPegawaiId,
+                        nama_jabatan: document.getElementById('namaJabatan').value,
+                        nomor_sk: document.getElementById('nomorSk').value,
+                        tmt_jabatan: document.getElementById('tmtJabatan').value
+                    };
+
+                    const res = id
+                        ? await Data.update(Data.KEYS.JABATAN, id, data)
+                        : await Data.create(Data.KEYS.JABATAN, data);
+
+                    if (res) {
+                        closeModal();
+                        loadJabatan();
+                        if (window.App && App.showToast) App.showToast('Data berhasil disimpan', 'success');
+                    }
+                });
+            }
+        });
     </script>
