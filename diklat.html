@@ -146,35 +146,105 @@
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
+        // Inisialisasi Halaman
+        window.addEventListener('load', async () => {
+            if (Auth.requireAuth()) {
+                await loadDiklat();
+            }
+        });
+
         async function loadDiklat() {
             try {
                 await Data.isReady();
                 let p = await Data.getPegawaiByNip(user.nip);
                 if (!p) {
-                    const employees = await Data.getPegawai();
-                    p = (employees || []).find(x => x.user_id == user.id);
+                    const emps = await Data.getPegawai();
+                    p = (emps || []).find(x => x.user_id == user.id);
                 }
                 if (!p) return;
-
                 currentPegawaiId = p.id;
+
                 const allData = await Data.getDiklat();
                 const myData = (allData || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
-                console.log("Data Diklat dimuat", myData);
+
+                const container = document.getElementById('diklatList');
+                if (!container) return;
+
+                if (myData.length === 0) {
+                    container.innerHTML = '<p class="text-center text-muted">Belum ada data diklat.</p>';
+                    return;
+                }
+
+                container.innerHTML = myData.map(item => `
+                <div class="card mb-2">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">${item.nama_diklat}</h4>
+                            <small class="text-muted">Penyelenggara: ${item.penyelenggara} • Tahun: ${item.tahun}</small>
+                            <br><small class="text-muted">Durasi: ${item.durasi_jam} Jam</small>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                            <button class="btn btn-sm btn-outline text-danger" onclick="deleteDiklat('${item.id}')">Hapus</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
             } catch (err) { console.error(err); }
         }
 
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Diklat';
             document.getElementById('editId').value = '';
-            document.getElementById('diklatForm').reset();
+            document.getElementById('diklatForm')?.reset();
             document.getElementById('diklatModal').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            try {
+                const item = await Data.getById(Data.KEYS.DIKLAT, id);
+                if (!item) return;
+
+                document.getElementById('modalTitle').textContent = 'Edit Diklat';
+                document.getElementById('editId').value = item.id;
+                document.getElementById('namaDiklat').value = item.nama_diklat;
+                document.getElementById('penyelenggara').value = item.penyelenggara;
+                document.getElementById('tahun').value = item.tahun;
+                document.getElementById('durasiJam').value = item.durasi_jam;
+                document.getElementById('diklatModal').classList.add('show');
+            } catch (err) { console.error(err); }
         }
 
         function closeModal() {
             document.getElementById('diklatModal').classList.remove('show');
         }
 
-        window.addEventListener('load', () => {
-            if (Auth.requireAuth()) loadDiklat();
+        async function deleteDiklat(id) {
+            if (confirm('Hapus data diklat ini?')) {
+                const success = await Data.delete(Data.KEYS.DIKLAT, id);
+                if (success) {
+                    App.showToast('Data berhasil dihapus');
+                    loadDiklat();
+                }
+            }
+        }
+
+        document.getElementById('diklatForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const data = {
+                pegawai_id: currentPegawaiId,
+                nama_diklat: document.getElementById('namaDiklat').value,
+                penyelenggara: document.getElementById('penyelenggara').value,
+                tahun: document.getElementById('tahun').value,
+                durasi_jam: document.getElementById('durasiJam').value
+            };
+
+            const res = id ? await Data.update(Data.KEYS.DIKLAT, id, data) : await Data.create(Data.KEYS.DIKLAT, data);
+            if (res) {
+                closeModal();
+                loadDiklat();
+                App.showToast('Berhasil disimpan');
+            }
         });
     </script>
