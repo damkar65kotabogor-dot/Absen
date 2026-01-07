@@ -156,27 +156,33 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
-        if (!Auth.requireAuth()) return;
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
         async function loadData() {
             try {
-                // Wait for Data to be ready
+                console.log('Loading riwayat jabatan for user:', user);
+                if (!Auth.requireAuth()) {
+                    console.error('User not authenticated');
+                    return;
+                }
+
                 await Data.isReady();
 
-                // 1. Get Pegawai ID safely
                 let p = null;
                 if (user.nip) {
+                    console.log('Fetching pegawai by NIP:', user.nip);
                     p = await Data.getPegawaiByNip(user.nip);
                 }
 
                 if (!p) {
+                    console.log('Fetching all pegawai to find by user_id:', user.id);
                     const employees = await Data.getPegawai();
-                    p = employees.find(x => x.user_id == user.id);
+                    p = (employees || []).find(x => x.user_id == user.id);
                 }
 
                 if (!p) {
+                    console.error('Pegawai not found for user:', user);
                     document.querySelector('.card-body').innerHTML = `
                         <div class="alert alert-warning">
                             <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
@@ -197,10 +203,13 @@
                 }
 
                 currentPegawaiId = p.id;
+                console.log('Current pegawai ID:', currentPegawaiId);
 
-                // 2. Get Data
                 const allData = await Data.getRiwayatJabatan();
+                console.log('All riwayat jabatan data:', allData);
                 const myData = (allData || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
+                console.log('Filtered data for pegawai:', myData);
+
                 const container = document.querySelector('.card-body');
 
                 if (myData.length === 0) {
@@ -240,17 +249,17 @@
                     container.innerHTML = html;
                 }
             } catch (err) {
-                console.error('Error loading jabatan:', err);
-                App.showToast('Gagal memuat data', 'danger');
+                console.error('Error loading riwayat jabatan:', err);
+                if (window.App) App.showToast('Gagal memuat data: ' + err.message, 'danger');
             }
         }
 
         async function openAddModal() {
             if (!currentPegawaiId) {
-                // Try one last time to load data
+                console.log('Pegawai ID not set, reloading...');
                 await loadData();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
+                    if (window.App) App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
                     return;
                 }
             }
@@ -262,19 +271,28 @@
         }
 
         async function openEditModal(id) {
-            const item = await Data.getById(Data.KEYS.RIWAYAT_JABATAN, id);
-            if (!item) return;
+            try {
+                console.log('Editing riwayat jabatan with ID:', id);
+                const item = await Data.getById(Data.KEYS.RIWAYAT_JABATAN, id);
+                if (!item) {
+                    console.error('Data not found:', id);
+                    if (window.App) App.showToast('Data tidak ditemukan', 'error');
+                    return;
+                }
 
-            document.getElementById('modalTitle').textContent = 'Edit Jabatan';
-            document.getElementById('editId').value = item.id;
+                document.getElementById('modalTitle').textContent = 'Edit Jabatan';
+                document.getElementById('editId').value = item.id;
+                document.getElementById('namaJabatan').value = item.nama_jabatan;
+                document.getElementById('unitKerja').value = item.unit_kerja;
+                document.getElementById('tmtJabatan').value = item.tmt_jabatan;
+                document.getElementById('nomorSk').value = item.nomor_sk || '';
+                document.getElementById('tanggalSk').value = item.tanggal_sk || '';
 
-            document.getElementById('namaJabatan').value = item.nama_jabatan;
-            document.getElementById('unitKerja').value = item.unit_kerja;
-            document.getElementById('tmtJabatan').value = item.tmt_jabatan;
-            document.getElementById('nomorSk').value = item.nomor_sk || '';
-            document.getElementById('tanggalSk').value = item.tanggal_sk || '';
-
-            document.getElementById('formModal').classList.add('show');
+                document.getElementById('formModal').classList.add('show');
+            } catch (err) {
+                console.error('Error opening edit modal:', err);
+                if (window.App) App.showToast('Gagal memuat data edit: ' + err.message, 'error');
+            }
         }
 
         function closeModal() {
@@ -283,37 +301,46 @@
 
         async function deleteData(id) {
             if (confirm('Hapus data ini?')) {
-                await Data.delete(Data.KEYS.RIWAYAT_JABATAN, id);
-                App.showToast('Data dihapus', 'success');
-                loadData();
+                try {
+                    console.log('Deleting data with ID:', id);
+                    const success = await Data.delete(Data.KEYS.RIWAYAT_JABATAN, id);
+                    if (success) {
+                        if (window.App) App.showToast('Data berhasil dihapus', 'success');
+                        await loadData();
+                    }
+                } catch (err) {
+                    console.error('Error deleting data:', err);
+                    if (window.App) App.showToast('Gagal menghapus data: ' + err.message, 'error');
+                }
             }
         }
 
         document.getElementById('dataForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             if (!currentPegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                if (window.App) App.showToast('Data pegawai tidak ditemukan!', 'danger');
                 return;
             }
 
             const id = document.getElementById('editId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                nama_jabatan: document.getElementById('namaJabatan').value,
-                unit_kerja: document.getElementById('unitKerja').value,
+                nama_jabatan: document.getElementById('namaJabatan').value.trim(),
+                unit_kerja: document.getElementById('unitKerja').value.trim(),
                 tmt_jabatan: document.getElementById('tmtJabatan').value,
-                nomor_sk: document.getElementById('nomorSk').value,
+                nomor_sk: document.getElementById('nomorSk').value.trim(),
                 tanggal_sk: document.getElementById('tanggalSk').value
             };
 
             try {
+                console.log('Submitting data:', data);
                 let result;
                 if (id) {
-                    result = await Data.update('riwayat_jabatan', id, data);
-                    if (result) App.showToast('Berhasil diperbarui', 'success');
+                    result = await Data.update(Data.KEYS.RIWAYAT_JABATAN, id, data);
+                    if (result) if (window.App) App.showToast('Data berhasil diperbarui', 'success');
                 } else {
-                    result = await Data.create('riwayat_jabatan', data);
-                    if (result) App.showToast('Berhasil ditambahkan', 'success');
+                    result = await Data.create(Data.KEYS.RIWAYAT_JABATAN, data);
+                    if (result) if (window.App) App.showToast('Data berhasil ditambahkan', 'success');
                 }
 
                 if (result) {
@@ -321,11 +348,19 @@
                     await loadData();
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Error submitting data:', err);
+                if (window.App) App.showToast('Gagal menyimpan data: ' + err.message, 'error');
             }
         });
 
-        window.addEventListener('load', () => loadData());
+        // Initialize correctly
+        window.addEventListener('load', () => {
+            if (Auth.isLoggedIn()) {
+                loadData();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
     </script>
 </body>
 

@@ -8,7 +8,9 @@ const Data = {
         DIKLAT: 'diklat',
         KGB: 'kgb',
         SKP: 'skp',
-        KELUARGA: 'keluarga'
+        KELUARGA: 'keluarga',
+        JABATAN: 'jabatan',
+        UNIT_KERJA: 'unit_kerja'
     },
 
     // Internal ready promise
@@ -185,8 +187,8 @@ const Data = {
     // Specific Getters (Now asynchronous)
     async getUsers() { return this.getAll('users'); },
     async getPegawai() { return this.getAll('pegawai'); },
-    async getJabatan() { return this.getAll('jabatan'); },
-    async getUnitKerja() { return this.getAll('unit_kerja'); },
+    async getJabatan() { return this.getAll(this.KEYS.JABATAN); },
+    async getUnitKerja() { return this.getAll(this.KEYS.UNIT_KERJA); },
     async getAbsensi() { return this.getAll('absensi'); },
     async getCuti() { return this.getAll('cuti'); },
     async getPendidikan() { return this.getAll(this.KEYS.PENDIDIKAN); },
