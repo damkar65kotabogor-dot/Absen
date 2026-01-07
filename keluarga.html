@@ -342,26 +342,25 @@
 
 
 
-        async function handleDelete() {
+        // Pastikan nama fungsi adalah deleteMember agar sesuai dengan onclick di tombol
+        async function deleteMember() {
+            const id = document.getElementById('memberId').value; // Mengambil ID dari input hidden
 
-            const id = document.getElementById('memberId').value;
+            if (!id) return; // Jika ID tidak ada, batalkan
 
-            if (confirm('Hapus data keluarga ini?')) {
-
-                const success = await Data.delete(Data.KEYS.KELUARGA, id);
-
-                if (success) {
-
-                    if (window.App) App.showToast('Data berhasil dihapus', 'success');
-
-                    closeModal();
-
-                    loadKeluarga();
-
+            if (confirm('Apakah Anda yakin ingin menghapus anggota keluarga ini?')) {
+                try {
+                    const success = await Data.delete(Data.KEYS.KELUARGA, id);
+                    if (success) {
+                        if (window.App) App.showToast('Data berhasil dihapus', 'success');
+                        closeModal();      // Tutup modal setelah hapus
+                        loadKeluarga();    // Refresh daftar data
+                    }
+                } catch (err) {
+                    console.error("Gagal menghapus:", err);
+                    alert("Terjadi kesalahan saat menghapus data.");
                 }
-
             }
-
         }
 
 
