@@ -354,6 +354,110 @@
 
     </div>
 
+    <!-- BIODATA EDIT MODAL -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Biodata</h3>
+                <button class="modal-close" onclick="App.closeModal('editModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form id="biodataForm">
+                <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr; display: grid;">
+                        <div class="form-group">
+                            <label class="form-label">NIK *</label>
+                            <input type="text" class="form-control" id="nik" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">NIP *</label>
+                            <input type="text" class="form-control" id="nip" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap *</label>
+                        <input type="text" class="form-control" id="nama" required>
+                    </div>
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr; display: grid;">
+                        <div class="form-group">
+                            <label class="form-label">Gelar Depan</label>
+                            <input type="text" class="form-control" id="gelarDepan">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gelar Belakang</label>
+                            <input type="text" class="form-control" id="gelarBelakang">
+                        </div>
+                    </div>
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr; display: grid;">
+                        <div class="form-group">
+                            <label class="form-label">Tempat Lahir</label>
+                            <input type="text" class="form-control" id="tempatLahir">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Lahir</label>
+                            <input type="date" class="form-control" id="tanggalLahir">
+                        </div>
+                    </div>
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr; display: grid;">
+                        <div class="form-group">
+                            <label class="form-label">Jenis Kelamin</label>
+                            <select class="form-control" id="jenisKelamin">
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Agama</label>
+                            <select class="form-control" id="agama">
+                                <option value="Islam">Islam</option>
+                                <option value="Kristen">Kristen</option>
+                                <option value="Katolik">Katolik</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Buddha">Buddha</option>
+                                <option value="Konghucu">Konghucu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status Nikah</label>
+                        <select class="form-control" id="statusNikah">
+                            <option value="Belum Menikah">Belum Menikah</option>
+                            <option value="Menikah">Menikah</option>
+                            <option value="Cerai">Cerai</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamat" rows="2"></textarea>
+                    </div>
+                    <div class="d-grid gap-4" style="grid-template-columns: 1fr 1fr; display: grid;">
+                        <div class="form-group">
+                            <label class="form-label">No. HP</label>
+                            <input type="text" class="form-control" id="telepon">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Masuk</label>
+                        <input type="date" class="form-control" id="tanggalMasuk">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="App.closeModal('editModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- PENDIDIKAN MODAL -->
     <div class="modal-overlay" id="pendidikanModal">
         <div class="modal">
@@ -636,15 +740,18 @@
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            // Find tab element based on onclick attribute or text
             const tabs = document.querySelectorAll('.tab-item');
             tabs.forEach(t => {
-                if (t.getAttribute('onclick').includes(tabId)) {
+                const onclick = t.getAttribute('onclick');
+                if (onclick && onclick.includes(tabId)) {
                     t.classList.add('active');
                 }
             });
 
-            document.getElementById(tabId).classList.add('active');
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         }
 
         // LOAD MASTER DATA
