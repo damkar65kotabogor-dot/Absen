@@ -58,7 +58,7 @@
                     <input type="hidden" id="kgbId">
                     <div class="form-group">
                         <label class="form-label">TMT (Terhitung Mulai Tanggal) *</label>
-                        <input type="date" class="form-control" id="tmt" required>
+                        <input type="date" class="form-control" id="tmtKgb" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Gaji Pokok *</label>
@@ -66,11 +66,25 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">No. Surat Keputusan</label>
-                        <input type="text" class="form-control" id="noSK">
+                        <input type="text" class="form-control" id="nomorSk">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Tanggal SK</label>
-                        <input type="date" class="form-control" id="tglSK">
+                        <input type="date" class="form-control" id="tanggalSk">
+                    </div>
+                    <div class="row">
+                        <div class="col-6" style="flex:1; margin-right: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Masa Kerja (Tahun)</label>
+                                <input type="number" class="form-control" id="masaKerjaTahun">
+                            </div>
+                        </div>
+                        <div class="col-6" style="flex:1; margin-left: 0.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Masa Kerja (Bulan)</label>
+                                <input type="number" class="form-control" id="masaKerjaBulan">
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Keterangan</label>
@@ -173,13 +187,13 @@
                     return;
                 }
 
-                container.innerHTML = myData.map(item => `
+                container.innerHTML = myData.sort((a, b) => new Date(b.tmt_kgb) - new Date(a.tmt_kgb)).map(item => `
                 <div class="card mb-2">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="mb-0">Gaji Pokok: Rp ${item.gaji_pokok}</h4>
-                            <small class="text-muted">TMT: ${item.tmt_kgb} • No SK: ${item.nomor_sk}</small>
-                            <br><small class="text-muted">Masa Kerja: ${item.masa_kerja_tahun} Thn ${item.masa_kerja_bulan} Bln</small>
+                            <h4 class="mb-0">Gaji Pokok: Rp ${App.formatCurrency ? App.formatCurrency(item.gaji_pokok) : item.gaji_pokok}</h4>
+                            <small class="text-muted">TMT: ${App.formatDate(item.tmt_kgb)} • No SK: ${item.nomor_sk || '-'}</small>
+                            <br><small class="text-muted">Masa Kerja: ${item.masa_kerja_tahun || 0} Thn ${item.masa_kerja_bulan || 0} Bln</small>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
@@ -193,7 +207,7 @@
 
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Tambah KGB';
-            document.getElementById('editId').value = '';
+            document.getElementById('kgbId').value = '';
             document.getElementById('kgbForm')?.reset();
             document.getElementById('kgbModal').classList.add('show');
         }
@@ -204,12 +218,14 @@
                 if (!item) return;
 
                 document.getElementById('modalTitle').textContent = 'Edit KGB';
-                document.getElementById('editId').value = item.id;
+                document.getElementById('kgbId').value = item.id;
                 document.getElementById('gajiPokok').value = item.gaji_pokok;
                 document.getElementById('tmtKgb').value = item.tmt_kgb;
-                document.getElementById('nomorSk').value = item.nomor_sk;
-                document.getElementById('masaKerjaTahun').value = item.masa_kerja_tahun;
-                document.getElementById('masaKerjaBulan').value = item.masa_kerja_bulan;
+                document.getElementById('nomorSk').value = item.nomor_sk || '';
+                document.getElementById('tanggalSk').value = item.tanggal_sk || '';
+                document.getElementById('masaKerjaTahun').value = item.masa_kerja_tahun || 0;
+                document.getElementById('masaKerjaBulan').value = item.masa_kerja_bulan || 0;
+                document.getElementById('keterangan').value = item.keterangan || '';
                 document.getElementById('kgbModal').classList.add('show');
             } catch (err) { console.error(err); }
         }
@@ -230,21 +246,23 @@
 
         document.getElementById('kgbForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id = document.getElementById('editId').value;
+            const id = document.getElementById('kgbId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                gaji_pokok: document.getElementById('gajiPokok').value,
+                gaji_pokok: parseFloat(document.getElementById('gajiPokok').value),
                 tmt_kgb: document.getElementById('tmtKgb').value,
                 nomor_sk: document.getElementById('nomorSk').value,
-                masa_kerja_tahun: document.getElementById('masaKerjaTahun').value,
-                masa_kerja_bulan: document.getElementById('masaKerjaBulan').value
+                tanggal_sk: document.getElementById('tanggalSk').value,
+                masa_kerja_tahun: parseInt(document.getElementById('masaKerjaTahun').value) || 0,
+                masa_kerja_bulan: parseInt(document.getElementById('masaKerjaBulan').value) || 0,
+                keterangan: document.getElementById('keterangan').value
             };
 
             const res = id ? await Data.update(Data.KEYS.KGB, id, data) : await Data.create(Data.KEYS.KGB, data);
             if (res) {
                 closeModal();
                 loadKGB();
-                App.showToast('Berhasil disimpan');
+                App.showToast('Berhasil disimpan', 'success');
             }
         });
     </script>

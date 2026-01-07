@@ -183,8 +183,8 @@
                 <div class="card mb-2">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="mb-0">${item.golongan} - ${item.pangkat}</h4>
-                            <small class="text-muted">TMT: ${item.tmt_pangkat} • No SK: ${item.nomor_sk}</small>
+                            <h4 class="mb-0">${item.golongan}</h4>
+                            <small class="text-muted">TMT: ${App.formatDate(item.tmt_pangkat)} • No SK: ${item.nomor_sk || '-'}</small>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
@@ -201,7 +201,7 @@
         // Modal & Form
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Pangkat';
-            document.getElementById('editId').value = '';
+            document.getElementById('pangkatId').value = '';
             const form = document.getElementById('pangkatForm');
             if (form) form.reset();
             document.getElementById('pangkatModal').classList.add('show');
@@ -213,11 +213,13 @@
                 if (!item) return;
 
                 document.getElementById('modalTitle').textContent = 'Edit Pangkat';
-                document.getElementById('editId').value = item.id;
-                document.getElementById('pangkat').value = item.pangkat;
+                document.getElementById('pangkatId').value = item.id;
                 document.getElementById('golongan').value = item.golongan;
-                document.getElementById('tmtPangkat').value = item.tmt_pangkat;
-                document.getElementById('nomorSk').value = item.nomor_sk;
+                document.getElementById('tmt').value = item.tmt_pangkat;
+                document.getElementById('noSK').value = item.nomor_sk || '';
+                document.getElementById('tglSK').value = item.tanggal_sk || '';
+                document.getElementById('pejabat').value = item.pejabat_penetap || '';
+
                 document.getElementById('pangkatModal').classList.add('show');
             } catch (err) { console.error(err); }
         }
@@ -235,27 +237,33 @@
         // Submit Handler
         document.getElementById('pangkatForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) return;
-            const id = document.getElementById('editId').value;
+            if (!currentPegawaiId) {
+                App.showToast('Data pegawai tidak ditemukan!', 'danger');
+                return;
+            }
+
+            const id = document.getElementById('pangkatId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                pangkat: document.getElementById('pangkat').value,
                 golongan: document.getElementById('golongan').value,
-                tmt_pangkat: document.getElementById('tmtPangkat').value,
-                nomor_sk: document.getElementById('nomorSk').value
+                tmt_pangkat: document.getElementById('tmt').value,
+                nomor_sk: document.getElementById('noSK').value,
+                tanggal_sk: document.getElementById('tglSK').value,
+                pejabat_penetap: document.getElementById('pejabat').value
             };
 
             try {
                 let result;
                 if (id) {
                     result = await Data.update(Data.KEYS.PANGKAT, id, data);
+                    if (result) App.showToast('Berhasil diperbarui', 'success');
                 } else {
                     result = await Data.create(Data.KEYS.PANGKAT, data);
+                    if (result) App.showToast('Berhasil ditambahkan', 'success');
                 }
 
                 if (result) {
-                    if (window.App) App.showToast('Berhasil menyimpan data', 'success');
-                    closeModal();
+                    App.closeModal('pangkatModal');
                     loadPangkat();
                 }
             } catch (err) {

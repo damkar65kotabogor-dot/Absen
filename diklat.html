@@ -180,8 +180,8 @@
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
                             <h4 class="mb-0">${item.nama_diklat}</h4>
-                            <small class="text-muted">Penyelenggara: ${item.penyelenggara} • Tahun: ${item.tahun}</small>
-                            <br><small class="text-muted">Durasi: ${item.durasi_jam} Jam</small>
+                            <small class="text-muted">Penyelenggara: ${item.penyelenggara || '-'} • Tahun: ${item.tahun}</small>
+                            ${item.no_sertifikat ? `<br><small class="text-muted">No Sertifikat: ${item.no_sertifikat}</small>` : ''}
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
@@ -195,7 +195,7 @@
 
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Diklat';
-            document.getElementById('editId').value = '';
+            document.getElementById('diklatId').value = '';
             document.getElementById('diklatForm')?.reset();
             document.getElementById('diklatModal').classList.add('show');
         }
@@ -206,11 +206,12 @@
                 if (!item) return;
 
                 document.getElementById('modalTitle').textContent = 'Edit Diklat';
-                document.getElementById('editId').value = item.id;
+                document.getElementById('diklatId').value = item.id;
                 document.getElementById('namaDiklat').value = item.nama_diklat;
                 document.getElementById('penyelenggara').value = item.penyelenggara;
                 document.getElementById('tahun').value = item.tahun;
-                document.getElementById('durasiJam').value = item.durasi_jam;
+                document.getElementById('noSertifikat').value = item.no_sertifikat || '';
+                document.getElementById('keterangan').value = item.keterangan || '';
                 document.getElementById('diklatModal').classList.add('show');
             } catch (err) { console.error(err); }
         }
@@ -231,20 +232,21 @@
 
         document.getElementById('diklatForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id = document.getElementById('editId').value;
+            const id = document.getElementById('diklatId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
                 nama_diklat: document.getElementById('namaDiklat').value,
                 penyelenggara: document.getElementById('penyelenggara').value,
-                tahun: document.getElementById('tahun').value,
-                durasi_jam: document.getElementById('durasiJam').value
+                tahun: parseInt(document.getElementById('tahun').value),
+                no_sertifikat: document.getElementById('noSertifikat').value,
+                keterangan: document.getElementById('keterangan').value
             };
 
             const res = id ? await Data.update(Data.KEYS.DIKLAT, id, data) : await Data.create(Data.KEYS.DIKLAT, data);
             if (res) {
                 closeModal();
                 loadDiklat();
-                App.showToast('Berhasil disimpan');
+                App.showToast('Berhasil disimpan', 'success');
             }
         });
     </script>

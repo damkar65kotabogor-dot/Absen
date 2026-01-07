@@ -7,10 +7,12 @@ const Data = {
         RIWAYAT_PANGKAT: 'riwayat_pangkat',
         DIKLAT: 'diklat',
         KGB: 'kgb',
-        SKP: 'skp',
+        SKP: 'riwayat_skp',
         KELUARGA: 'keluarga',
         JABATAN: 'jabatan',
-        UNIT_KERJA: 'unit_kerja'
+        UNIT_KERJA: 'unit_kerja',
+        PANGKAT: 'riwayat_pangkat',
+        DIKLAT_KEY: 'diklat'
     },
 
     // Internal ready promise
