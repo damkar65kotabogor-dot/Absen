@@ -116,38 +116,146 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
+        // --- 1. Variabel Global ---
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
+        // --- 2. Fungsi Load & Render Data ---
         async function loadKeluarga() {
             try {
                 await Data.isReady();
+
+                // Cari data pegawai
                 let p = await Data.getPegawaiByNip(user.nip);
                 if (!p) {
                     const employees = await Data.getPegawai();
                     p = (employees || []).find(x => x.user_id == user.id);
                 }
-                if (!p) return;
+
+                if (!p) {
+                    document.getElementById('familyList').innerHTML = '<div class="alert alert-warning">Data Pegawai tidak ditemukan.</div>';
+                    return;
+                }
 
                 currentPegawaiId = p.id;
+
+                // Ambil data keluarga
                 const allData = await Data.getKeluarga();
                 const myData = (allData || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
-                console.log("Data Keluarga dimuat", myData);
-            } catch (err) { console.error(err); }
+
+                renderFamilyList(myData);
+            } catch (err) {
+                console.error('Gagal memuat data keluarga:', err);
+            }
         }
 
+        function renderFamilyList(data) {
+            const container = document.getElementById('familyList');
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Belum ada data keluarga.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                html += `
+                    <div class="card mb-3" onclick="openEditModal('${item.id}')" style="cursor:pointer">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h4 class="mb-1">${item.nama}</h4>
+                                    <p class="text-muted small mb-0">${item.hubungan} • ${item.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
+                                    <p class="text-muted small mb-0">${item.pekerjaan || '-'}</p>
+                                </div>
+                                <span class="badge badge-outline text-primary">${item.hubungan}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- 3. Fungsi Modal (Add & Edit) ---
         function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Tambah Anggota Keluarga';
-            document.getElementById('editId').value = '';
-            document.getElementById('keluargaForm').reset();
-            document.getElementById('keluargaModal').classList.add('show');
+            document.getElementById('modalTitle').textContent = 'Tambah Keluarga';
+            document.getElementById('memberId').value = ''; // Reset ID
+            document.getElementById('familyForm').reset();
+            document.getElementById('deleteBtn').classList.add('d-none'); // Sembunyikan tombol hapus
+            document.getElementById('familyModal').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            const item = await Data.getById(Data.KEYS.KELUARGA, id);
+            if (!item) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Keluarga';
+            document.getElementById('memberId').value = item.id;
+            document.getElementById('nama').value = item.nama;
+            document.getElementById('hubungan').value = item.hubungan;
+            document.getElementById('jenisKelamin').value = item.jenis_kelamin;
+            document.getElementById('tanggalLahir').value = item.tanggal_lahir;
+            document.getElementById('pekerjaan').value = item.pekerjaan || '';
+
+            document.getElementById('deleteBtn').classList.remove('d-none'); // Tampilkan tombol hapus
+            document.getElementById('familyModal').classList.add('show');
         }
 
         function closeModal() {
-            document.getElementById('keluargaModal').classList.remove('show');
+            document.getElementById('familyModal').classList.remove('show');
         }
 
+        // --- 4. Fungsi Simpan & Hapus ---
+        document.getElementById('familyForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('memberId').value;
+            const formData = {
+                pegawai_id: currentPegawaiId,
+                nama: document.getElementById('nama').value,
+                hubungan: document.getElementById('hubungan').value,
+                jenis_kelamin: document.getElementById('jenisKelamin').value,
+                tanggal_lahir: document.getElementById('tanggalLahir').value,
+                pekerjaan: document.getElementById('pekerjaan').value
+            };
+
+            try {
+                let success;
+                if (id) {
+                    success = await Data.update(Data.KEYS.KELUARGA, id, formData);
+                } else {
+                    success = await Data.create(Data.KEYS.KELUARGA, formData);
+                }
+
+                if (success) {
+                    App.showToast('Data keluarga berhasil disimpan', 'success');
+                    closeModal();
+                    loadKeluarga();
+                }
+            } catch (err) {
+                console.error(err);
+                App.showToast('Gagal menyimpan data', 'danger');
+            }
+        });
+
+        async function deleteMember() {
+            const id = document.getElementById('memberId').value;
+            if (confirm('Apakah Anda yakin ingin menghapus anggota keluarga ini?')) {
+                const success = await Data.delete(Data.KEYS.KELUARGA, id);
+                if (success) {
+                    App.showToast('Data berhasil dihapus', 'success');
+                    closeModal();
+                    loadKeluarga();
+                }
+            }
+        }
+
+        // --- 5. Init ---
         window.addEventListener('load', () => {
-            if (Auth.requireAuth()) loadKeluarga();
+            if (Auth.requireAuth()) {
+                loadKeluarga();
+            }
         });
     </script>
