@@ -233,8 +233,9 @@
         }
 
         // Submit Handler
-        document.getElementById('pangkatForm')?.addEventListener('submit', async (e) => {
+        document.getElementById('pangkatForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            if (!currentPegawaiId) return;
             const id = document.getElementById('editId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
@@ -244,11 +245,29 @@
                 nomor_sk: document.getElementById('nomorSk').value
             };
 
-            const res = id ? await Data.update(Data.KEYS.PANGKAT, id, data) : await Data.create(Data.KEYS.PANGKAT, data);
-            if (res) {
-                document.getElementById('pangkatModal').classList.remove('show');
+            try {
+                let result;
+                if (id) {
+                    result = await Data.update(Data.KEYS.PANGKAT, id, data);
+                } else {
+                    result = await Data.create(Data.KEYS.PANGKAT, data);
+                }
+
+                if (result) {
+                    if (window.App) App.showToast('Berhasil menyimpan data', 'success');
+                    closeModal();
+                    loadPangkat();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // --- 5. Event Listener saat halaman dimuat ---
+        window.addEventListener('load', () => {
+            // Jalankan pengecekan auth saat halaman load
+            if (Auth.requireAuth()) {
                 loadPangkat();
-                App.showToast('Berhasil disimpan');
             }
         });
     </script>
