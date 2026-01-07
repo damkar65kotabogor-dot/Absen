@@ -168,54 +168,65 @@
         // --- 2. Fungsi Load Data Utama ---
         async function loadJabatan() {
             try {
+                console.log('Loading jabatan for user:', user); // Debugging: Lihat user yang login
                 // Pastikan user sudah login
-                if (!Auth.requireAuth()) return;
+                if (!Auth.requireAuth()) {
+                    console.error('User not authenticated');
+                    return;
+                }
 
                 await Data.isReady();
 
                 let p = null;
                 if (user.nip) {
+                    console.log('Fetching pegawai by NIP:', user.nip); // Debugging
                     p = await Data.getPegawaiByNip(user.nip);
                 }
 
                 if (!p) {
+                    console.log('Fetching all pegawai to find by user_id:', user.id); // Debugging
                     const employees = await Data.getPegawai();
                     p = (employees || []).find(x => x.user_id == user.id || x.user_id === String(user.id));
                 }
 
                 if (!p) {
+                    console.error('Pegawai not found for user:', user); // Debugging
                     document.querySelector('.card-body').innerHTML = `
-                    <div class="alert alert-warning">
-                        <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
-                        <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu.</p>
-                        <div class="mt-3">
-                            <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
-                        </div>
-                    </div>`;
+                <div class="alert alert-warning">
+                    <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
+                    <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu.</p>
+                    <div class="mt-3">
+                        <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
+                    </div>
+                </div>`;
                     const addBtn = document.querySelector('button[onclick="openAddModal()"]');
                     if (addBtn) addBtn.style.display = 'none';
                     return;
                 }
 
                 currentPegawaiId = p.id;
+                console.log('Current pegawai ID:', currentPegawaiId); // Debugging: Pastikan ID benar
 
                 const allJabatan = await Data.getJabatan();
+                console.log('All jabatan data:', allJabatan); // Debugging: Lihat data jabatan mentah
                 const myJabatan = (allJabatan || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
+                console.log('Filtered jabatan for pegawai:', myJabatan); // Debugging: Lihat data yang difilter
+
                 const container = document.querySelector('.card-body');
 
                 if (myJabatan.length === 0) {
                     container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                <circle cx="8.5" cy="7" r="4" />
-                                <polyline points="17 11 19 13 23 9" />
-                            </svg>
-                        </div>
-                        <h3>Belum Ada Data</h3>
-                        <p>Data riwayat jabatan belum tersedia</p>
-                    </div>`;
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="8.5" cy="7" r="4" />
+                            <polyline points="17 11 19 13 23 9" />
+                        </svg>
+                    </div>
+                    <h3>Belum Ada Data</h3>
+                    <p>Data riwayat jabatan belum tersedia</p>
+                </div>`;
                 } else {
                     // Urutkan berdasarkan TMT terbaru
                     myJabatan.sort((a, b) => new Date(b.tmt_jabatan) - new Date(a.tmt_jabatan));
@@ -227,32 +238,33 @@
                         const noSk = item.nomor_sk;
 
                         html += `
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h4 class="mb-1">${namaJabatan}</h4>
-                                    <p class="mb-0 text-muted small">TMT: ${tmt || '-'}</p>
-                                    <p class="mb-0 text-muted small">No. SK: ${noSk || '-'}</p>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
-                                    <button class="btn btn-sm btn-outline text-danger" onclick="deleteJabatan('${item.id}')">Hapus</button>
-                                </div>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">${namaJabatan}</h4>
+                                <p class="mb-0 text-muted small">TMT: ${tmt || '-'}</p>
+                                <p class="mb-0 text-muted small">No. SK: ${noSk || '-'}</p>
                             </div>
-                        </div>`;
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                                <button class="btn btn-sm btn-outline text-danger" onclick="deleteJabatan('${item.id}')">Hapus</button>
+                            </div>
+                        </div>
+                    </div>`;
                     });
                     html += '</div>';
                     container.innerHTML = html;
                 }
             } catch (err) {
                 console.error('Error loading jabatan:', err);
-                if (window.App) App.showToast('Gagal memuat data jabatan', 'danger');
+                if (window.App) App.showToast('Gagal memuat data jabatan: ' + err.message, 'danger');
             }
         }
 
         // --- 3. Modal Functions ---
         async function openAddModal() {
             if (!currentPegawaiId) {
+                console.log('Pegawai ID not set, reloading...'); // Debugging
                 await loadJabatan();
                 if (!currentPegawaiId) {
                     if (window.App) App.showToast('Data pegawai belum siap.', 'danger');
@@ -266,16 +278,26 @@
         }
 
         async function openEditModal(id) {
-            const item = await Data.getById(Data.KEYS.JABATAN, id);
-            if (!item) return;
+            try {
+                console.log('Editing jabatan with ID:', id); // Debugging
+                const item = await Data.getById(Data.KEYS.JABATAN, id);
+                if (!item) {
+                    console.error('Jabatan item not found:', id);
+                    if (window.App) App.showToast('Data jabatan tidak ditemukan', 'error');
+                    return;
+                }
 
-            document.getElementById('modalTitle').textContent = 'Edit Jabatan';
-            document.getElementById('editId').value = item.id;
-            document.getElementById('namaJabatan').value = item.nama_jabatan;
-            document.getElementById('tmtJabatan').value = item.tmt_jabatan;
-            document.getElementById('nomorSk').value = item.nomor_sk || '';
+                document.getElementById('modalTitle').textContent = 'Edit Jabatan';
+                document.getElementById('editId').value = item.id;
+                document.getElementById('namaJabatan').value = item.nama_jabatan;
+                document.getElementById('tmtJabatan').value = item.tmt_jabatan;
+                document.getElementById('nomorSk').value = item.nomor_sk || '';
 
-            document.getElementById('jabatanModal').classList.add('show');
+                document.getElementById('jabatanModal').classList.add('show');
+            } catch (err) {
+                console.error('Error opening edit modal:', err);
+                if (window.App) App.showToast('Gagal memuat data edit: ' + err.message, 'error');
+            }
         }
 
         function closeModal() {
@@ -284,10 +306,18 @@
 
         async function deleteJabatan(id) {
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                const success = await Data.delete(Data.KEYS.JABATAN, id);
-                if (success) {
-                    if (window.App) App.showToast('Data jabatan berhasil dihapus', 'success');
-                    loadJabatan();
+                try {
+                    console.log('Deleting jabatan with ID:', id); // Debugging
+                    const success = await Data.delete(Data.KEYS.JABATAN, id);
+                    if (success) {
+                        if (window.App) App.showToast('Data jabatan berhasil dihapus', 'success');
+                        await loadJabatan(); // Reload setelah hapus
+                    } else {
+                        if (window.App) App.showToast('Gagal menghapus data jabatan', 'error');
+                    }
+                } catch (err) {
+                    console.error('Error deleting jabatan:', err);
+                    if (window.App) App.showToast('Gagal menghapus data jabatan: ' + err.message, 'error');
                 }
             }
         }
@@ -295,31 +325,49 @@
         // --- 4. Form Submit Logic ---
         document.getElementById('jabatanForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) return;
+            if (!currentPegawaiId) {
+                console.error('Pegawai ID not set for submit');
+                if (window.App) App.showToast('Data pegawai belum siap.', 'danger');
+                return;
+            }
+
+            // Validasi sederhana
+            const namaJabatan = document.getElementById('namaJabatan').value.trim();
+            const tmtJabatan = document.getElementById('tmtJabatan').value;
+
+            if (!namaJabatan || !tmtJabatan) {
+                if (window.App) App.showToast('Harap isi Nama Jabatan dan TMT Jabatan', 'warning');
+                return;
+            }
 
             const id = document.getElementById('editId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                nama_jabatan: document.getElementById('namaJabatan').value,
-                tmt_jabatan: document.getElementById('tmtJabatan').value,
-                nomor_sk: document.getElementById('nomorSk').value
+                nama_jabatan: namaJabatan,
+                tmt_jabatan: tmtJabatan,
+                nomor_sk: document.getElementById('nomorSk').value.trim()
             };
 
             try {
+                console.log('Submitting jabatan data:', data); // Debugging
                 let result;
                 if (id) {
                     result = await Data.update(Data.KEYS.JABATAN, id, data);
+                    if (result) if (window.App) App.showToast('Data jabatan berhasil diperbarui', 'success');
                 } else {
                     result = await Data.create(Data.KEYS.JABATAN, data);
+                    if (result) if (window.App) App.showToast('Data jabatan berhasil ditambahkan', 'success');
                 }
 
                 if (result) {
-                    if (window.App) App.showToast('Berhasil menyimpan data', 'success');
                     closeModal();
-                    loadJabatan();
+                    await loadJabatan(); // Reload setelah simpan
+                } else {
+                    if (window.App) App.showToast('Gagal menyimpan data jabatan', 'error');
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Error submitting jabatan:', err);
+                if (window.App) App.showToast('Gagal menyimpan data jabatan: ' + err.message, 'error');
             }
         });
 
