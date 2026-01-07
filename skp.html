@@ -187,16 +187,18 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
-        if (!Auth.requireAuth()) return;
+        // --- 1. Inisialisasi Variabel Global ---
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
-        async function loadSKP() {
+        // --- 2. Fungsi Load Data Utama ---
+        async function loadPendidikan() {
             try {
-                // Wait for Data to be ready
+                // Pastikan user sudah login, jika tidak Auth.requireAuth akan redirect
+                if (!Auth.requireAuth()) return;
+
                 await Data.isReady();
 
-                // 1. Get Pegawai ID safely
                 let p = null;
                 if (user.nip) {
                     p = await Data.getPegawaiByNip(user.nip);
@@ -208,156 +210,156 @@
                 }
 
                 if (!p) {
-                    document.getElementById('skpList').innerHTML = `
+                    document.querySelector('.card-body').innerHTML = `
                         <div class="alert alert-warning">
-                            <h4 class="alert-title shadow-sm">Data Pegawai Tidak Ditemukan</h4>
-                            <p>Silakan lengkapi biodata Anda terlebih dahulu agar dapat mengelola data SKP.</p>
+                            <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
+                            <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu.</p>
                             <div class="mt-3">
                                 <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
                             </div>
                         </div>`;
-                    const addBtn = document.querySelector('.mobile-action-btn');
+                    const addBtn = document.querySelector('button[onclick="openAddModal()"]');
                     if (addBtn) addBtn.style.display = 'none';
                     return;
                 }
 
-                if (!user.pegawaiId || user.pegawaiId !== p.id) {
-                    user.pegawaiId = p.id;
-                    user.nip = p.nip;
-                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-                }
-
                 currentPegawaiId = p.id;
 
-                // 2. Get Data
-                const allData = await Data.getSkp();
-                const myData = (allData || []).filter(r => String(r.pegawai_id) === String(currentPegawaiId));
-                const container = document.getElementById('skpList');
+                const allPendidikan = await Data.getPendidikan();
+                const myPendidikan = (allPendidikan || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
+                const container = document.querySelector('.card-body');
 
-                if (myData.length === 0) {
-                    container.innerHTML = '<div class="empty-state-dash">-</div>';
-                    return;
+                if (myPendidikan.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                                </svg>
+                            </div>
+                            <h3>Belum Ada Data</h3>
+                            <p>Data riwayat pendidikan belum tersedia</p>
+                        </div>`;
+                } else {
+                    myPendidikan.sort((a, b) => b.tahun_lulus - a.tahun_lulus);
+
+                    let html = '<div class="list-group">';
+                    myPendidikan.forEach(item => {
+                        const nama = item.nama_sekolah || item.namaSekolah;
+                        const jurusan = item.jurusan;
+                        const tahun = item.tahun_lulus || item.tahunLulus;
+                        const noIjz = item.no_ijazah || item.noIjazah;
+
+                        html += `
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-1">${item.tingkat} - ${nama}</h4>
+                                        <p class="mb-0 text-muted small">${jurusan ? jurusan + ' • ' : ''}Lulus Tahun ${tahun}</p>
+                                        <p class="mb-0 text-muted small">No. Ijazah: ${noIjz || '-'}</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                                        <button class="btn btn-sm btn-outline text-danger" onclick="deletePendidikan('${item.id}')">Hapus</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
                 }
-
-                // Sort by Tahun descending
-                myData.sort((a, b) => b.tahun - a.tahun);
-
-                container.innerHTML = myData.map(r => `
-                    <div class="skp-card" onclick="editSKP('${r.id}')">
-                        <div class="skp-header">
-                            <span class="skp-tahun">Tahun ${r.tahun}</span>
-                            <span class="skp-nilai">Nilai: ${r.nilai_skp || r.nilai_prestasi_kerja || '-'}</span>
-                        </div>
-                        <div class="skp-info">
-                            <p><strong>Pejabat Penilai:</strong> ${r.pejabat_penilai || '-'}</p>
-                            <p><strong>Atasan Penilai:</strong> ${r.atasan_pejabat_penilai || '-'}</p>
-                        </div>
-                    </div>
-                `).join('');
             } catch (err) {
-                console.error('Error loading SKP:', err);
-                App.showToast('Gagal memuat data', 'danger');
+                console.error('Error loading pendidikan:', err);
+                if (window.App) App.showToast('Gagal memuat data pendidikan', 'danger');
             }
         }
 
+        // --- 3. Modal Functions (Sekarang akan terbaca secara global) ---
         async function openAddModal() {
+            console.log("Membuka modal tambah..."); // Untuk debug
             if (!currentPegawaiId) {
-                await loadSKP();
+                await loadPendidikan();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
+                    if (window.App) App.showToast('Data pegawai belum siap.', 'danger');
                     return;
                 }
             }
-            document.getElementById('modalTitle').textContent = 'Tambah Riwayat SKP';
-            const form = document.getElementById('skpForm');
-            if (form) form.reset();
-            document.getElementById('skpId').value = '';
-            document.getElementById('deleteBtn').classList.add('d-none');
-            App.openModal('skpModal');
+            document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';
+            document.getElementById('editId').value = '';
+            document.getElementById('pendidikanForm').reset();
+
+            // Menggunakan class 'show' seperti fungsi closeModal Anda
+            document.getElementById('pendidikanModal').classList.add('show');
         }
 
-        async function editSKP(id) {
-            const r = await Data.getById(Data.KEYS.SKP, id);
-            if (!r) return;
+        async function openEditModal(id) {
+            const item = await Data.getById(Data.KEYS.PENDIDIKAN, id);
+            if (!item) return;
 
-            document.getElementById('modalTitle').textContent = 'Edit Riwayat SKP';
-            document.getElementById('skpId').value = r.id;
+            document.getElementById('modalTitle').textContent = 'Edit Pendidikan';
+            document.getElementById('editId').value = item.id;
+            document.getElementById('tingkat').value = item.tingkat;
+            document.getElementById('namaSekolah').value = item.nama_sekolah;
+            document.getElementById('jurusan').value = item.jurusan || '';
+            document.getElementById('tahunLulus').value = item.tahun_lulus;
+            document.getElementById('noIjazah').value = item.no_ijazah || '';
 
-            // Map keys
-            document.getElementById('tahun').value = r.tahun;
-            document.getElementById('nilai').value = r.nilai_skp || r.nilai_prestasi_kerja;
-
-            document.getElementById('orientasiPelayanan').value = r.orientasi_pelayanan || '';
-            document.getElementById('integritas').value = r.integritas || '';
-            document.getElementById('komitmen').value = r.komitmen || '';
-            document.getElementById('disiplin').value = r.disiplin || '';
-            document.getElementById('kerjasama').value = r.kerjasama || '';
-            document.getElementById('kepemimpinan').value = r.kepemimpinan || '';
-
-            document.getElementById('pejabatPenilai').value = r.pejabat_penilai || '';
-            document.getElementById('atasanPejabatPenilai').value = r.atasan_pejabat_penilai || '';
-
-
-            document.getElementById('deleteBtn').classList.remove('d-none');
-            App.openModal('skpModal');
+            document.getElementById('pendidikanModal').classList.add('show');
         }
 
-        async function deleteSKP() {
-            const id = document.getElementById('skpId').value;
-            if (!id) return;
+        function closeModal() {
+            document.getElementById('pendidikanModal').classList.remove('show');
+        }
+
+        async function deletePendidikan(id) {
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                await Data.delete(Data.KEYS.SKP, id);
-                App.showToast('Data berhasil dihapus', 'success');
-                App.closeModal('skpModal');
-                loadSKP();
+                const success = await Data.delete(Data.KEYS.PENDIDIKAN, id);
+                if (success) {
+                    if (window.App) App.showToast('Data pendidikan berhasil dihapus', 'success');
+                    loadPendidikan();
+                }
             }
         }
 
-        document.getElementById('skpForm').addEventListener('submit', async function (e) {
+        // --- 4. Form Submit Logic ---
+        document.getElementById('pendidikanForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'danger');
-                return;
-            }
+            if (!currentPegawaiId) return;
 
-            const id = document.getElementById('skpId').value;
+            const id = document.getElementById('editId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                tahun: parseInt(document.getElementById('tahun').value),
-                nilai_skp: parseFloat(document.getElementById('nilai').value),
-
-                orientasi_pelayanan: parseFloat(document.getElementById('orientasiPelayanan').value) || 0,
-                integritas: parseFloat(document.getElementById('integritas').value) || 0,
-                komitmen: parseFloat(document.getElementById('komitmen').value) || 0,
-                disiplin: parseFloat(document.getElementById('disiplin').value) || 0,
-                kerjasama: parseFloat(document.getElementById('kerjasama').value) || 0,
-                kepemimpinan: parseFloat(document.getElementById('kepemimpinan').value) || 0,
-
-                pejabat_penilai: document.getElementById('pejabatPenilai').value,
-                atasan_pejabat_penilai: document.getElementById('atasanPejabatPenilai').value
+                tingkat: document.getElementById('tingkat').value,
+                nama_sekolah: document.getElementById('namaSekolah').value,
+                jurusan: document.getElementById('jurusan').value,
+                tahun_lulus: parseInt(document.getElementById('tahunLulus').value),
+                no_ijazah: document.getElementById('noIjazah').value
             };
 
             try {
                 let result;
                 if (id) {
-                    result = await Data.update('skp', id, data);
-                    if (result) App.showToast('Data berhasil diperbarui', 'success');
+                    result = await Data.update(Data.KEYS.PENDIDIKAN, id, data);
                 } else {
-                    result = await Data.create('skp', data);
-                    if (result) App.showToast('Data berhasil ditambahkan', 'success');
+                    result = await Data.create(Data.KEYS.PENDIDIKAN, data);
                 }
 
                 if (result) {
-                    App.closeModal('skpModal');
-                    await loadSKP();
+                    if (window.App) App.showToast('Berhasil menyimpan data', 'success');
+                    closeModal();
+                    loadPendidikan();
                 }
             } catch (err) {
                 console.error(err);
             }
         });
 
-        window.addEventListener('load', () => loadSKP());
+        // --- 5. Event Listener saat halaman dimuat ---
+        window.addEventListener('load', () => {
+            // Jalankan pengecekan auth saat halaman load
+            if (Auth.requireAuth()) {
+                loadPendidikan();
+            }
+        });
     </script>
-</body>
-
-</html>

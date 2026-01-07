@@ -161,103 +161,179 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // Require admin
-        if (!Auth.requireRole(['admin'])) {
-            // Redirected
-        }
+        // --- 1. Inisialisasi Variabel Global ---
+        const user = Auth.getCurrentUser() || {};
+        let currentPegawaiId = null;
 
-        // Load jabatan data
-        async function loadJabatan() {
-            const jabatan = await Data.getJabatan();
+        // --- 2. Fungsi Load Data Utama ---
+        async function loadPendidikan() {
+            try {
+                // Pastikan user sudah login, jika tidak Auth.requireAuth akan redirect
+                if (!Auth.requireAuth()) return;
 
-            const html = jabatan.length > 0 ? jabatan.map(j => `
-        <tr>
-          <td><span class="badge badge-primary">${j.kode}</span></td>
-          <td>${j.nama}</td>
-          <td>${j.golongan || '-'}</td>
-          <td>${App.formatCurrency(j.tunjangan || 0)}</td>
-          <td class="actions">
-            <button class="btn btn-sm btn-outline btn-icon" onclick="editJabatan(${j.id})" title="Edit">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn btn-sm btn-danger btn-icon" onclick="deleteJabatan(${j.id})" title="Hapus">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              </svg>
-            </button>
-          </td>
-        </tr>
-      `).join('') : '<tr><td colspan="5" class="text-center text-muted">Tidak ada data jabatan</td></tr>';
+                await Data.isReady();
 
-            document.getElementById('jabatanTable').innerHTML = html;
-        }
+                let p = null;
+                if (user.nip) {
+                    p = await Data.getPegawaiByNip(user.nip);
+                }
 
-        // Open add modal
-        function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Tambah Jabatan';
-            document.getElementById('jabatanForm').reset();
-            document.getElementById('jabatanId').value = '';
-            App.openModal('jabatanModal');
-        }
+                if (!p) {
+                    const employees = await Data.getPegawai();
+                    p = (employees || []).find(x => x.user_id == user.id || x.user_id === String(user.id));
+                }
 
-        // Edit jabatan
-        async function editJabatan(id) {
-            const jabatan = await Data.getJabatan();
-            const j = jabatan.find(x => x.id === id);
-            if (!j) return;
+                if (!p) {
+                    document.querySelector('.card-body').innerHTML = `
+                        <div class="alert alert-warning">
+                            <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
+                            <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu.</p>
+                            <div class="mt-3">
+                                <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
+                            </div>
+                        </div>`;
+                    const addBtn = document.querySelector('button[onclick="openAddModal()"]');
+                    if (addBtn) addBtn.style.display = 'none';
+                    return;
+                }
 
-            document.getElementById('modalTitle').textContent = 'Edit Jabatan';
-            document.getElementById('jabatanId').value = j.id;
-            document.getElementById('kode').value = j.kode;
-            document.getElementById('nama').value = j.nama;
-            document.getElementById('golongan').value = j.golongan || '';
-            document.getElementById('tunjangan').value = j.tunjangan || 0;
+                currentPegawaiId = p.id;
 
-            App.openModal('jabatanModal');
-        }
+                const allPendidikan = await Data.getPendidikan();
+                const myPendidikan = (allPendidikan || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
+                const container = document.querySelector('.card-body');
 
-        // Delete jabatan
-        async function deleteJabatan(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus jabatan ini?')) {
-                await Data.delete('jabatan', id);
-                App.showToast('Jabatan berhasil dihapus!', 'success');
-                await loadJabatan();
+                if (myPendidikan.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                                </svg>
+                            </div>
+                            <h3>Belum Ada Data</h3>
+                            <p>Data riwayat pendidikan belum tersedia</p>
+                        </div>`;
+                } else {
+                    myPendidikan.sort((a, b) => b.tahun_lulus - a.tahun_lulus);
+
+                    let html = '<div class="list-group">';
+                    myPendidikan.forEach(item => {
+                        const nama = item.nama_sekolah || item.namaSekolah;
+                        const jurusan = item.jurusan;
+                        const tahun = item.tahun_lulus || item.tahunLulus;
+                        const noIjz = item.no_ijazah || item.noIjazah;
+
+                        html += `
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-1">${item.tingkat} - ${nama}</h4>
+                                        <p class="mb-0 text-muted small">${jurusan ? jurusan + ' • ' : ''}Lulus Tahun ${tahun}</p>
+                                        <p class="mb-0 text-muted small">No. Ijazah: ${noIjz || '-'}</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                                        <button class="btn btn-sm btn-outline text-danger" onclick="deletePendidikan('${item.id}')">Hapus</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                }
+            } catch (err) {
+                console.error('Error loading pendidikan:', err);
+                if (window.App) App.showToast('Gagal memuat data pendidikan', 'danger');
             }
         }
 
-        // Handle form submit
-        document.getElementById('jabatanForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        // --- 3. Modal Functions (Sekarang akan terbaca secara global) ---
+        async function openAddModal() {
+            console.log("Membuka modal tambah..."); // Untuk debug
+            if (!currentPegawaiId) {
+                await loadPendidikan();
+                if (!currentPegawaiId) {
+                    if (window.App) App.showToast('Data pegawai belum siap.', 'danger');
+                    return;
+                }
+            }
+            document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';
+            document.getElementById('editId').value = '';
+            document.getElementById('pendidikanForm').reset();
 
-            const id = document.getElementById('jabatanId').value;
-            const jabatanData = {
-                kode: document.getElementById('kode').value,
-                nama: document.getElementById('nama').value,
-                golongan: document.getElementById('golongan').value,
-                tunjangan: parseInt(document.getElementById('tunjangan').value) || 0
+            // Menggunakan class 'show' seperti fungsi closeModal Anda
+            document.getElementById('pendidikanModal').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            const item = await Data.getById(Data.KEYS.PENDIDIKAN, id);
+            if (!item) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Pendidikan';
+            document.getElementById('editId').value = item.id;
+            document.getElementById('tingkat').value = item.tingkat;
+            document.getElementById('namaSekolah').value = item.nama_sekolah;
+            document.getElementById('jurusan').value = item.jurusan || '';
+            document.getElementById('tahunLulus').value = item.tahun_lulus;
+            document.getElementById('noIjazah').value = item.no_ijazah || '';
+
+            document.getElementById('pendidikanModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('pendidikanModal').classList.remove('show');
+        }
+
+        async function deletePendidikan(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                const success = await Data.delete(Data.KEYS.PENDIDIKAN, id);
+                if (success) {
+                    if (window.App) App.showToast('Data pendidikan berhasil dihapus', 'success');
+                    loadPendidikan();
+                }
+            }
+        }
+
+        // --- 4. Form Submit Logic ---
+        document.getElementById('pendidikanForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (!currentPegawaiId) return;
+
+            const id = document.getElementById('editId').value;
+            const data = {
+                pegawai_id: currentPegawaiId,
+                tingkat: document.getElementById('tingkat').value,
+                nama_sekolah: document.getElementById('namaSekolah').value,
+                jurusan: document.getElementById('jurusan').value,
+                tahun_lulus: parseInt(document.getElementById('tahunLulus').value),
+                no_ijazah: document.getElementById('noIjazah').value
             };
 
-            if (id) {
-                await Data.update('jabatan', id, jabatanData);
-                App.showToast('Jabatan berhasil diperbarui!', 'success');
-            } else {
-                await Data.create('jabatan', jabatanData);
-                App.showToast('Jabatan berhasil ditambahkan!', 'success');
-            }
+            try {
+                let result;
+                if (id) {
+                    result = await Data.update(Data.KEYS.PENDIDIKAN, id, data);
+                } else {
+                    result = await Data.create(Data.KEYS.PENDIDIKAN, data);
+                }
 
-            App.closeModal('jabatanModal');
-            await loadJabatan();
+                if (result) {
+                    if (window.App) App.showToast('Berhasil menyimpan data', 'success');
+                    closeModal();
+                    loadPendidikan();
+                }
+            } catch (err) {
+                console.error(err);
+            }
         });
 
-        // Initialize
-        (async () => {
-            await loadJabatan();
-        })();
+        // --- 5. Event Listener saat halaman dimuat ---
+        window.addEventListener('load', () => {
+            // Jalankan pengecekan auth saat halaman load
+            if (Auth.requireAuth()) {
+                loadPendidikan();
+            }
+        });
     </script>
-</body>
-
-</html>

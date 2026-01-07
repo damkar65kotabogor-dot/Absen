@@ -144,16 +144,18 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
-        if (!Auth.requireAuth()) return;
+        // --- 1. Inisialisasi Variabel Global ---
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
-        async function loadPangkat() {
+        // --- 2. Fungsi Load Data Utama ---
+        async function loadPendidikan() {
             try {
-                // Wait for Data to be ready
+                // Pastikan user sudah login, jika tidak Auth.requireAuth akan redirect
+                if (!Auth.requireAuth()) return;
+
                 await Data.isReady();
 
-                // 1. Get Pegawai ID safely
                 let p = null;
                 if (user.nip) {
                     p = await Data.getPegawaiByNip(user.nip);
@@ -165,142 +167,156 @@
                 }
 
                 if (!p) {
-                    document.getElementById('pangkatList').innerHTML = `
+                    document.querySelector('.card-body').innerHTML = `
                         <div class="alert alert-warning">
-                            <h4 class="alert-title shadow-sm">Data Pegawai Tidak Ditemukan</h4>
-                            <p>Silakan lengkapi biodata Anda terlebih dahulu agar dapat mengelola data pangkat.</p>
+                            <h4 class="alert-title">Data Pegawai Tidak Ditemukan</h4>
+                            <p>Data kepegawaian Anda belum terdaftar di sistem. Silakan lengkapi biodata Anda terlebih dahulu.</p>
                             <div class="mt-3">
                                 <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
                             </div>
                         </div>`;
-                    const addBtn = document.querySelector('.mobile-action-btn');
+                    const addBtn = document.querySelector('button[onclick="openAddModal()"]');
                     if (addBtn) addBtn.style.display = 'none';
                     return;
                 }
 
-                if (!user.pegawaiId || user.pegawaiId !== p.id) {
-                    user.pegawaiId = p.id;
-                    user.nip = p.nip;
-                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-                }
-
                 currentPegawaiId = p.id;
 
-                // 2. Get Data
-                const allData = await Data.getRiwayatPangkat();
-                const myData = (allData || []).filter(r => String(r.pegawai_id) === String(currentPegawaiId));
-                const container = document.getElementById('pangkatList');
+                const allPendidikan = await Data.getPendidikan();
+                const myPendidikan = (allPendidikan || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
+                const container = document.querySelector('.card-body');
 
-                if (myData.length === 0) {
-                    container.innerHTML = '<div class="empty-state-dash">-</div>';
-                    return;
+                if (myPendidikan.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                                </svg>
+                            </div>
+                            <h3>Belum Ada Data</h3>
+                            <p>Data riwayat pendidikan belum tersedia</p>
+                        </div>`;
+                } else {
+                    myPendidikan.sort((a, b) => b.tahun_lulus - a.tahun_lulus);
+
+                    let html = '<div class="list-group">';
+                    myPendidikan.forEach(item => {
+                        const nama = item.nama_sekolah || item.namaSekolah;
+                        const jurusan = item.jurusan;
+                        const tahun = item.tahun_lulus || item.tahunLulus;
+                        const noIjz = item.no_ijazah || item.noIjazah;
+
+                        html += `
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-1">${item.tingkat} - ${nama}</h4>
+                                        <p class="mb-0 text-muted small">${jurusan ? jurusan + ' • ' : ''}Lulus Tahun ${tahun}</p>
+                                        <p class="mb-0 text-muted small">No. Ijazah: ${noIjz || '-'}</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline text-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                                        <button class="btn btn-sm btn-outline text-danger" onclick="deletePendidikan('${item.id}')">Hapus</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
                 }
-
-                // Sort by TMT descending
-                myData.sort((a, b) => new Date(b.tmt_pangkat) - new Date(a.tmt_pangkat));
-
-                container.innerHTML = myData.map(r => `
-                    <div class="pangkat-card" onclick="editPangkat('${r.id}')">
-                        <div class="pangkat-header">
-                            <span class="pangkat-name">${r.golongan || r.pangkat}</span>
-                            <span class="pangkat-tmt">TMT: ${App.formatDate(r.tmt_pangkat)}</span>
-                        </div>
-                        <div class="pangkat-info">
-                            <p><strong>No SK:</strong> ${r.nomor_sk || '-'}</p>
-                            <p><strong>Tgl SK:</strong> ${r.tanggal_sk ? App.formatDate(r.tanggal_sk) : '-'}</p>
-                            <p><strong>Pejabat:</strong> ${r.pejabat_penetap || '-'}</p>
-                        </div>
-                    </div>
-                `).join('');
             } catch (err) {
-                console.error('Error loading pangkat:', err);
-                App.showToast('Gagal memuat data', 'danger');
+                console.error('Error loading pendidikan:', err);
+                if (window.App) App.showToast('Gagal memuat data pendidikan', 'danger');
             }
         }
 
+        // --- 3. Modal Functions (Sekarang akan terbaca secara global) ---
         async function openAddModal() {
+            console.log("Membuka modal tambah..."); // Untuk debug
             if (!currentPegawaiId) {
-                await loadPangkat();
+                await loadPendidikan();
                 if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
+                    if (window.App) App.showToast('Data pegawai belum siap.', 'danger');
                     return;
                 }
             }
-            document.getElementById('modalTitle').textContent = 'Tambah Riwayat Kepangkatan';
-            const form = document.getElementById('pangkatForm');
-            if (form) form.reset();
-            document.getElementById('pangkatId').value = '';
-            document.getElementById('deleteBtn').classList.add('d-none');
-            App.openModal('pangkatModal');
+            document.getElementById('modalTitle').textContent = 'Tambah Pendidikan';
+            document.getElementById('editId').value = '';
+            document.getElementById('pendidikanForm').reset();
+
+            // Menggunakan class 'show' seperti fungsi closeModal Anda
+            document.getElementById('pendidikanModal').classList.add('show');
         }
 
-        async function editPangkat(id) {
-            const r = await Data.getById(Data.KEYS.RIWAYAT_PANGKAT, id);
-            if (!r) return;
+        async function openEditModal(id) {
+            const item = await Data.getById(Data.KEYS.PENDIDIKAN, id);
+            if (!item) return;
 
-            document.getElementById('modalTitle').textContent = 'Edit Riwayat Kepangkatan';
-            document.getElementById('pangkatId').value = r.id;
+            document.getElementById('modalTitle').textContent = 'Edit Pendidikan';
+            document.getElementById('editId').value = item.id;
+            document.getElementById('tingkat').value = item.tingkat;
+            document.getElementById('namaSekolah').value = item.nama_sekolah;
+            document.getElementById('jurusan').value = item.jurusan || '';
+            document.getElementById('tahunLulus').value = item.tahun_lulus;
+            document.getElementById('noIjazah').value = item.no_ijazah || '';
 
-            // Map keys
-            document.getElementById('golongan').value = r.golongan || r.pangkat;
-            document.getElementById('tmt').value = r.tmt_pangkat;
-            document.getElementById('noSK').value = r.nomor_sk || '';
-            document.getElementById('tglSK').value = r.tanggal_sk || '';
-            document.getElementById('pejabat').value = r.pejabat_penetap || '';
-
-            document.getElementById('deleteBtn').classList.remove('d-none');
-            App.openModal('pangkatModal');
+            document.getElementById('pendidikanModal').classList.add('show');
         }
 
-        async function deletePangkat() {
-            const id = document.getElementById('pangkatId').value;
-            if (!id) return;
+        function closeModal() {
+            document.getElementById('pendidikanModal').classList.remove('show');
+        }
+
+        async function deletePendidikan(id) {
             if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                await Data.delete(Data.KEYS.RIWAYAT_PANGKAT, id);
-                App.showToast('Data berhasil dihapus', 'success');
-                App.closeModal('pangkatModal');
-                loadPangkat();
+                const success = await Data.delete(Data.KEYS.PENDIDIKAN, id);
+                if (success) {
+                    if (window.App) App.showToast('Data pendidikan berhasil dihapus', 'success');
+                    loadPendidikan();
+                }
             }
         }
 
-        document.getElementById('pangkatForm').addEventListener('submit', async function (e) {
+        // --- 4. Form Submit Logic ---
+        document.getElementById('pendidikanForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (!currentPegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'danger');
-                return;
-            }
+            if (!currentPegawaiId) return;
 
-            const id = document.getElementById('pangkatId').value;
+            const id = document.getElementById('editId').value;
             const data = {
                 pegawai_id: currentPegawaiId,
-                golongan: document.getElementById('golongan').value,
-                tmt_pangkat: document.getElementById('tmt').value,
-                nomor_sk: document.getElementById('noSK').value,
-                tanggal_sk: document.getElementById('tglSK').value,
-                pejabat_penetap: document.getElementById('pejabat').value
+                tingkat: document.getElementById('tingkat').value,
+                nama_sekolah: document.getElementById('namaSekolah').value,
+                jurusan: document.getElementById('jurusan').value,
+                tahun_lulus: parseInt(document.getElementById('tahunLulus').value),
+                no_ijazah: document.getElementById('noIjazah').value
             };
 
             try {
                 let result;
                 if (id) {
-                    result = await Data.update('riwayat_pangkat', id, data);
-                    if (result) App.showToast('Data berhasil diperbarui', 'success');
+                    result = await Data.update(Data.KEYS.PENDIDIKAN, id, data);
                 } else {
-                    result = await Data.create('riwayat_pangkat', data);
-                    if (result) App.showToast('Data berhasil ditambahkan', 'success');
+                    result = await Data.create(Data.KEYS.PENDIDIKAN, data);
                 }
 
                 if (result) {
-                    App.closeModal('pangkatModal');
-                    await loadPangkat();
+                    if (window.App) App.showToast('Berhasil menyimpan data', 'success');
+                    closeModal();
+                    loadPendidikan();
                 }
             } catch (err) {
                 console.error(err);
             }
         });
 
-        window.addEventListener('load', () => loadPangkat());
+        // --- 5. Event Listener saat halaman dimuat ---
+        window.addEventListener('load', () => {
+            // Jalankan pengecekan auth saat halaman load
+            if (Auth.requireAuth()) {
+                loadPendidikan();
+            }
+        });
     </script>
-</body>
-
-</html>
