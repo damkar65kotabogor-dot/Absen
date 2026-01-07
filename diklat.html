@@ -143,163 +143,38 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
-        if (!Auth.requireAuth()) return;
         const user = Auth.getCurrentUser() || {};
         let currentPegawaiId = null;
 
         async function loadDiklat() {
             try {
-                // Wait for Data to be ready
                 await Data.isReady();
-
-                // 1. Get Pegawai ID safely
-                let p = null;
-                if (user.nip) {
-                    p = await Data.getPegawaiByNip(user.nip);
-                }
-
+                let p = await Data.getPegawaiByNip(user.nip);
                 if (!p) {
                     const employees = await Data.getPegawai();
-                    p = (employees || []).find(x => x.user_id == user.id || x.user_id === String(user.id));
+                    p = (employees || []).find(x => x.user_id == user.id);
                 }
-
-                if (!p) {
-                    document.getElementById('diklatList').innerHTML = `
-                        <div class="alert alert-warning">
-                            <h4 class="alert-title shadow-sm">Data Pegawai Tidak Ditemukan</h4>
-                            <p>Silakan lengkapi biodata Anda terlebih dahulu agar dapat mengelola data diklat.</p>
-                            <div class="mt-3">
-                                <a href="biodata.html" class="btn btn-primary btn-sm text-white">Lengkapi Biodata</a>
-                            </div>
-                        </div>`;
-                    const addBtn = document.querySelector('.mobile-action-btn');
-                    if (addBtn) addBtn.style.display = 'none';
-                    return;
-                }
-
-                if (!user.pegawaiId || user.pegawaiId !== p.id) {
-                    user.pegawaiId = p.id;
-                    user.nip = p.nip;
-                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-                }
+                if (!p) return;
 
                 currentPegawaiId = p.id;
-
-                // 2. Get Data
                 const allData = await Data.getDiklat();
-                const myData = (allData || []).filter(r => String(r.pegawai_id) === String(currentPegawaiId)); // snake_case
-                const container = document.getElementById('diklatList');
-
-                if (myData.length === 0) {
-                    container.innerHTML = '<div class="empty-state-dash">-</div>';
-                    return;
-                }
-
-                // Sort by year descending
-                myData.sort((a, b) => b.tahun - a.tahun);
-
-                container.innerHTML = myData.map(r => `
-                    <div class="diklat-card" onclick="editDiklat('${r.id}')">
-                        <div class="diklat-header">
-                            <span class="diklat-name">${r.nama_diklat}</span>
-                            <span class="diklat-tahun">Tahun: ${r.tahun}</span>
-                        </div>
-                        <div class="diklat-info">
-                            <p><strong>Penyelenggara:</strong> ${r.penyelenggara || '-'}</p>
-                            <p><strong>Sertifikat:</strong> ${r.no_sertifikat || '-'}</p>
-                            ${r.keterangan ? `<p class="mt-2 text-muted italic">${r.keterangan}</p>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                console.error('Error loading diklat:', err);
-                App.showToast('Gagal memuat data', 'danger');
-            }
+                const myData = (allData || []).filter(item => String(item.pegawai_id) === String(currentPegawaiId));
+                console.log("Data Diklat dimuat", myData);
+            } catch (err) { console.error(err); }
         }
 
-        async function openAddModal() {
-            if (!currentPegawaiId) {
-                await loadDiklat();
-                if (!currentPegawaiId) {
-                    App.showToast('Data pegawai belum siap. Silakan lengkapi biodata Anda.', 'danger');
-                    return;
-                }
-            }
-            document.getElementById('modalTitle').textContent = 'Tambah Riwayat Diklat';
-            const form = document.getElementById('diklatForm');
-            if (form) form.reset();
-            document.getElementById('diklatId').value = '';
-            document.getElementById('deleteBtn').classList.add('d-none');
-            App.openModal('diklatModal');
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Diklat';
+            document.getElementById('editId').value = '';
+            document.getElementById('diklatForm').reset();
+            document.getElementById('diklatModal').classList.add('show');
         }
 
-        async function editDiklat(id) {
-            const r = await Data.getById(Data.KEYS.DIKLAT, id);
-            if (!r) return;
-
-            document.getElementById('modalTitle').textContent = 'Edit Riwayat Diklat';
-            document.getElementById('diklatId').value = r.id;
-
-            // Map keys
-            document.getElementById('namaDiklat').value = r.nama_diklat;
-            document.getElementById('tahun').value = r.tahun;
-            document.getElementById('penyelenggara').value = r.penyelenggara || '';
-            document.getElementById('noSertifikat').value = r.no_sertifikat || '';
-            document.getElementById('keterangan').value = r.keterangan || '';
-
-            document.getElementById('deleteBtn').classList.remove('d-none');
-            App.openModal('diklatModal');
+        function closeModal() {
+            document.getElementById('diklatModal').classList.remove('show');
         }
 
-        async function deleteDiklat() {
-            const id = document.getElementById('diklatId').value;
-            if (!id) return;
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                await Data.delete(Data.KEYS.DIKLAT, id);
-                App.showToast('Data berhasil dihapus', 'success');
-                App.closeModal('diklatModal');
-                loadDiklat();
-            }
-        }
-
-        document.getElementById('diklatForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            if (!currentPegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'danger');
-                return;
-            }
-
-            const id = document.getElementById('diklatId').value;
-            const data = {
-                pegawai_id: currentPegawaiId,
-                nama_diklat: document.getElementById('namaDiklat').value,
-                tahun: parseInt(document.getElementById('tahun').value),
-                penyelenggara: document.getElementById('penyelenggara').value,
-                no_sertifikat: document.getElementById('noSertifikat').value,
-                keterangan: document.getElementById('keterangan').value
-            };
-
-            try {
-                let result;
-                if (id) {
-                    result = await Data.update('diklat', id, data);
-                    if (result) App.showToast('Data berhasil diperbarui', 'success');
-                } else {
-                    result = await Data.create('diklat', data);
-                    if (result) App.showToast('Data berhasil ditambahkan', 'success');
-                }
-
-                if (result) {
-                    App.closeModal('diklatModal');
-                    await loadDiklat();
-                }
-            } catch (err) {
-                console.error(err);
-            }
+        window.addEventListener('load', () => {
+            if (Auth.requireAuth()) loadDiklat();
         });
-
-        window.addEventListener('load', () => loadDiklat());
     </script>
-</body>
-
-</html>
