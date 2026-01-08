@@ -722,10 +722,7 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // Check Auth
-        if (!Auth.requireRole(['admin', 'pimpinan'])) return;
-
-        // Get ID
+        // Get ID first
         const urlParams = new URLSearchParams(window.location.search);
         const pegawaiId = parseInt(urlParams.get('id'));
 
@@ -735,8 +732,8 @@
 
         let currentPegawai = null;
 
-        // Tabs Logic
-        function showTab(tabId) {
+        // Tabs Logic - Define globally
+        window.showTab = function (tabId) {
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
@@ -1000,8 +997,8 @@
              `;
         }
 
-        // BIODATA ACTIONS
-        function openEditBiodata() {
+        // BIODATA ACTIONS - Define globally
+        window.openEditBiodata = function () {
             const p = currentPegawai;
             document.getElementById('nik').value = p.nik || '';
             document.getElementById('nip').value = p.nip || '';
@@ -1019,7 +1016,7 @@
             document.getElementById('tanggalMasuk').value = p.tanggal_masuk || '';
 
             App.openModal('editModal');
-        }
+        };
 
         document.getElementById('biodataForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -1051,49 +1048,49 @@
             }
         });
 
-        // OPEN MODALS
-        function openPendidikanModal() {
+        // OPEN MODALS - Define globally
+        window.openPendidikanModal = function () {
             document.getElementById('pendidikanModalTitle').textContent = 'Tambah Pendidikan';
             document.getElementById('pendidikanForm').reset();
             document.getElementById('pendidikanId').value = '';
             App.openModal('pendidikanModal');
-        }
-        function openJabatanModal() {
+        };
+        window.openJabatanModal = function () {
             document.getElementById('jabatanModalTitle').textContent = 'Tambah Riwayat Jabatan';
             document.getElementById('jabatanForm').reset();
             document.getElementById('riwayatJabatanId').value = '';
             App.openModal('jabatanModal');
-        }
-        function openPangkatModal() {
+        };
+        window.openPangkatModal = function () {
             document.getElementById('pangkatModalTitle').textContent = 'Tambah Riwayat Pangkat';
             document.getElementById('pangkatForm').reset();
             document.getElementById('pangkatId').value = '';
             App.openModal('pangkatModal');
-        }
-        function openDiklatModal() {
+        };
+        window.openDiklatModal = function () {
             document.getElementById('diklatModalTitle').textContent = 'Tambah Riwayat Diklat';
             document.getElementById('diklatForm').reset();
             document.getElementById('diklatId').value = '';
             App.openModal('diklatModal');
-        }
-        function openKgbModal() {
+        };
+        window.openKgbModal = function () {
             document.getElementById('kgbModalTitle').textContent = 'Tambah Riwayat KGB';
             document.getElementById('kgbForm').reset();
             document.getElementById('kgbId').value = '';
             App.openModal('kgbModal');
-        }
-        function openKeluargaModal() {
+        };
+        window.openKeluargaModal = function () {
             document.getElementById('keluargaModalTitle').textContent = 'Tambah Keluarga';
             document.getElementById('keluargaForm').reset();
             document.getElementById('memberId').value = '';
             App.openModal('keluargaModal');
-        }
-        function openSkpModal() {
+        };
+        window.openSkpModal = function () {
             document.getElementById('skpModalTitle').textContent = 'Tambah SKP';
             document.getElementById('skpForm').reset();
             document.getElementById('skpId').value = '';
             App.openModal('skpModal');
-        }
+        };
 
         // EDIT ACTIONS
         async function editPendidikan(id) {
@@ -1438,14 +1435,16 @@
             }
         });
 
-        // Initialize
-        loadDetail();
+        // Check Auth and Initialize
+        if (Auth.requireRole(['admin', 'pimpinan'])) {
+            loadDetail();
+        }
 
         // Action Menu Functionality
         let currentActiveId = null;
         let currentActiveType = null;
 
-        function showActionMenu(event, id, type) {
+        window.showActionMenu = function (event, id, type) {
             event.preventDefault();
             event.stopPropagation();
 
@@ -1465,9 +1464,9 @@
             popover.style.top = `${top}px`;
             popover.style.left = `${left}px`;
             popover.classList.add('show');
-        }
+        };
 
-        function editCurrentItem() {
+        window.editCurrentItem = function () {
             if (!currentActiveId || !currentActiveType) return;
 
             switch (currentActiveType) {
@@ -1480,9 +1479,9 @@
                 case 'skp': editSkp(currentActiveId); break;
             }
             document.getElementById('actionMenuPopover').classList.remove('show');
-        }
+        };
 
-        async function deleteCurrentItem() {
+        window.deleteCurrentItem = async function () {
             if (!currentActiveId || !currentActiveType) return;
 
             let success = false;
@@ -1496,7 +1495,7 @@
                 case 'skp': await deleteSkp(currentActiveId); break;
             }
             document.getElementById('actionMenuPopover').classList.remove('show');
-        }
+        };
 
         // Close Popover when clicking outside
         document.addEventListener('click', (e) => {
