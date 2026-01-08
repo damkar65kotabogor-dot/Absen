@@ -1,23 +1,10 @@
--- SIMPEG PPPK - Comprehensive RLS Fix
--- CARA MENJALANKAN: Salin seluruh kode ini dan jalankan di Supabase SQL Editor.
--- Script ini akan membuka izin akses tabel untuk role 'anon' dan 'authenticated'.
+-- SIMPEG PPPK - Comprehensive RLS Policy Fix
+-- CARA MENJALANKAN: 
+-- 1. Buka Supabase Dashboard → SQL Editor
+-- 2. Salin seluruh kode ini dan jalankan
+-- 3. Script ini akan membuka izin akses tabel untuk role 'anon' dan 'authenticated'
 
--- 1. Enable RLS for all tables
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE unit_kerja ENABLE ROW LEVEL SECURITY;
-ALTER TABLE jabatan ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pegawai ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pendidikan ENABLE ROW LEVEL SECURITY;
-ALTER TABLE diklat ENABLE ROW LEVEL SECURITY;
-ALTER TABLE keluarga ENABLE ROW LEVEL SECURITY;
-ALTER TABLE skp ENABLE ROW LEVEL SECURITY;
-ALTER TABLE riwayat_pangkat ENABLE ROW LEVEL SECURITY;
-ALTER TABLE riwayat_jabatan ENABLE ROW LEVEL SECURITY;
-ALTER TABLE kgb ENABLE ROW LEVEL SECURITY;
-ALTER TABLE absensi ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cuti ENABLE ROW LEVEL SECURITY;
-
--- 2. Create 'Permit All' policies for ALL tables (Allows anon access)
+-- Drop all existing policies first to avoid conflicts
 DO $$ 
 DECLARE
     tab text;
@@ -26,21 +13,60 @@ BEGIN
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' 
+        AND table_type = 'BASE TABLE'
         AND table_name IN ('users', 'unit_kerja', 'jabatan', 'pegawai', 'pendidikan', 'diklat', 'keluarga', 'skp', 'riwayat_pangkat', 'riwayat_jabatan', 'kgb', 'absensi', 'cuti')
     LOOP
         EXECUTE format('DROP POLICY IF EXISTS "Permit All" ON %I', tab);
-        EXECUTE format('CREATE POLICY "Permit All" ON %I FOR ALL TO anon, authenticated USING (true) WITH CHECK (true)', tab);
+        EXECUTE format('DROP POLICY IF EXISTS "Enable all for anon" ON %I', tab);
+        EXECUTE format('DROP POLICY IF EXISTS "Enable all for authenticated" ON %I', tab);
     END LOOP;
 END $$;
 
--- 3. Fix cuti table columns (Ensure TEXT type for names)
+-- Enable RLS for all tables
+ALTER TABLE IF EXISTS users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS unit_kerja ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS jabatan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS pegawai ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS pendidikan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS diklat ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS keluarga ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS skp ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS riwayat_pangkat ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS riwayat_jabatan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS kgb ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS absensi ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS cuti ENABLE ROW LEVEL SECURITY;
+
+-- Create comprehensive 'Permit All' policies for ALL tables
+-- This allows both anon and authenticated users full access
 DO $$ 
-BEGIN 
-    -- Fix approved_by type if it exists as something else
-    IF EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'cuti' AND column_name = 'approved_by' AND data_type != 'text'
-    ) THEN
-        ALTER TABLE cuti ALTER COLUMN approved_by TYPE TEXT;
-    END IF;
+DECLARE
+    tab text;
+BEGIN
+    FOR tab IN 
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_type = 'BASE TABLE'
+        AND table_name IN ('users', 'unit_kerja', 'jabatan', 'pegawai', 'pendidikan', 'diklat', 'keluarga', 'skp', 'riwayat_pangkat', 'riwayat_jabatan', 'kgb', 'absensi', 'cuti')
+    LOOP
+        -- Create policy for anon and authenticated roles
+        EXECUTE format('CREATE POLICY "Permit All" ON %I FOR ALL TO anon, authenticated USING (true) WITH CHECK (true)', tab);
+        
+        RAISE NOTICE 'Created policy for table: %', tab;
+    END LOOP;
 END $$;
+
+-- Verify policies were created
+SELECT 
+    schemaname,
+    tablename,
+    policyname,
+    roles,
+    cmd,
+    qual,
+    with_check
+FROM pg_policies 
+WHERE schemaname = 'public'
+AND tablename IN ('users', 'unit_kerja', 'jabatan', 'pegawai', 'pendidikan', 'diklat', 'keluarga', 'skp', 'riwayat_pangkat', 'riwayat_jabatan', 'kgb', 'absensi', 'cuti')
+ORDER BY tablename;

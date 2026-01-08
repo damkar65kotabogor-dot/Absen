@@ -7,7 +7,7 @@ const Data = {
         RIWAYAT_PANGKAT: 'riwayat_pangkat',
         DIKLAT: 'diklat',
         KGB: 'kgb',
-        SKP: 'riwayat_skp',
+        SKP: 'skp',
         KELUARGA: 'keluarga',
         JABATAN: 'jabatan',
         UNIT_KERJA: 'unit_kerja',
