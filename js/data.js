@@ -213,9 +213,11 @@ const Data = {
 
         if (error) {
             console.error('Error fetching pegawai with relations:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             return [];
         }
-        return data;
+        console.log('getPegawaiWithRelations returned:', data?.length || 0, 'records');
+        return data || [];
     },
 
     // Get statistics
@@ -255,9 +257,11 @@ const Data = {
 
         if (error) {
             console.error('Error fetching absensi with pegawai:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             return [];
         }
-        return data;
+        console.log('getAbsensiWithPegawai returned:', data?.length || 0, 'records');
+        return data || [];
     },
 
     async getPegawaiByNip(nip) {
