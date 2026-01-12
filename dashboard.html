@@ -492,6 +492,15 @@
           const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
           document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
 
+          // Helper to get local date string YYYY-MM-DD
+          function getLocalTodayDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          }
+
           // Chart instance
           let attendanceChart = null;
 
@@ -794,7 +803,7 @@
             const user = Auth.getCurrentUser();
             if (!user.pegawaiId) return;
 
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalTodayDate();
             const attendance = await Data.getAbsensi();
             const absensi = attendance.find(a =>
               a.pegawai_id === user.pegawaiId && a.tanggal === today
@@ -835,7 +844,7 @@
 
             const now = new Date();
             const jamMasuk = now.toTimeString().slice(0, 5);
-            const today = now.toISOString().split('T')[0];
+            const today = getLocalTodayDate();
 
             await Data.create('absensi', {
               pegawai_id: user.pegawaiId,
@@ -861,7 +870,7 @@
             const isAtLocation = await App.validateLocation();
             if (!isAtLocation) return;
 
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalTodayDate();
             const attendance = await Data.getAbsensi();
             const absensi = attendance.find(a =>
               a.pegawai_id === user.pegawaiId && a.tanggal === today
@@ -925,7 +934,7 @@
                 pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
             }
 
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalTodayDate();
             const now = new Date().toTimeString().slice(0, 5);
 
             document.getElementById('manualTanggal').value = today;
