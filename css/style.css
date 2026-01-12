@@ -2157,6 +2157,20 @@ select.form-control {
     }
 }
 
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0 !important;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+}
+
 @media (max-width: 768px) {
 
     .dashboard-header,
