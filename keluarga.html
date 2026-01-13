@@ -108,6 +108,81 @@
             display: flex;
             gap: 0.5rem;
         }
+
+        /* New Family Card Styles */
+        .family-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            /* Subtle shadow */
+            border: 1px solid #f1f5f9;
+        }
+
+        .family-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .family-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .family-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem 1.5rem;
+            /* Row gap, Col gap */
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .info-item span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Badge Customization */
+        .badge {
+            display: inline-flex;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-pink {
+            background-color: #fce7f3;
+            /* Pink 100 */
+            color: #db2777;
+            /* Pink 600 */
+        }
+
+        .badge-success {
+            background-color: #dcfce7;
+            /* Green 100 */
+            color: #15803d;
+            /* Green 700 */
+        }
+
+        .badge-primary {
+            background-color: #dbeafe;
+            /* Blue 100 */
+            color: #2563eb;
+            /* Blue 600 */
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -193,43 +268,62 @@
 
 
         function renderList(data) {
-
             const container = document.getElementById('familyList');
-
             if (data.length === 0) {
-
                 container.innerHTML = '<p class="text-center text-muted">Belum ada data keluarga.</p>';
-
                 return;
-
             }
 
-
-
             let html = '';
-
             data.forEach(item => {
+                // Determine badge color based on relationship
+                let badgeClass = 'badge-primary'; // Default blue
+                if (['Istri', 'Ibu'].includes(item.hubungan) || item.jenis_kelamin === 'P') {
+                    badgeClass = 'badge-pink';
+                } else if (['Anak'].includes(item.hubungan)) {
+                    badgeClass = 'badge-success'; // Green
+                }
+
+                // Format Date: DD-MM-YYYY
+                const dob = item.tanggal_lahir ? new Date(item.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-') : '-';
+
+                // Gender Text
+                const genderText = item.jenis_kelamin === 'L' ? 'LAKI-LAKI' : 'PEREMPUAN';
 
                 html += `
-
                     <div class="family-card" onclick="openEditModal('${item.id}')">
-
-                        <div>
-
-                            <strong style="display:block; font-size: 1.1rem;">${item.nama}</strong>
-
-                            <span class="text-muted small">${item.hubungan} • ${item.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
-
+                        <div class="family-header">
+                            <span class="badge ${badgeClass}">${item.hubungan.toUpperCase()}</span>
                         </div>
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-
+                        
+                        <h3 class="family-name">${item.nama}</h3>
+                        
+                        <div class="family-info-grid">
+                            <div class="info-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <span>${genderText}</span>
+                            </div>
+                            <div class="info-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <span>${dob}</span>
+                            </div>
+                            <div class="info-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> <!-- Fallback icon? Or specific briefcase? -->
+                                <!-- Let's use briefcase for job -->
+                                <svg style="display:none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                            </div> 
+                             <div class="info-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                <span>${item.pekerjaan || '-'}</span>
+                            </div>
+                            <div class="info-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <span>Tidak Dapat</span>
+                            </div>
+                        </div>
                     </div>`;
-
             });
-
             container.innerHTML = html;
-
         }
 
 
