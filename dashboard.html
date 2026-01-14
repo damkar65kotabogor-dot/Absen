@@ -8,8 +8,8 @@
   <title>Dashboard - SIMPEG PPPK Paruh Waktu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1.1">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -69,10 +69,12 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content mobile-layout">
-      <!-- New Mobile Header -->
-      <header class="mobile-header">
-        <button class="toggle-sidebar-mobile" id="toggleSidebar">
+    <!-- Main Content Rewrite for Total Mobile Experience -->
+    <main class="mobile-app-wrapper">
+
+      <!-- Fixed Mobile Header -->
+      <header class="app-header-mobile">
+        <button class="icon-btn-pill" id="toggleSidebar">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -80,35 +82,38 @@
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <h1 class="header-title-mobile">PPPK Paruh Waktu</h1>
-        <button class="notif-btn-mobile">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        <span class="app-title-main">PPPK Paruh Waktu</span>
+        <button class="notif-btn-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
-          <span class="notif-dot" id="notifBadge" style="display: none;"></span>
+          <span class="dot-indicator" id="notifBadge" style="display: none;"></span>
         </button>
       </header>
 
-      <!-- Dashboard Content -->
-      <div id="dashboardContent" class="content-padding">
+      <!-- Scrollable Content Area -->
+      <div class="scroll-area">
 
-        <!-- Greeting Section -->
-        <div class="greeting-section">
-          <p class="greeting-text">Selamat Pagi,</p>
-          <h2 class="user-name-large" id="greetingName">Memuat...</h2>
-        </div>
+        <!-- Welcome Section -->
+        <section class="welcome-box">
+          <p class="txt-greeting">Selamat Pagi,</p>
+          <h2 class="txt-user-name" id="greetingName">Memuat...</h2>
+        </section>
 
-        <!-- Ringkasan Header -->
-        <div class="summary-header">
-          <div class="summary-text">
+        <!-- Dynamic White Shape Background Effect (Optional based on design) -->
+        <div class="curve-bg-effect"></div>
+
+        <!-- Activity Summary Header -->
+        <div class="section-title-row">
+          <div class="title-label">
             <h3>Ringkasan</h3>
             <p>Aktivitas Hari Ini</p>
           </div>
-          <div class="date-badge">
+          <div class="pill-date-badge">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="16" y1="2" x2="16" y2="6"></line>
               <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -118,127 +123,126 @@
           </div>
         </div>
 
-        <!-- Blue Status Card -->
-        <div class="status-card-blue">
-          <div class="status-info">
-            <p class="status-label">Status Kehadiran</p>
-            <h2 class="status-main" id="statusText">Belum Hadir</h2>
-            <div class="status-time-badge" id="checkInTimeBadge">
+        <!-- Attendance Card (Blue Gradient) -->
+        <div class="card-attendance-main">
+          <div class="card-left">
+            <span class="card-label">Status Kehadiran</span>
+            <h2 class="card-status-text" id="statusText">Belum Hadir</h2>
+            <div class="card-time-pill">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
               <span id="checkInTime">Masuk: --:-- WIB</span>
             </div>
           </div>
-          <div class="status-icon-circle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
+          <div class="card-right">
+            <div class="icon-check-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
 
-        <!-- Profile Card -->
-        <a href="profil.html" class="menu-card-wide">
-          <div class="menu-icon-circle blue-light">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <div class="menu-text">
-            <h4>Profil Saya</h4>
-            <p>Kelola data kepegawaian</p>
-          </div>
-          <div class="menu-arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Menu Grid -->
+        <div class="main-menu-container">
+          <!-- Profile Card Wide -->
+          <a href="profil.html" class="menu-item-wide">
+            <div class="menu-icon-bg blue">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="menu-info">
+              <h4>Profil Saya</h4>
+              <p>Kelola data kepegawaian</p>
+            </div>
+            <svg class="chevron-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
+          </a>
+
+          <!-- Grid 2 Columns -->
+          <div class="menu-grid-2col">
+            <a href="absensi.html" class="menu-item-square">
+              <div class="icon-sq-bg orange">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <div class="sq-text">
+                <h4>Rekapitulasi</h4>
+                <p class="orange-label">KEHADIRAN</p>
+              </div>
+            </a>
+
+            <a href="cuti.html" class="menu-item-square">
+              <div class="icon-sq-bg teal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div class="sq-text">
+                <h4>Fleksibilitas</h4>
+                <p class="teal-label">KERJA</p>
+              </div>
+            </a>
           </div>
-        </a>
-
-        <!-- Grid Menu -->
-        <div class="menu-grid-new">
-          <!-- Rekapitulasi -->
-          <a href="absensi.html" class="menu-card-square">
-            <div class="menu-icon-soft orange">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </div>
-            <h4>Rekapitulasi</h4>
-            <p>KEHADIRAN</p>
-          </a>
-
-          <!-- Fleksibilitas -->
-          <a href="cuti.html" class="menu-card-square">
-            <div class="menu-icon-soft green">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </div>
-            <h4>Fleksibilitas</h4>
-            <p>KERJA</p>
-          </a>
         </div>
 
-        <!-- Spacer for bottom nav -->
-        <div style="height: 100px;"></div>
-
-        <!-- Admin Dashboard Fallback (Hidden by default, can be toggled via JS if needed for Admin role) -->
-        <div id="adminDashboardContent" style="display: none;">
-          <!-- Keeps original admin layout if necessary, but hiding it for now -->
-        </div>
+        <!-- Space for Bottom Nav -->
+        <div class="spacer-bottom"></div>
       </div>
 
-      <!-- Custom Bottom Navigation -->
-      <div class="bottom-nav-container">
-        <button class="nav-btn-large green" id="btnCheckIn">
-          <div class="btn-content">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-              <polyline points="10 17 15 12 10 7"></polyline>
-              <line x1="15" y1="12" x2="3" y2="12"></line>
-            </svg>
-            <span>Datang</span>
-          </div>
+      <!-- Action Bottom Bar -->
+      <nav class="app-bottom-nav">
+        <!-- Datang Button -->
+        <button class="action-nav-btn btn-datang" id="btnCheckIn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          <span>Datang</span>
         </button>
 
-        <div class="nav-center-home">
-          <div class="home-circle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white"
-              stroke="currentColor" stroke-width="0">
+        <!-- Home Floating Button -->
+        <div class="home-nav-item">
+          <div class="home-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="white"
+              stroke="white" stroke-width="1">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
           </div>
-          <span class="home-label">Beranda</span>
+          <span class="home-text">Beranda</span>
         </div>
 
-        <button class="nav-btn-large red" id="btnCheckOut">
-          <div class="btn-content">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            <span>Pulang</span>
-          </div>
+        <!-- Pulang Button -->
+        <button class="action-nav-btn btn-pulang" id="btnCheckOut">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Pulang</span>
         </button>
-      </div>
+      </nav>
 
     </main>
 
@@ -294,7 +298,7 @@
 
           if (document.getElementById('greetingName')) {
             document.getElementById('greetingName').textContent = user.name || 'Pegawai';
-            const greetingTextEl = document.querySelector('.greeting-text');
+            const greetingTextEl = document.querySelector('.txt-greeting');
             if (greetingTextEl) greetingTextEl.textContent = greeting;
           }
 
@@ -460,8 +464,13 @@
             if (titleActions) titleActions.style.display = 'none';
 
             // Show simple pegawai menu
-            document.getElementById('pegawaiDashboard').classList.remove('d-none');
-            document.getElementById('pegawaiActions').classList.remove('d-none');
+            // Show simple pegawai menu (if exists)
+            const pegDash = document.getElementById('pegawaiDashboard');
+            if (pegDash) pegDash.classList.remove('d-none');
+
+            const pegAct = document.getElementById('pegawaiActions');
+            if (pegAct) pegAct.classList.remove('d-none');
+
             await checkTodayAttendance();
           } else {
             // Show search for admin/pimpinan
@@ -515,7 +524,7 @@
                 // Check if already checked in
                 const exists = await Data.getAbsensi();
                 if (exists.find(a => a.pegawai_id == Auth.getCurrentUser().pegawaiId && a.tanggal == today)) {
-                  alert('Anda sudah melakukan absensi hari ini.');
+                  App.showToast('Anda sudah melakukan absensi hari ini.', 'warning');
                   return;
                 }
 
@@ -528,7 +537,7 @@
                   keterangan: 'Check-in via Dashboard'
                 });
 
-                alert('Berhasil Absen Datang!');
+                App.showToast('Berhasil Absen Datang!', 'success');
                 loadDashboard();
               }
             };
@@ -551,10 +560,10 @@
                 if (absensi) {
                   const jamKeluar = new Date().toTimeString().slice(0, 5);
                   await Data.update('absensi', absensi.id, { jam_keluar: jamKeluar });
-                  alert('Berhasil Absen Pulang!');
+                  App.showToast('Berhasil Absen Pulang!', 'success');
                   loadDashboard();
                 } else {
-                  alert('Belum ada data absensi masuk hari ini.');
+                  App.showToast('Belum ada data absensi masuk hari ini.', 'warning');
                 }
               }
             };

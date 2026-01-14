@@ -2476,3 +2476,407 @@ select.form-control {
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
 }
+
+
+/* ==========================================================================
+   Mobile Dashboard - PPPK Paruh Waktu (Premium Refined V2)
+   ========================================================================== */
+
+/* Font Override if Outfit is used */
+:root {
+    --font-primary: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Hide default elements when in mobile app mode */
+.mobile-app-wrapper~.sidebar,
+.mobile-app-wrapper~.sidebar-overlay,
+.app-container:has(.mobile-app-wrapper)>.sidebar,
+.app-container:has(.mobile-app-wrapper)>.sidebar-overlay,
+.app-container:has(.mobile-app-wrapper)>.top-header {
+    display: none !important;
+}
+
+body:has(.mobile-app-wrapper) {
+    background-color: #f6f8fb;
+}
+
+.mobile-app-wrapper {
+    font-family: var(--font-primary);
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: #f6f8fb;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.05);
+}
+
+/* Header */
+.app-header-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: transparent;
+}
+
+.icon-btn-pill {
+    background: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.app-title-main {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.notif-btn-wrapper {
+    background: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    position: relative;
+}
+
+.dot-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+/* Scroll Area */
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1.5rem 120px;
+}
+
+.welcome-box {
+    margin: 1.5rem 0 2rem;
+}
+
+.txt-greeting {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.txt-user-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0.25rem 0 0;
+    letter-spacing: -0.02em;
+}
+
+.section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.title-label h3 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.title-label p {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.pill-date-badge {
+    background: white;
+    padding: 0.625rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Attendance Card */
+.card-attendance-main {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    padding: 1.75rem;
+    border-radius: 28px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.25);
+    margin-bottom: 2rem;
+}
+
+.card-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.85;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.card-status-text {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+}
+
+.card-time-pill {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 0.5rem 0.875rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+}
+
+.icon-check-wrapper {
+    width: 68px;
+    height: 68px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Menu Container */
+.main-menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.menu-item-wide {
+    background: white;
+    padding: 1.125rem;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.menu-icon-bg {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-icon-bg.blue {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.menu-info h4 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.menu-info p {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.chevron-right {
+    margin-left: auto;
+    color: #cbd5e1;
+}
+
+/* Grid Menu */
+.menu-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.menu-item-square {
+    background: white;
+    padding: 1.5rem 1rem;
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.icon-sq-bg {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+.icon-sq-bg.orange {
+    background: #fff7ed;
+    color: #f97316;
+}
+
+.icon-sq-bg.teal {
+    background: #f0fdfa;
+    color: #0d9488;
+}
+
+.sq-text {
+    text-align: center;
+}
+
+.sq-text h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.125rem 0;
+}
+
+.sq-text p {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.orange-label {
+    color: #f97316;
+}
+
+.teal-label {
+    color: #0d9488;
+}
+
+/* Bottom Nav */
+.app-bottom-nav {
+    position: fixed;
+    bottom: 25px;
+    left: 1.5rem;
+    right: 1.5rem;
+    max-width: 432px;
+    margin: 0 auto;
+    height: 80px;
+    background: white;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    z-index: 2000;
+}
+
+.action-nav-btn {
+    flex: 1;
+    height: 60px;
+    border: none;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-datang {
+    background: #10b981;
+}
+
+.btn-pulang {
+    background: #ef4444;
+}
+
+.home-nav-item {
+    width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    top: -15px;
+}
+
+.home-icon-circle {
+    width: 68px;
+    height: 68px;
+    background: #312e81;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(49, 46, 129, 0.3);
+    border: 5px solid #f6f8fb;
+}
+
+.home-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #312e81;
+    margin-top: 4px;
+}
+
+.spacer-bottom {
+    height: 40px;
+}
+
+/* Desktop centering */
+@media (min-width: 481px) {
+    body {
+        background-color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
+}
+.action-nav-btn:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
