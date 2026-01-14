@@ -255,7 +255,10 @@
 
       // Update current date
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
+      const currentDateEl = document.getElementById('currentDate');
+      if (currentDateEl) {
+        currentDateEl.textContent = new Date().toLocaleDateString('id-ID', options);
+      }
 
       // Helper to get local date string YYYY-MM-DD
       function getLocalTodayDate() {
@@ -291,7 +294,8 @@
 
           if (document.getElementById('greetingName')) {
             document.getElementById('greetingName').textContent = user.name || 'Pegawai';
-            document.querySelector('.greeting-text').textContent = greeting;
+            const greetingTextEl = document.querySelector('.greeting-text');
+            if (greetingTextEl) greetingTextEl.textContent = greeting;
           }
 
           const optionsDate = { weekday: 'long', day: 'numeric', month: 'short' };
@@ -339,17 +343,29 @@
             if (checkInTime) checkInTime.textContent = "Belum melakukan absensi";
           }
 
-          // Update stats
-          document.getElementById('statTotalPegawai').textContent = totalPegawai;
-          document.getElementById('statHadir').textContent = stats.hadirHariIni - stats.terlambatHariIni;
-          document.getElementById('statTerlambat').textContent = stats.terlambatHariIni;
-          document.getElementById('statTidakHadir').textContent = stats.tidakHadir;
-          document.getElementById('notifBadge').textContent = stats.cutiPending;
+          // Update stats with null checks
+          const statTotal = document.getElementById('statTotalPegawai');
+          if (statTotal) statTotal.textContent = totalPegawai;
+
+          const statHadir = document.getElementById('statHadir');
+          if (statHadir) statHadir.textContent = stats.hadirHariIni - stats.terlambatHariIni;
+
+          const statTerlambat = document.getElementById('statTerlambat');
+          if (statTerlambat) statTerlambat.textContent = stats.terlambatHariIni;
+
+          const statTidakHadir = document.getElementById('statTidakHadir');
+          if (statTidakHadir) statTidakHadir.textContent = stats.tidakHadir;
+
+          const nb = document.getElementById('notifBadge');
+          if (nb) nb.textContent = stats.cutiPending;
 
           // Calculate percentages
           const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
-          document.getElementById('statHadirPersen').textContent = hadirPersen;
-          document.getElementById('statTanpaKet').textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
+          const statHadirPersen = document.getElementById('statHadirPersen');
+          if (statHadirPersen) statHadirPersen.textContent = hadirPersen;
+
+          const statTanpaKet = document.getElementById('statTanpaKet');
+          if (statTanpaKet) statTanpaKet.textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
 
           // Load recent absensi with new format
           // let allAbsensi = await Data.getAbsensiWithPegawai(); // This line is now redundant due to the inserted code
@@ -418,7 +434,10 @@
         `;
           }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi</td></tr>';
 
-          document.getElementById('recentAbsensi').innerHTML = absensiHtml;
+          const recentAbsensiEl = document.getElementById('recentAbsensi');
+          if (recentAbsensiEl) {
+            recentAbsensiEl.innerHTML = absensiHtml;
+          }
           updateBulkActionVisibility();
 
           // Show different dashboard based on role
@@ -427,11 +446,18 @@
             const headerSearch = document.getElementById('headerSearch');
             if (headerSearch) headerSearch.style.display = 'none';
 
-            // Hide admin content for pegawai
-            document.querySelector('.stats-grid-new').style.display = 'none';
-            document.querySelector('.dashboard-grid').style.display = 'none';
-            document.querySelector('.attendance-table-card').style.display = 'none';
-            document.querySelector('.title-actions').style.display = 'none';
+            // Hide admin content for pegawai (with null checks)
+            const statsGrid = document.querySelector('.stats-grid-new');
+            if (statsGrid) statsGrid.style.display = 'none';
+
+            const dashGrid = document.querySelector('.dashboard-grid');
+            if (dashGrid) dashGrid.style.display = 'none';
+
+            const tableCard = document.querySelector('.attendance-table-card');
+            if (tableCard) tableCard.style.display = 'none';
+
+            const titleActions = document.querySelector('.title-actions');
+            if (titleActions) titleActions.style.display = 'none';
 
             // Show simple pegawai menu
             document.getElementById('pegawaiDashboard').classList.remove('d-none');
@@ -681,7 +707,8 @@
           html += `<span class="calendar-day other-month">${d}</span>`;
         }
 
-        document.getElementById('calendarDays').innerHTML = html;
+        const calDays = document.getElementById('calendarDays');
+        if (calDays) calDays.innerHTML = html;
       }
 
       // Calendar navigation
@@ -712,19 +739,19 @@
         const btnCheckOut = document.getElementById('btnCheckOut');
 
         if (absensi) {
-          statusDiv.classList.remove('d-none');
+          if (statusDiv) statusDiv.classList.remove('d-none');
           if (absensi.jam_keluar) {
-            statusText.textContent = `Anda sudah absen hari ini. Masuk: ${absensi.jam_masuk}, Keluar: ${absensi.jam_keluar}`;
-            btnCheckIn.disabled = true;
-            btnCheckOut.disabled = true;
+            if (statusText) statusText.textContent = `Anda sudah absen hari ini. Masuk: ${absensi.jam_masuk}, Keluar: ${absensi.jam_keluar}`;
+            if (btnCheckIn) btnCheckIn.disabled = true;
+            if (btnCheckOut) btnCheckOut.disabled = true;
           } else {
-            statusText.textContent = `Anda sudah check-in pada ${absensi.jam_masuk}. Jangan lupa check-out!`;
-            btnCheckIn.disabled = true;
-            btnCheckOut.disabled = false;
+            if (statusText) statusText.textContent = `Anda sudah check-in pada ${absensi.jam_masuk}. Jangan lupa check-out!`;
+            if (btnCheckIn) btnCheckIn.disabled = true;
+            if (btnCheckOut) btnCheckOut.disabled = false;
           }
         } else {
-          btnCheckIn.disabled = false;
-          btnCheckOut.disabled = true;
+          if (btnCheckIn) btnCheckIn.disabled = false;
+          if (btnCheckOut) btnCheckOut.disabled = true;
         }
       }
 
@@ -1038,7 +1065,8 @@
         if (bulkActions) {
           if (checked.length > 0) {
             bulkActions.classList.remove('d-none');
-            document.getElementById('selectedCount').textContent = checked.length;
+            const selCount = document.getElementById('selectedCount');
+            if (selCount) selCount.textContent = checked.length;
           } else {
             bulkActions.classList.add('d-none');
           }
