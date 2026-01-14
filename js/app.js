@@ -307,9 +307,116 @@ const App = {
         return badges[status] || `<span class="badge badge-secondary">${status}</span>`;
     },
 
-    // Simplified location validation (Always allowed as requested)
-    async validateLocation() {
-        return true;
+    // Allowed Locations configuration
+    ALLOWED_LOCATIONS: [
+        {
+            name: "Mako Sukasari (Pusat)",
+            lat: -6.617769,
+            lng: 106.813872,
+            radius: 50 // meters
+        },
+        {
+            name: "Sektor Yasmin",
+            lat: -6.560500,
+            lng: 106.772500,
+            radius: 50 // meters
+        },
+        {
+            name: "Sektor Cibuluh",
+            lat: -6.536968,
+            lng: 106.815998,
+            radius: 50 // meters
+        }
+    ],
+
+    // Haversine formula to calculate distance in meters
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Earth radius in meters
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c; // Distance in meters
+    },
+
+    // Validate Location with Geofencing
+    validateLocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                this.showToast('Browser Anda tidak mendukung Geolocation', 'danger');
+                resolve(false);
+                return;
+            }
+
+            const loadingToast = document.createElement('div');
+            loadingToast.className = 'alert alert-info';
+            loadingToast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 3000;';
+            loadingToast.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Mendapatkan lokasi...';
+            document.body.appendChild(loadingToast);
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    loadingToast.remove();
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+
+                    let insideLocation = null;
+                    let nearestLocation = null;
+                    let minDistance = Infinity;
+
+                    // Check all locations
+                    for (const loc of this.ALLOWED_LOCATIONS) {
+                        const distance = this.calculateDistance(userLat, userLng, loc.lat, loc.lng);
+
+                        // Track nearest for error message
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            nearestLocation = loc;
+                        }
+
+                        if (distance <= loc.radius) {
+                            insideLocation = loc;
+                            break; // Stop if found
+                        }
+                    }
+
+                    if (insideLocation) {
+                        this.showToast(`Lokasi terdeteksi: ${insideLocation.name}`, 'success');
+                        resolve(true);
+                    } else {
+                        const distStr = Math.round(minDistance);
+                        const msg = nearestLocation
+                            ? `Anda berada di luar jangkauan. Lokasi terdekat: ${nearestLocation.name} (${distStr}m)`
+                            : 'Anda berada di luar jangkauan lokasi absensi.';
+
+                        this.showToast(msg, 'danger');
+                        resolve(false);
+                    }
+                },
+                (error) => {
+                    loadingToast.remove();
+                    let errMsg = 'Gagal mendapatkan lokasi.';
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED: errMsg = 'Izin lokasi ditolak via Browser.'; break;
+                        case error.POSITION_UNAVAILABLE: errMsg = 'Informasi lokasi tidak tersedia.'; break;
+                        case error.TIMEOUT: errMsg = 'Waktu permintaan lokasi habis.'; break;
+                    }
+                    this.showToast(errMsg, 'danger');
+                    resolve(false);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        });
     },
 
     // Confirm dialog
