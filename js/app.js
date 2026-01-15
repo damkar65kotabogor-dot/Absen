@@ -94,6 +94,8 @@ const App = {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.querySelector('.sidebar-overlay');
 
+        if (!sidebar) return;
+
         sidebar.classList.toggle('open');
         if (overlay) {
             overlay.classList.toggle('show');
