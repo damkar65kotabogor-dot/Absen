@@ -575,7 +575,9 @@
 
       // Initialize attendance chart
       async function initChart() {
-        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        const chartEl = document.getElementById('attendanceChart');
+        if (!chartEl) return;
+        const ctx = chartEl.getContext('2d');
 
         // Get weekly data
         const weekData = await getWeeklyAttendanceData();
@@ -643,8 +645,10 @@
         endOfWeek.setDate(startOfWeek.getDate() + 6);
 
         const formatDate = (d) => `${d.getDate()} ${d.toLocaleDateString('id-ID', { month: 'short' })}`;
-        document.getElementById('chartDateRange').textContent =
-          `Statistik mingguan (${formatDate(startOfWeek)}-${formatDate(endOfWeek)})`;
+        const rangeText = document.getElementById('chartDateRange');
+        if (rangeText) {
+          rangeText.textContent = `Statistik mingguan (${formatDate(startOfWeek)}-${formatDate(endOfWeek)})`;
+        }
       }
 
       // Get weekly attendance data
@@ -674,13 +678,16 @@
 
       // Render calendar
       function renderCalendar() {
+        const calendarTitle = document.getElementById('calendarMonth');
+        if (!calendarTitle) return;
+
         const year = currentCalendarDate.getFullYear();
         const month = currentCalendarDate.getMonth();
 
         // Update month title
         const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+        calendarTitle.textContent = `${monthNames[month]} ${year}`;
 
         // Get first day of month and total days
         const firstDay = new Date(year, month, 1);
@@ -1106,9 +1113,10 @@
       });
 
       // Initialize
-      (async () => {
+      document.addEventListener('DOMContentLoaded', async () => {
+        await App.init();
         await loadDashboard();
-      })();
+      });
     </script>
 </body>
 

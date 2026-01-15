@@ -1436,9 +1436,12 @@
         });
 
         // Check Auth and Initialize
-        if (Auth.requireRole(['admin', 'pimpinan'])) {
-            loadDetail();
-        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (Auth.requireRole(['admin', 'pimpinan'])) {
+                await App.init();
+                await loadDetail();
+            }
+        });
 
         // Action Menu Functionality
         let currentActiveId = null;

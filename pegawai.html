@@ -471,10 +471,11 @@
         document.getElementById('filterStatus').addEventListener('change', loadPegawai);
 
         // Initialize
-        (async () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await App.init();
             await loadOptions();
             await loadPegawai();
-        })();
+        });
     </script>
 </body>
 

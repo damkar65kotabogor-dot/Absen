@@ -3,16 +3,26 @@
  */
 
 const App = {
+    initialized: null,
+
     // Initialize application
-    async init() {
-        try {
-            await Data.init();
-            this.setupEventListeners();
-            this.renderSidebar();
-            await this.updateUserInfo();
-        } catch (err) {
-            console.error('App initialization failed:', err);
-        }
+    init() {
+        if (this.initialized) return this.initialized;
+
+        this.initialized = (async () => {
+            try {
+                await Data.init();
+                this.setupEventListeners();
+                this.renderSidebar();
+                await this.updateUserInfo();
+                return true;
+            } catch (err) {
+                console.error('App initialization failed:', err);
+                return false;
+            }
+        })();
+
+        return this.initialized;
     },
 
     // Setup global event listeners
