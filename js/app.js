@@ -51,6 +51,8 @@ const App = {
         const mainContent = document.querySelector('.main-content');
         const overlay = document.querySelector('.sidebar-overlay');
 
+        if (!sidebar) return; // Defensive check
+
         // On mobile, toggle open class
         if (window.innerWidth <= 1024) {
             sidebar.classList.toggle('open');
@@ -60,7 +62,9 @@ const App = {
         } else {
             // On desktop, toggle collapsed class
             sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('sidebar-collapsed');
+            if (mainContent) {
+                mainContent.classList.toggle('sidebar-collapsed');
+            }
         }
     },
 
@@ -69,7 +73,7 @@ const App = {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.querySelector('.sidebar-overlay');
 
-        sidebar.classList.remove('open');
+        if (sidebar) sidebar.classList.remove('open');
         if (overlay) {
             overlay.classList.remove('show');
         }
