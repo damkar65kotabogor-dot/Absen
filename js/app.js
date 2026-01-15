@@ -311,21 +311,21 @@ const App = {
     ALLOWED_LOCATIONS: [
         {
             name: "Mako Sukasari (Pusat)",
-            lat: -6.617769,
-            lng: 106.813872,
-            radius: 50 // meters
+            lat: -6.620377,
+            lng: 106.815888,
+            radius: 500 // meters (increased from 50m)
         },
         {
             name: "Sektor Yasmin",
-            lat: -6.560500,
-            lng: 106.772500,
-            radius: 50 // meters
+            lat: -6.561782,
+            lng: 106.765182,
+            radius: 500 // meters (increased from 50m)
         },
         {
             name: "Sektor Cibuluh",
-            lat: -6.536968,
-            lng: 106.815998,
-            radius: 50 // meters
+            lat: -6.549295,
+            lng: 106.823164,
+            radius: 500 // meters (increased from 50m)
         }
     ],
 
