@@ -463,6 +463,23 @@ const App = {
         });
     },
 
+    // Modal management
+    openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    },
+
     // Confirm dialog
     confirm(message) {
         return window.confirm(message);

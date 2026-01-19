@@ -234,6 +234,14 @@
         <div class="card-header">
           <h3 class="card-title">Monitoring Absensi Real-time</h3>
           <div class="table-actions">
+            <button class="btn btn-primary btn-sm d-flex align-center gap-2" onclick="addManualAbsensi()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Tambah
+            </button>
             <button class="btn btn-outline btn-sm d-flex align-center gap-2" onclick="downloadReport()">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -471,12 +479,123 @@
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>
-        Hapus
+          Hapus
       </a>
     </div>
 
-    <!-- Critical scripts - must load before inline code -->
+    <!-- Edit Absensi Modal -->
+    <div id="manualAttendanceModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Edit Absensi Manual</h3>
+          <button class="modal-close" onclick="App.closeModal('manualAttendanceModal')"
+            aria-label="Close Modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="manualAttendanceForm">
+            <input type="hidden" id="editAbsensiId">
+
+            <div class="form-group">
+              <label for="manualPegawai">Pegawai <span style="color: red;">*</span></label>
+              <select id="manualPegawai" class="form-control" required>
+                <option value="">Pilih Pegawai</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="manualTanggal">Tanggal <span style="color: red;">*</span></label>
+              <input type="date" id="manualTanggal" class="form-control" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="manualJamMasuk">Jam Masuk <span style="color: red;">*</span></label>
+                <input type="time" id="manualJamMasuk" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label for="manualJamKeluar">Jam Keluar</label>
+                <input type="time" id="manualJamKeluar" class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="manualStatus">Status <span style="color: red;">*</span></label>
+              <select id="manualStatus" class="form-control" required>
+                <option value="hadir">Hadir</option>
+                <option value="izin">Izin</option>
+                <option value="sakit">Sakit</option>
+                <option value="alpha">Alpha</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="manualKeterangan">Keterangan</label>
+              <textarea id="manualKeterangan" class="form-control" rows="3" placeholder="Opsional"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="App.closeModal('manualAttendanceModal')">Batal</button>
+          <button class="btn btn-primary" onclick="saveManualAttendance()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Absensi Modal -->
+    <div id="detailAbsensiModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Detail Absensi</h3>
+          <button class="modal-close" onclick="App.closeModal('detailAbsensiModal')"
+            aria-label="Close Modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Pegawai</span>
+              <span class="detail-value" id="detNama"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tanggal</span>
+              <span class="detail-value" id="detTanggal"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Status</span>
+              <span class="detail-value" id="detStatus"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Jam Masuk</span>
+              <span class="detail-value" id="detJamMasuk"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Jam Keluar</span>
+              <span class="detail-value" id="detJamKeluar">-</span>
+            </div>
+          </div>
+
+          <div class="form-group mb-0 mt-3">
+            <span class="detail-label">Keterangan</span>
+            <p class="detail-value" id="detKeterangan">-</p>
+          </div>
+
+          <div id="detLokasiSection" class="mt-4">
+            <span class="detail-label">Lokasi Check-in</span>
+            <div id="detMapLinkMasuk"></div>
+          </div>
+
+          <div id="detFotoSection" class="mt-4">
+            <span class="detail-label">Foto Selfie</span>
+            <div class="detail-photo-container">
+              <img id="detFoto" src="https://via.placeholder.com/400x300?text=Tidak+Ada+Foto" alt="Selfie Absensi">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="App.closeModal('detailAbsensiModal')">Tutup</button>
+        </div>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
@@ -1242,15 +1361,77 @@
         }, 100);
       }
 
-      function viewDetailAbsensi() {
+      // View Detail Absensi
+      async function viewDetailAbsensi() {
         if (!currentAbsensiId) return;
 
-        // Close action menu
-        const actionMenu = document.getElementById('actionMenuPopover');
-        if (actionMenu) actionMenu.classList.remove('show');
+        // Hide popover
+        const popover = document.getElementById('actionMenuPopover');
+        if (popover) popover.classList.remove('show');
 
-        // Show toast since detail modal not implemented yet
-        App.showToast(`Fitur detail absensi akan segera hadir (ID: ${currentAbsensiId})`, 'info');
+        try {
+          const items = await Data.getAbsensiWithPegawai();
+          const item = items.find(x => x.id === currentAbsensiId);
+          if (!item) return;
+
+          // Populate static fields
+          document.getElementById('detNama').textContent = item.pegawai ? item.pegawai.nama : (item.pegawai_id || '-');
+          document.getElementById('detTanggal').textContent = new Date(item.tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+          document.getElementById('detStatus').textContent = item.status.charAt(0).toUpperCase() + item.status.slice(1);
+          document.getElementById('detJamMasuk').textContent = item.jam_masuk || '-';
+          document.getElementById('detJamKeluar').textContent = item.jam_keluar || '-';
+          document.getElementById('detKeterangan').textContent = item.keterangan || '-';
+
+          // Photo handling
+          const img = document.getElementById('detFoto');
+          if (item.foto_masuk) {
+            img.src = item.foto_masuk;
+          } else {
+            img.src = 'https://via.placeholder.com/400x300?text=Tidak+Ada+Foto';
+          }
+
+          // Map handling
+          const mapSec = document.getElementById('detMapLinkMasuk');
+          if (item.lat_masuk && item.lng_masuk) {
+            mapSec.innerHTML = `
+              <a href="https://www.google.com/maps?q=${item.lat_masuk},${item.lng_masuk}" target="_blank" class="map-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Lihat di Google Maps
+              </a>
+            `;
+            document.getElementById('detLokasiSection').style.display = 'block';
+          } else {
+            document.getElementById('detLokasiSection').style.display = 'none';
+          }
+
+          App.openModal('detailAbsensiModal');
+        } catch (error) {
+          console.error('Error loading detail:', error);
+          App.showToast('Gagal memuat detail absensi', 'danger');
+        }
+      }
+
+      // Add Manual Absensi
+      async function addManualAbsensi() {
+        // Reset form
+        document.getElementById('manualAttendanceForm').reset();
+        document.getElementById('editAbsensiId').value = '';
+
+        // Set default date to today
+        document.getElementById('manualTanggal').value = getLocalTodayDate();
+
+        // Get pegawai list for dropdown
+        const pegawai = (await Data.getPegawai()).filter(p => p.status === 'aktif');
+        const select = document.getElementById('manualPegawai');
+        if (select) {
+          select.innerHTML = '<option value="">Pilih Pegawai</option>' +
+            pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
+        }
+
+        const modalHeader = document.querySelector('#manualAttendanceModal .modal-title');
+        if (modalHeader) modalHeader.textContent = 'Tambah Absensi Manual';
+
+        App.openModal('manualAttendanceModal');
       }
 
       async function editAbsensi() {
@@ -1276,8 +1457,8 @@
           document.getElementById('manualStatus').value = a.status;
           document.getElementById('manualKeterangan').value = a.keterangan || '';
         } catch (err) {
-          console.warn('Some form elements not found, edit modal may not be fully implemented:', err.message);
-          App.showToast('Fitur edit absensi sedang dalam pengembangan', 'info');
+          console.error('Error populating form:', err);
+          App.showToast('Terjadi kesalahan', 'danger');
           return;
         }
 
@@ -1285,11 +1466,11 @@
         if (modalHeader) modalHeader.textContent = 'Edit Absensi';
 
         // Hide popover
-        document.getElementById('actionMenuPopover').classList.remove('show');
+        const popover = document.getElementById('actionMenuPopover');
+        if (popover) popover.classList.remove('show');
 
         // Open modal
-        const modal = document.getElementById('manualAttendanceModal');
-        if (modal) modal.classList.add('show');
+        App.openModal('manualAttendanceModal');
       }
 
       async function deleteAbsensi() {
@@ -1312,6 +1493,52 @@
         } catch (error) {
           console.error('Error deleting absensi:', error);
           App.showToast('Gagal menghapus data absensi', 'danger');
+        }
+      }
+
+      // Save Manual Attendance (Edit/Create)
+      async function saveManualAttendance() {
+        const id = document.getElementById('editAbsensiId').value;
+        const pegawaiId = document.getElementById('manualPegawai').value;
+        const tanggal = document.getElementById('manualTanggal').value;
+        const jamMasuk = document.getElementById('manualJamMasuk').value;
+        const jamKeluar = document.getElementById('manualJamKeluar').value;
+        const status = document.getElementById('manualStatus').value;
+        const keterangan = document.getElementById('manualKeterangan').value;
+
+        if (!pegawaiId || !tanggal || !jamMasuk) {
+          App.showToast('Mohon lengkapi data yang wajib diisi', 'warning');
+          return;
+        }
+
+        const data = {
+          pegawai_id: pegawaiId,
+          tanggal,
+          jam_masuk: jamMasuk,
+          jam_keluar: jamKeluar || null,
+          status,
+          keterangan: keterangan || null
+        };
+
+        try {
+          if (id) {
+            await Data.update('absensi', id, data);
+            App.showToast('Data absensi berhasil diupdate', 'success');
+          } else {
+            await Data.create('absensi', data);
+            App.showToast('Data absensi berhasil ditambahkan', 'success');
+          }
+
+          App.closeModal('manualAttendanceModal');
+
+          if (typeof loadDashboard === 'function') {
+            await loadDashboard();
+          } else {
+            location.reload();
+          }
+        } catch (error) {
+          console.error('Error saving attendance:', error);
+          App.showToast('Gagal menyimpan data absensi', 'danger');
         }
       }
 
