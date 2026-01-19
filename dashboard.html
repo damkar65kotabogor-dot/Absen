@@ -1243,9 +1243,13 @@
 
       function viewDetailAbsensi() {
         if (!currentAbsensiId) return;
-        App.showToast(`Melihat detail absensi ID: ${currentAbsensiId}`, 'info');
-        // Navigate to detail page or show modal
-        document.getElementById('actionMenuPopover').classList.remove('show');
+
+        // Close action menu
+        const actionMenu = document.getElementById('actionMenuPopover');
+        if (actionMenu) actionMenu.classList.remove('show');
+
+        // Show toast since detail modal not implemented yet
+        App.showToast(`Fitur detail absensi akan segera hadir (ID: ${currentAbsensiId})`, 'info');
       }
 
       async function editAbsensi() {
@@ -1262,13 +1266,19 @@
             pegawai.map(p => `<option value="${p.id}">${p.nama} (${p.nip})</option>`).join('');
         }
 
-        document.getElementById('editAbsensiId').value = a.id;
-        document.getElementById('manualPegawai').value = a.pegawai_id;
-        document.getElementById('manualTanggal').value = a.tanggal;
-        document.getElementById('manualJamMasuk').value = a.jam_masuk;
-        document.getElementById('manualJamKeluar').value = a.jam_keluar || '';
-        document.getElementById('manualStatus').value = a.status;
-        document.getElementById('manualKeterangan').value = a.keterangan || '';
+        try {
+          document.getElementById('editAbsensiId').value = a.id;
+          document.getElementById('manualPegawai').value = a.pegawai_id;
+          document.getElementById('manualTanggal').value = a.tanggal;
+          document.getElementById('manualJamMasuk').value = a.jam_masuk;
+          document.getElementById('manualJamKeluar').value = a.jam_keluar || '';
+          document.getElementById('manualStatus').value = a.status;
+          document.getElementById('manualKeterangan').value = a.keterangan || '';
+        } catch (err) {
+          console.warn('Some form elements not found, edit modal may not be fully implemented:', err.message);
+          App.showToast('Fitur edit absensi sedang dalam pengembangan', 'info');
+          return;
+        }
 
         const modalHeader = document.querySelector('#manualAttendanceModal .modal-title');
         if (modalHeader) modalHeader.textContent = 'Edit Absensi';
@@ -1282,14 +1292,25 @@
       }
 
       async function deleteAbsensi() {
-        if (!currentAbsensiId) return;
-        if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
-          // Remove from DB (localStorage)
-          await Data.delete('absensi', currentAbsensiId);
 
+        // Close action menu first
+        const popover = document.getElementById('actionMenuPopover');
+        if (popover) popover.classList.remove('show');
+
+        if (!confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) return;
+
+        try {
+          await Data.delete('absensi', currentAbsensiId);
           App.showToast('Data absensi berhasil dihapus', 'success');
-          document.getElementById('actionMenuPopover').classList.remove('show');
-          await loadDashboard();
+
+          if (typeof loadDashboard === 'function') {
+            await loadDashboard();
+          } else {
+            location.reload();
+          }
+        } catch (error) {
+          console.error('Error deleting absensi:', error);
+          App.showToast('Gagal menghapus data absensi', 'danger');
         }
       }
 
