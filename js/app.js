@@ -27,13 +27,27 @@ const App = {
 
     // Setup global event listeners
     setupEventListeners() {
-        // Toggle sidebar
+        // Toggle sidebar - unified handler for mobile and desktop
         const toggleBtn = document.getElementById('toggleSidebar');
+        const toggleBtnDesktop = document.getElementById('toggleSidebarDesktop');
+
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => this.toggleSidebar());
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleSidebar();
+            });
         }
 
-        // Mobile menu toggle
+        if (toggleBtnDesktop) {
+            toggleBtnDesktop.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleSidebar();
+            });
+        }
+
+        // Mobile menu toggle (legacy support)
         const mobileToggle = document.getElementById('mobileMenuToggle');
         if (mobileToggle) {
             mobileToggle.addEventListener('click', () => this.toggleMobileSidebar());
@@ -53,9 +67,15 @@ const App = {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => Auth.logout());
         }
+
+        // Sidebar close button (mobile)
+        const sidebarCloseBtn = document.querySelector('.sidebar-close');
+        if (sidebarCloseBtn) {
+            sidebarCloseBtn.addEventListener('click', () => this.closeMobileSidebar());
+        }
     },
 
-    // Toggle sidebar (desktop collapse)
+    // Toggle sidebar (desktop collapse / mobile slide)
     toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
@@ -63,11 +83,17 @@ const App = {
 
         if (!sidebar) return; // Defensive check
 
-        // On mobile, toggle open class
+        // On mobile, toggle open class and overlay
         if (window.innerWidth <= 1024) {
             sidebar.classList.toggle('open');
             if (overlay) {
                 overlay.classList.toggle('show');
+            }
+            // Prevent body scroll when sidebar is open
+            if (sidebar.classList.contains('open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
             }
         } else {
             // On desktop, toggle collapsed class
@@ -87,6 +113,8 @@ const App = {
         if (overlay) {
             overlay.classList.remove('show');
         }
+        // Restore body scroll
+        document.body.style.overflow = '';
     },
 
     // Toggle mobile sidebar
