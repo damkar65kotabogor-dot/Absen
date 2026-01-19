@@ -485,6 +485,27 @@
       </a>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal-overlay" style="z-index: 5000;">
+      <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-body py-4">
+          <div class="mb-3 text-primary" style="display: flex; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+          </div>
+          <p id="confirmMessage" style="font-size: 1.1rem; font-weight: 500; margin-bottom: 0;">Apakah Anda yakin?</p>
+        </div>
+        <div class="modal-footer" style="justify-content: center; gap: 12px; border: none; padding-top: 0;">
+          <button class="btn btn-outline" onclick="closeConfirm()" style="min-width: 100px;">Batal</button>
+          <button class="btn btn-primary" onclick="handleConfirm()" style="min-width: 100px;">Ya</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Edit Absensi Modal -->
     <div id="manualAttendanceModal" class="modal-overlay">
       <div class="modal-content" style="max-width: 600px;">
@@ -830,84 +851,7 @@
             }
           }
 
-          // Mobile Button Listeners
-          const btnCheckIn = document.getElementById('btnCheckIn');
-          const btnCheckOut = document.getElementById('btnCheckOut');
-
-          if (btnCheckIn) {
-            btnCheckIn.onclick = async () => {
-              // Trigger existing check-in logic
-              await App.init(); // Ensure initialized
-              // Reuse logic from absensi.html (simulated here since we are in dashboard)
-              // We need to move the check logic to App or duplicate it. 
-              // Best practice: redirect to absensi.html or implement simple check here.
-              // Given the request, I will redirect to absensi for now OR implement direct call if easiest.
-              // Let's implement direct call using Data and Geolocation
-
-              if (!Auth.getCurrentUser().pegawaiId) {
-                alert('Data pegawai tidak ditemukan');
-                return;
-              }
-
-              if (confirm('Lakukan Absensi Masuk (Datang)?')) {
-                const isAtLocation = await App.validateLocation();
-                if (!isAtLocation) return;
-
-                const now = new Date();
-                const jamMasuk = now.toTimeString().slice(0, 5);
-                const today = getLocalTodayDate();
-
-                // Check if already checked in (Filtered by user and today)
-                const exists = await Data.getAbsensi({
-                  pegawai_id: Auth.getCurrentUser().pegawaiId,
-                  tanggal: today
-                });
-                if (exists.length > 0) {
-                  App.showToast('Anda sudah melakukan absensi hari ini.', 'warning');
-                  return;
-                }
-
-                await Data.create('absensi', {
-                  pegawai_id: Auth.getCurrentUser().pegawaiId,
-                  tanggal: today,
-                  jam_masuk: jamMasuk,
-                  jam_keluar: null,
-                  status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
-                  keterangan: 'Check-in via Dashboard'
-                });
-
-                App.showToast('Berhasil Absen Datang!', 'success');
-                loadDashboard();
-              }
-            };
-          }
-
-          if (btnCheckOut) {
-            btnCheckOut.onclick = async () => {
-              if (!Auth.getCurrentUser().pegawaiId) return;
-
-              if (confirm('Lakukan Absensi Pulang?')) {
-                const isAtLocation = await App.validateLocation();
-                if (!isAtLocation) return;
-
-                const today = getLocalTodayDate();
-                const attendance = await Data.getAbsensi({
-                  pegawai_id: Auth.getCurrentUser().pegawaiId,
-                  tanggal: today
-                });
-                const absensi = attendance[0];
-
-                if (absensi) {
-                  const jamKeluar = new Date().toTimeString().slice(0, 5);
-                  await Data.update('absensi', absensi.id, { jam_keluar: jamKeluar });
-                  App.showToast('Berhasil Absen Pulang!', 'success');
-                  loadDashboard();
-                } else {
-                  App.showToast('Belum ada data absensi masuk hari ini.', 'warning');
-                }
-              }
-            };
-          }
+          // Sidebar toggle handled in app.js listener
         } catch (err) {
           console.error('Error loading dashboard:', err);
         }
@@ -1085,11 +1029,13 @@
         if (!user.pegawaiId) return;
 
         const today = getLocalTodayDate();
-        // Limit to 200 for calendar (sufficient for recent history)
-        const attendance = await Data.getAbsensi({ limit: 200 });
-        const absensi = attendance.find(a =>
-          a.pegawai_id === user.pegawaiId && a.tanggal === today
-        );
+        // Fetch specific record for today and user
+        const attendance = await Data.getAbsensi({
+          pegawai_id: user.pegawaiId,
+          tanggal: today,
+          limit: 1
+        });
+        const absensi = attendance[0];
 
         const statusDiv = document.getElementById('attendanceStatus');
         const statusText = document.getElementById('attendanceStatusText');
@@ -1121,49 +1067,54 @@
           return;
         }
 
-        const isAtLocation = await App.validateLocation();
-        if (!isAtLocation) return;
+        showConfirm('Lakukan Absensi Masuk (Datang)?', async () => {
+          const isAtLocation = await App.validateLocation();
+          if (!isAtLocation) return;
 
-        const now = new Date();
-        const jamMasuk = now.toTimeString().slice(0, 5);
-        const today = getLocalTodayDate();
+          const now = new Date();
+          const jamMasuk = now.toTimeString().slice(0, 5);
+          const today = getLocalTodayDate();
 
-        await Data.create('absensi', {
-          pegawai_id: user.pegawaiId,
-          tanggal: today,
-          jam_masuk: jamMasuk,
-          jam_keluar: null,
-          status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
-          keterangan: 'Check-in via Geolocation'
+          await Data.create('absensi', {
+            pegawai_id: user.pegawaiId,
+            tanggal: today,
+            jam_masuk: jamMasuk,
+            jam_keluar: null,
+            status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
+            keterangan: 'Check-in via Beranda'
+          });
+
+          App.showToast('Berhasil Absen Datang!', 'success');
+          loadDashboard();
         });
-
-        App.showToast('Check-in berhasil!', 'success');
-        await loadDashboard();
       });
 
       // Handle check-out
       document.getElementById('btnCheckOut')?.addEventListener('click', async function () {
         const user = Auth.getCurrentUser();
-        if (!user.pegawaiId) {
-          App.showToast('Data pegawai tidak ditemukan!', 'danger');
-          return;
-        }
+        if (!user.pegawaiId) return;
 
-        const isAtLocation = await App.validateLocation();
-        if (!isAtLocation) return;
+        showConfirm('Lakukan Absensi Pulang?', async () => {
+          const isAtLocation = await App.validateLocation();
+          if (!isAtLocation) return;
 
-        const today = getLocalTodayDate();
-        const attendance = await Data.getAbsensi({ limit: 200 });
-        const absensi = attendance.find(a =>
-          a.pegawai_id === user.pegawaiId && a.tanggal === today
-        );
+          const today = getLocalTodayDate();
+          const attendance = await Data.getAbsensi({
+            pegawai_id: user.pegawaiId,
+            tanggal: today,
+            limit: 1
+          });
+          const absensi = attendance[0];
 
-        if (absensi) {
-          const jamKeluar = new Date().toTimeString().slice(0, 5);
-          await Data.update('absensi', absensi.id, { jam_keluar: jamKeluar });
-          App.showToast('Check-out berhasil!', 'success');
-          await loadDashboard();
-        }
+          if (absensi) {
+            const jamKeluar = new Date().toTimeString().slice(0, 5);
+            await Data.update('absensi', absensi.id, {
+              jam_keluar: jamKeluar
+            });
+            App.showToast('Berhasil Absen Pulang!', 'success');
+            loadDashboard();
+          }
+        });
       });
 
       // Handle download report
@@ -1275,17 +1226,17 @@
         );
 
         if (existing) {
-          if (confirm('Data absensi untuk pegawai ini pada tanggal tersebut sudah ada. Update data?')) {
+          showConfirm('Data absensi untuk pegawai ini pada tanggal tersebut sudah ada. Update data?', async () => {
             await Data.update('absensi', existing.id, {
-              jam_masuk: jam_masuk,
-              jam_keluar: jam_keluar,
+              jam_masuk: jamMasuk,
+              jam_keluar: jamKeluar,
               status: status,
               keterangan: keterangan
             });
             App.showToast('Data absensi berhasil diupdate!', 'success');
             closeManualModal();
             await loadDashboard();
-          }
+          });
           return;
         }
 
@@ -1482,26 +1433,21 @@
       }
 
       async function deleteAbsensi() {
+        showConfirm('Apakah Anda yakin ingin menghapus data absensi ini?', async () => {
+          try {
+            await Data.delete('absensi', currentAbsensiId);
+            App.showToast('Data absensi berhasil dihapus', 'success');
 
-        // Close action menu first
-        const popover = document.getElementById('actionMenuPopover');
-        if (popover) popover.classList.remove('show');
-
-        if (!confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) return;
-
-        try {
-          await Data.delete('absensi', currentAbsensiId);
-          App.showToast('Data absensi berhasil dihapus', 'success');
-
-          if (typeof loadDashboard === 'function') {
-            await loadDashboard();
-          } else {
-            location.reload();
+            if (typeof loadDashboard === 'function') {
+              await loadDashboard();
+            } else {
+              location.reload();
+            }
+          } catch (error) {
+            console.error('Error deleting absensi:', error);
+            App.showToast('Gagal menghapus data absensi', 'danger');
           }
-        } catch (error) {
-          console.error('Error deleting absensi:', error);
-          App.showToast('Gagal menghapus data absensi', 'danger');
-        }
+        });
       }
 
       // Save Manual Attendance (Edit/Create)
@@ -1614,12 +1560,12 @@
         const checkboxes = document.querySelectorAll('.row-checkbox:checked');
         const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
-        if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} data absensi yang dipilih?`)) {
+        showConfirm(`Apakah Anda yakin ingin menghapus ${ids.length} data absensi yang dipilih?`, async () => {
           for (const id of ids) await Data.delete('absensi', id);
 
           App.showToast(`${ids.length} data absensi berhasil dihapus`, 'success');
           await loadDashboard();
-        }
+        });
       }
 
       // Close action menu when clicking outside
@@ -1634,6 +1580,37 @@
         await App.init();
         await loadDashboard();
       });
+      // Confirmation Modal Logic
+      let onConfirmCallback = null;
+      function showConfirm(message, callback) {
+        // Close action menu if open
+        const popover = document.getElementById('actionMenuPopover');
+        if (popover) popover.classList.remove('show');
+
+        onConfirmCallback = callback;
+        const modal = document.getElementById('confirmModal');
+        const msgEl = document.getElementById('confirmMessage');
+        if (msgEl) msgEl.textContent = message;
+        if (modal) modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function handleConfirm() {
+        const modal = document.getElementById('confirmModal');
+        if (modal) modal.classList.remove('show');
+        document.body.style.overflow = '';
+        if (onConfirmCallback) {
+          onConfirmCallback();
+          onConfirmCallback = null;
+        }
+      }
+
+      function closeConfirm() {
+        const modal = document.getElementById('confirmModal');
+        if (modal) modal.classList.remove('show');
+        document.body.style.overflow = '';
+        onConfirmCallback = null;
+      }
     </script>
 </body>
 
