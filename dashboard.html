@@ -109,7 +109,7 @@
 
       <!-- Stats Grid -->
       <div class="stats-grid-new mt-4">
-        <div class="stat-card-new">
+        <div class="stat-card-new" onclick="filterTableByStatus('all')" style="cursor: pointer;">
           <div class="stat-card-content">
             <span class="stat-label-new">Total Pegawai</span>
             <div class="stat-value-new" id="statTotalPegawai">0</div>
@@ -125,7 +125,7 @@
             </svg>
           </div>
         </div>
-        <div class="stat-card-new">
+        <div class="stat-card-new" onclick="filterTableByStatus('hadir')" style="cursor: pointer;">
           <div class="stat-card-content">
             <span class="stat-label-new">Hadir Hari Ini</span>
             <div class="stat-value-new" id="statHadir">0</div>
@@ -139,7 +139,7 @@
             </svg>
           </div>
         </div>
-        <div class="stat-card-new">
+        <div class="stat-card-new" onclick="filterTableByStatus('terlambat')" style="cursor: pointer;">
           <div class="stat-card-content">
             <span class="stat-label-new">Terlambat</span>
             <div class="stat-value-new" id="statTerlambat">0</div>
@@ -153,7 +153,7 @@
             </svg>
           </div>
         </div>
-        <div class="stat-card-new">
+        <div class="stat-card-new" onclick="filterTableByStatus('alpha')" style="cursor: pointer;">
           <div class="stat-card-content">
             <span class="stat-label-new">Tanpa Keterangan</span>
             <div class="stat-value-new" id="statTanpaKet">0</div>
@@ -587,7 +587,8 @@
           <div id="detFotoSection" class="mt-4">
             <span class="detail-label">Foto Selfie</span>
             <div class="detail-photo-container">
-              <img id="detFoto" src="https://via.placeholder.com/400x300?text=Tidak+Ada+Foto" alt="Selfie Absensi">
+              <img id="detFoto" src="https://placehold.jp/24/f1f5f9/94a3b8/400x300.png?text=Tidak%20Ada%20Foto"
+                alt="Selfie Absensi">
             </div>
           </div>
         </div>
@@ -1387,7 +1388,7 @@
           if (item.foto_masuk) {
             img.src = item.foto_masuk;
           } else {
-            img.src = 'https://via.placeholder.com/400x300?text=Tidak+Ada+Foto';
+            img.src = 'https://placehold.jp/24/f1f5f9/94a3b8/400x300.png?text=Tidak%20Ada%20Foto';
           }
 
           // Map handling
@@ -1540,6 +1541,37 @@
           console.error('Error saving attendance:', error);
           App.showToast('Gagal menyimpan data absensi', 'danger');
         }
+      }
+
+      // Filter Table by Status (Called by Stat Cards)
+      async function filterTableByStatus(status) {
+        App.showToast(`Memfilter: ${status === 'all' ? 'Semua Data' : status.toUpperCase()}`, 'info');
+        const tbody = document.getElementById('recentAbsensi');
+        if (!tbody) return;
+
+        let allAbsensi = await Data.getAbsensiWithPegawai();
+        let filtered = allAbsensi;
+        if (status !== 'all') {
+          const filterMap = { 'hadir': 'tepat_waktu', 'terlambat': 'terlambat', 'alpha': 'alpha' };
+          const dbStatus = filterMap[status] || status;
+          filtered = allAbsensi.filter(x => x.status === dbStatus);
+        }
+
+        tbody.innerHTML = filtered.length > 0 ? filtered.map(a => {
+          const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+          const avatarDisplay = a.pegawai?.foto ? `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials;
+          const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : (a.status === 'terlambat' ? 'status-terlambat' : 'status-danger');
+          const statusLabel = a.status === 'tepat_waktu' ? 'Hadir' : (a.status === 'terlambat' ? 'Terlambat' : a.status.toUpperCase());
+          return `
+            <tr>
+              <td><input type="checkbox" class="row-checkbox" value="${a.id}" onclick="updateBulkActionVisibility()"></td>
+              <td><div class="employee-cell"><div class="employee-avatar">${avatarDisplay}</div><div class="employee-info"><div class="employee-name">${a.pegawai?.nama || '-'}</div><div class="employee-nip">NIP. ${a.pegawai?.nip || '-'}</div></div></div></td>
+              <td>${a.jam_masuk || '-'} WIB</td>
+              <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+              <td><span class="location-cell"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Kantor Pusat</span></td>
+              <td><button class="action-menu-btn" onclick="currentAbsensiId = ${a.id}; App.toggleActionMenu(event)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button></td>
+            </tr>`;
+        }).join('') : '<tr><td colspan="6" class="text-center p-4 text-muted">Tidak ada data untuk filter ini</td></tr>';
       }
 
       // ========= Selection & Bulk Action Logic =========
