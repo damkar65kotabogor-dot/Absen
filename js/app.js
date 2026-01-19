@@ -472,6 +472,43 @@ const App = {
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
     await App.init();
+
+    // Re-setup event listeners after a short delay to ensure all elements are rendered
+    // This is especially important for elements that are conditionally shown (like admin dashboard)
+    setTimeout(() => {
+        console.log('Re-checking event listeners...');
+
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const toggleBtnDesktop = document.getElementById('toggleSidebarDesktop');
+
+        if (toggleBtn && !toggleBtn.hasAttribute('data-listener-attached')) {
+            console.log('Attaching listener to toggleSidebar');
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                App.toggleSidebar();
+            });
+            toggleBtn.setAttribute('data-listener-attached', 'true');
+        }
+
+        if (toggleBtnDesktop && !toggleBtnDesktop.hasAttribute('data-listener-attached')) {
+            console.log('Attaching listener to toggleSidebarDesktop');
+            toggleBtnDesktop.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                App.toggleSidebar();
+            });
+            toggleBtnDesktop.setAttribute('data-listener-attached', 'true');
+        }
+
+        // Also attach to sidebar close button
+        const sidebarCloseBtn = document.querySelector('.sidebar-close');
+        if (sidebarCloseBtn && !sidebarCloseBtn.hasAttribute('data-listener-attached')) {
+            console.log('Attaching listener to sidebar-close');
+            sidebarCloseBtn.addEventListener('click', () => App.closeMobileSidebar());
+            sidebarCloseBtn.setAttribute('data-listener-attached', 'true');
+        }
+    }, 500);
 });
 // Global Error Handler to catch silent failures
 window.onerror = function (message, source, lineno, colno, error) {
