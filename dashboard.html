@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=1.3">
   <script src="https://cdn.jsdelivr.net/npm/chart.js" async></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -74,7 +75,7 @@
     <main class="main-content" id="adminDashboard" style="display: none;">
       <header class="top-header">
         <div class="header-left">
-          <button class="toggle-sidebar" id="toggleSidebarDesktop">
+          <button class="toggle-sidebar" id="toggleSidebar">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -284,7 +285,7 @@
 
       <!-- Fixed Mobile Header -->
       <header class="app-header-mobile">
-        <button class="icon-btn-pill" id="toggleSidebar" aria-label="Toggle Menu">
+        <button class="toggle-sidebar" id="toggleSidebar" aria-label="Toggle Menu">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -1631,12 +1632,6 @@
       document.addEventListener('DOMContentLoaded', async () => {
         await App.init();
         await loadDashboard();
-
-        // Setup desktop sidebar toggle if exists
-        const toggleSidebarDesktop = document.getElementById('toggleSidebarDesktop');
-        if (toggleSidebarDesktop) {
-          toggleSidebarDesktop.onclick = () => App.toggleSidebar();
-        }
       });
     </script>
 </body>

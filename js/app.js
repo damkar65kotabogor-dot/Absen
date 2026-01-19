@@ -163,17 +163,9 @@ const App = {
         const menus = {
             admin: [
                 {
-                    title: 'Menu Utama',
-                    items: [
-                        { href: 'dashboard.html', icon: 'layout-dashboard', label: 'Dashboard' }
-                    ]
-                },
-                {
                     title: 'Kepegawaian',
                     items: [
-                        { href: 'pegawai.html', icon: 'users', label: 'Data Pegawai' },
-                        { href: 'jabatan.html', icon: 'briefcase', label: 'Jabatan' },
-                        { href: 'unit-kerja.html', icon: 'building-2', label: 'Unit Kerja' }
+                        { href: 'pegawai.html', icon: 'users', label: 'Data Pegawai' }
                     ]
                 },
                 {
@@ -181,12 +173,6 @@ const App = {
                     items: [
                         { href: 'absensi.html', icon: 'clock', label: 'Absensi' },
                         { href: 'cuti.html', icon: 'calendar-off', label: 'Pengajuan Cuti' }
-                    ]
-                },
-                {
-                    title: 'Laporan',
-                    items: [
-                        { href: 'laporan.html', icon: 'file-text', label: 'Laporan' }
                     ]
                 }
             ],
@@ -207,12 +193,6 @@ const App = {
             ],
             pimpinan: [
                 {
-                    title: 'Menu Utama',
-                    items: [
-                        { href: 'dashboard.html', icon: 'layout-dashboard', label: 'Dashboard' }
-                    ]
-                },
-                {
                     title: 'Kepegawaian',
                     items: [
                         { href: 'pegawai.html', icon: 'users', label: 'Data Pegawai' }
@@ -223,12 +203,6 @@ const App = {
                     items: [
                         { href: 'absensi.html', icon: 'clock', label: 'Absensi' },
                         { href: 'cuti.html', icon: 'calendar-off', label: 'Persetujuan Cuti' }
-                    ]
-                },
-                {
-                    title: 'Laporan',
-                    items: [
-                        { href: 'laporan.html', icon: 'file-text', label: 'Laporan' }
                     ]
                 }
             ]
