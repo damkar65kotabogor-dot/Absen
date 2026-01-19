@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await App.init();
 
     // Re-setup event listeners after a short delay to ensure all elements are rendered
-    // This is especially important for elements that are conditionally shown (like admin dashboard)
+    // Reduced from 500ms to 100ms for better performance
     setTimeout(() => {
         console.log('Re-checking event listeners...');
 
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             sidebarCloseBtn.addEventListener('click', () => App.closeMobileSidebar());
             sidebarCloseBtn.setAttribute('data-listener-attached', 'true');
         }
-    }, 500);
+    }, 100); // Reduced from 500ms
 });
 // Global Error Handler to catch silent failures
 window.onerror = function (message, source, lineno, colno, error) {
