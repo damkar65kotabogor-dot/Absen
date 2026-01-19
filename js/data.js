@@ -191,7 +191,20 @@ const Data = {
     async getPegawai() { return this.getAll('pegawai'); },
     async getJabatan() { return this.getAll(this.KEYS.JABATAN); },
     async getUnitKerja() { return this.getAll(this.KEYS.UNIT_KERJA); },
-    async getAbsensi() { return this.getAll('absensi'); },
+    async getAbsensi(options = {}) {
+        let query = supabaseClient.from('absensi').select('*');
+        if (options.limit) query = query.order('tanggal', { ascending: false }).limit(options.limit);
+        if (options.id) query = query.eq('id', options.id);
+        if (options.pegawai_id) query = query.eq('pegawai_id', options.pegawai_id);
+        if (options.tanggal) query = query.eq('tanggal', options.tanggal);
+
+        const { data, error } = await query;
+        if (error) {
+            console.error('Error fetching absensi:', error);
+            return [];
+        }
+        return data || [];
+    },
     async getCuti() { return this.getAll('cuti'); },
     async getPendidikan() { return this.getAll(this.KEYS.PENDIDIKAN); },
     async getKeluarga() { return this.getAll(this.KEYS.KELUARGA); },
@@ -246,21 +259,43 @@ const Data = {
         };
     },
 
-    async getAbsensiWithPegawai() {
-        const { data, error } = await supabaseClient
+    async getAbsensiWithPegawai(options = {}) {
+        let query = supabaseClient
             .from('absensi')
             .select(`
                 *,
                 pegawai:pegawai_id (*)
             `)
-            .order('tanggal', { ascending: false });
+            .order('tanggal', { ascending: false })
+            .order('jam_masuk', { ascending: false });
+
+        if (options.limit) {
+            query = query.limit(options.limit);
+        }
+
+        if (options.status) {
+            query = query.eq('status', options.status);
+        }
+
+        if (options.id) {
+            query = query.eq('id', options.id);
+        }
+
+        if (options.pegawai_id) {
+            query = query.eq('pegawai_id', options.pegawai_id);
+        }
+
+        if (options.month) {
+            query = query.like('tanggal', `${options.month}%`);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
             console.error('Error fetching absensi with pegawai:', error);
             console.error('Error details:', JSON.stringify(error, null, 2));
             return [];
         }
-        console.log('getAbsensiWithPegawai returned:', data?.length || 0, 'records');
         return data || [];
     },
 

@@ -362,10 +362,8 @@
             if (!user.pegawaiId) return;
 
             const today = getLocalTodayDate();
-            const attendance = await Data.getAbsensi();
-            const absensi = attendance.find(a =>
-                a.pegawai_id === user.pegawaiId && a.tanggal === today
-            );
+            const attendance = await Data.getAbsensi({ pegawai_id: user.pegawaiId, tanggal: today });
+            const absensi = attendance[0];
 
             const infoEl = document.getElementById('attendanceInfo');
             const btnCheckIn = document.getElementById('btnCheckIn');
@@ -398,7 +396,10 @@
                 const filterPegawai = document.getElementById('filterPegawai').value;
                 const filterStatus = document.getElementById('filterStatus').value;
 
-                let absensi = await Data.getAbsensiWithPegawai();
+                const filterOptions = { limit: 500 };
+                if (isPegawai) filterOptions.pegawai_id = user.pegawaiId;
+
+                let absensi = await Data.getAbsensiWithPegawai(filterOptions);
 
                 // Filter by pegawai (for pegawai role)
                 if (isPegawai) {
@@ -550,8 +551,7 @@
         async function editAbsensi() {
             if (!currentAbsensiId) return;
 
-            const attendance = await Data.getAbsensi();
-            const a = attendance.find(x => x.id === currentAbsensiId);
+            const a = await Data.getById('absensi', currentAbsensiId);
             if (!a) return;
 
             // Populate Pegawai list if not already there (admin only usually)
@@ -652,10 +652,8 @@
             if (!isAtLocation) return;
 
             const today = getLocalTodayDate();
-            const attendance = await Data.getAbsensi();
-            const absensi = attendance.find(a =>
-                a.pegawai_id === user.pegawaiId && a.tanggal === today
-            );
+            const attendance = await Data.getAbsensi({ pegawai_id: user.pegawaiId, tanggal: today });
+            const absensi = attendance[0];
 
             if (absensi) {
                 const jamKeluar = new Date().toTimeString().slice(0, 5);

@@ -238,7 +238,11 @@
       const month = document.getElementById('absensiMonth').value;
       const pegawaiId = document.getElementById('absensiPegawai').value;
 
-      let absensi = await Data.getAbsensiWithPegawai();
+      const opts = { limit: 1000 };
+      if (month) opts.month = month;
+      if (pegawaiId) opts.pegawai_id = pegawaiId;
+
+      let absensi = await Data.getAbsensiWithPegawai(opts);
 
       // Apply filters
       if (month) {

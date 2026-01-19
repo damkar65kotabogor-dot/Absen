@@ -663,8 +663,8 @@
             document.getElementById('currentDateShort').textContent = new Date().toLocaleDateString('id-ID', optionsDate);
           }
 
-          // Load recent absensi with new format
-          let allAbsensi = await Data.getAbsensiWithPegawai();
+          // Load recent absensi with new format (Limited to 100 to prevent timeout)
+          let allAbsensi = await Data.getAbsensiWithPegawai({ limit: 100 });
 
           // Always focus on current user for this dashboard
           if (!user.pegawaiId) {
@@ -855,9 +855,12 @@
                 const jamMasuk = now.toTimeString().slice(0, 5);
                 const today = getLocalTodayDate();
 
-                // Check if already checked in
-                const exists = await Data.getAbsensi();
-                if (exists.find(a => a.pegawai_id == Auth.getCurrentUser().pegawaiId && a.tanggal == today)) {
+                // Check if already checked in (Filtered by user and today)
+                const exists = await Data.getAbsensi({
+                  pegawai_id: Auth.getCurrentUser().pegawaiId,
+                  tanggal: today
+                });
+                if (exists.length > 0) {
                   App.showToast('Anda sudah melakukan absensi hari ini.', 'warning');
                   return;
                 }
@@ -886,10 +889,11 @@
                 if (!isAtLocation) return;
 
                 const today = getLocalTodayDate();
-                const attendance = await Data.getAbsensi();
-                const absensi = attendance.find(a =>
-                  a.pegawai_id === Auth.getCurrentUser().pegawaiId && a.tanggal === today
-                );
+                const attendance = await Data.getAbsensi({
+                  pegawai_id: Auth.getCurrentUser().pegawaiId,
+                  tanggal: today
+                });
+                const absensi = attendance[0];
 
                 if (absensi) {
                   const jamKeluar = new Date().toTimeString().slice(0, 5);
@@ -987,7 +991,8 @@
 
       // Get weekly attendance data
       async function getWeeklyAttendanceData() {
-        const absensi = await Data.getAbsensi();
+        // Limit to 50 for status update check
+        const absensi = await Data.getAbsensi({ limit: 50 });
         const today = new Date();
         const startOfWeek = new Date(today);
         startOfWeek.setDate(today.getDate() - today.getDay() + 1);
@@ -1078,7 +1083,8 @@
         if (!user.pegawaiId) return;
 
         const today = getLocalTodayDate();
-        const attendance = await Data.getAbsensi();
+        // Limit to 200 for calendar (sufficient for recent history)
+        const attendance = await Data.getAbsensi({ limit: 200 });
         const absensi = attendance.find(a =>
           a.pegawai_id === user.pegawaiId && a.tanggal === today
         );
@@ -1145,7 +1151,7 @@
         if (!isAtLocation) return;
 
         const today = getLocalTodayDate();
-        const attendance = await Data.getAbsensi();
+        const attendance = await Data.getAbsensi({ limit: 200 });
         const absensi = attendance.find(a =>
           a.pegawai_id === user.pegawaiId && a.tanggal === today
         );
@@ -1161,7 +1167,7 @@
       // Handle download report
       async function downloadReport() {
         console.log('Running downloadReport');
-        const absensi = await Data.getAbsensiWithPegawai();
+        const absensi = await Data.getAbsensiWithPegawai({ limit: 20 });
         const today = new Date();
         const month = today.getMonth();
         const year = today.getFullYear();
@@ -1261,7 +1267,7 @@
         }
 
         // Check if attendance already exists
-        const attendance = await Data.getAbsensi();
+        const attendance = await Data.getAbsensi({ limit: 50 });
         const existing = attendance.find(a =>
           a.pegawai_id === parseInt(pegawai_id) && a.tanggal === tanggal
         );
@@ -1371,8 +1377,8 @@
         if (popover) popover.classList.remove('show');
 
         try {
-          const items = await Data.getAbsensiWithPegawai();
-          const item = items.find(x => x.id === currentAbsensiId);
+          const items = await Data.getAbsensiWithPegawai({ id: currentAbsensiId });
+          const item = items[0];
           if (!item) return;
 
           // Populate static fields
@@ -1437,8 +1443,7 @@
 
       async function editAbsensi() {
         if (!currentAbsensiId) return;
-        const attendance = await Data.getAbsensi();
-        const a = attendance.find(x => x.id === currentAbsensiId);
+        const a = await Data.getById('absensi', currentAbsensiId);
         if (!a) return;
 
         // Get pegawai list first to ensure dropdown is ready
@@ -1549,13 +1554,13 @@
         const tbody = document.getElementById('recentAbsensi');
         if (!tbody) return;
 
-        let allAbsensi = await Data.getAbsensiWithPegawai();
-        let filtered = allAbsensi;
+        const options = { limit: 100 };
         if (status !== 'all') {
           const filterMap = { 'hadir': 'tepat_waktu', 'terlambat': 'terlambat', 'alpha': 'alpha' };
-          const dbStatus = filterMap[status] || status;
-          filtered = allAbsensi.filter(x => x.status === dbStatus);
+          options.status = filterMap[status] || status;
         }
+
+        let filtered = await Data.getAbsensiWithPegawai(options);
 
         tbody.innerHTML = filtered.length > 0 ? filtered.map(a => {
           const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
