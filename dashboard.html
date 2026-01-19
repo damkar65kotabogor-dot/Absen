@@ -448,6 +448,34 @@
 
     </main>
 
+    <!-- Action Menu Popover -->
+    <div id="actionMenuPopover" class="action-menu-popover">
+      <a href="#" class="action-menu-item" onclick="viewDetailAbsensi(); return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Lihat Detail
+      </a>
+      <a href="#" class="action-menu-item" onclick="editAbsensi(); return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Edit
+      </a>
+      <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi(); return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Hapus
+      </a>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
@@ -1175,11 +1203,17 @@
         currentAbsensiId = id;
 
         const popover = document.getElementById('actionMenuPopover');
+
+        // Defensive check - if popover doesn't exist, log error and return
+        if (!popover) {
+          console.error('Action menu popover element not found');
+          return;
+        }
+
         const btn = event.currentTarget;
         const rect = btn.getBoundingClientRect();
 
         // Dynamic positioning for FIXED element
-        // For fixed, top/left are relative to viewport, so rect.bottom/rect.left are already correct
         const popoverWidth = 160;
         let top = rect.bottom + 5;
         let left = rect.left - popoverWidth + rect.width;
@@ -1195,6 +1229,16 @@
         popover.style.top = `${top}px`;
         popover.style.left = `${left}px`;
         popover.classList.add('show');
+
+        // Close on click outside
+        setTimeout(() => {
+          document.addEventListener('click', function closePopover(e) {
+            if (!popover.contains(e.target) && e.target !== btn) {
+              popover.classList.remove('show');
+              document.removeEventListener('click', closePopover);
+            }
+          });
+        }, 100);
       }
 
       function viewDetailAbsensi() {
