@@ -55,15 +55,15 @@
         </a>
         <a href="pegawai.html" class="nav-item">
           <i data-lucide="users"></i>
-          <span>Pegawai</span>
+          <span>Employees</span>
         </a>
         <a href="absensi.html" class="nav-item">
           <i data-lucide="file-text"></i>
-          <span>Laporan</span>
+          <span>Reports</span>
         </a>
         <a href="setting.html" class="nav-item">
           <i data-lucide="settings"></i>
-          <span>Pengaturan</span>
+          <span>Settings</span>
         </a>
       </nav>
 
@@ -125,8 +125,8 @@
         <div class="dashboard-main-content">
           <!-- Page Header Info -->
           <div class="dashboard-header-intro mb-4">
-            <h1 class="dashboard-main-title">Ikhtisar Dashboard</h1>
-            <p class="dashboard-main-subtitle">Pemantauan kehadiran dan data pegawai secara real-time</p>
+            <h1 class="dashboard-main-title">Dashboard Overview</h1>
+            <p class="dashboard-main-subtitle">Real-time attendance and payroll tracking</p>
           </div>
 
           <!-- Stats Grid -->
@@ -134,14 +134,15 @@
             <div class="stat-card-redesign" onclick="filterTableByStatus('all')">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <span class="stat-label">PEGAWAI AKTIF</span>
+                  <span class="stat-label">ACTIVE EMPLOYEES</span>
                   <div class="stat-value-group">
                     <span class="stat-number" id="statTotalPegawai">0</span>
-                    <span class="stat-trend positive">+<span id="statHadirPersen">0</span>% vs minggu lalu</span>
+                    <span class="stat-trend positive">+5% <span class="text-muted font-normal">vs last
+                        week</span></span>
                   </div>
                 </div>
-                <div class="stat-icon-wrapper blue">
-                  <i data-lucide="users"></i>
+                <div class="stat-icon-wrapper green-bg">
+                  <i data-lucide="users" class="text-green-dark"></i>
                 </div>
               </div>
             </div>
@@ -149,14 +150,15 @@
             <div class="stat-card-redesign" onclick="filterTableByStatus('pending')">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <span class="stat-label">PERSETUJUAN PENDING</span>
+                  <span class="stat-label">PENDING APPROVALS</span>
                   <div class="stat-value-group">
                     <span class="stat-number" id="statPendingCuti">0</span>
-                    <span class="stat-trend negative">-2% butuh tindakan</span>
+                    <span class="stat-trend negative">-2% <span class="text-muted font-normal">urgent
+                        items</span></span>
                   </div>
                 </div>
-                <div class="stat-icon-wrapper orange">
-                  <i data-lucide="clipboard-list"></i>
+                <div class="stat-icon-wrapper orange-bg">
+                  <i data-lucide="calendar-check" class="text-orange-dark"></i>
                 </div>
               </div>
             </div>
@@ -164,14 +166,14 @@
             <div class="stat-card-redesign" onclick="filterTableByStatus('hadir')">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <span class="stat-label">HADIR HARI INI</span>
+                  <span class="stat-label">WEEKLY PAYROLL EST.</span>
                   <div class="stat-value-group">
-                    <span class="stat-number" id="statHadir">0</span>
-                    <span class="stat-trend positive">+8% proyeksi</span>
+                    <span class="stat-number">$<span id="statHadir">12,450</span></span>
+                    <span class="stat-trend blue-text">+8% <span class="text-muted font-normal">projection</span></span>
                   </div>
                 </div>
-                <div class="stat-icon-wrapper green">
-                  <i data-lucide="user-check"></i>
+                <div class="stat-icon-wrapper blue-bg">
+                  <i data-lucide="banknote" class="text-blue-dark"></i>
                 </div>
               </div>
             </div>
@@ -181,7 +183,7 @@
           <div class="card attendance-monitoring-card">
             <div class="card-header-redesign">
               <div class="header-title-group">
-                <h3 class="card-title">Monitor Absensi Real-time</h3>
+                <h3 class="card-title">Current Active Shifts</h3>
                 <span class="live-badge">LIVE UPDATES</span>
               </div>
             </div>
@@ -190,11 +192,11 @@
                 <table class="table-redesign">
                   <thead>
                     <tr>
-                      <th>NAMA PEGAWAI</th>
-                      <th>UNIT KERJA</th>
-                      <th>JAM MASUK</th>
+                      <th>EMPLOYEE NAME</th>
+                      <th>DEPARTMENT</th>
+                      <th>CLOCK-IN TIME</th>
                       <th>STATUS</th>
-                      <th>AKSI</th>
+                      <th>ACTION</th>
                     </tr>
                   </thead>
                   <tbody id="recentAbsensi">
@@ -203,7 +205,7 @@
                 </table>
               </div>
               <button class="show-all-btn" onclick="window.location.href='absensi.html'">
-                Lihat semua data absen <i data-lucide="chevron-down" style="width: 16px;"></i>
+                Show all active shifts <i data-lucide="chevron-down" style="width: 16px;"></i>
               </button>
             </div>
           </div>
@@ -213,34 +215,38 @@
         <div class="dashboard-side-content">
           <!-- Quick Actions -->
           <div class="card actions-card mb-4">
-            <div class="card-header-redesign">
-              <h3 class="card-title"><i data-lucide="zap" class="icon-inline"></i> Aksi Cepat</h3>
-              <p class="card-description">Pintasan administratif untuk eksekusi cepat.</p>
+            <div class="card-header-redesign border-none">
+              <h3 class="card-title"><i data-lucide="zap" class="text-blue icon-inline"></i> Quick Actions</h3>
+              <p class="card-description">Administrative shortcuts for rapid execution.</p>
             </div>
             <div class="card-body">
               <button class="btn-action-primary w-100 mb-3" onclick="App.showToast('Fitur diproses...', 'info')">
                 <div class="btn-content">
-                  <i data-lucide="check-square"></i>
-                  <span>Setujui Semua Log</span>
+                  <i data-lucide="list-checks"></i>
+                  <span>Approve All Logs</span>
                 </div>
                 <i data-lucide="chevron-right"></i>
               </button>
 
-              <button class="btn-action-secondary w-100 mb-3" onclick="downloadReport()">
-                <div class="btn-content">
-                  <i data-lucide="file-text"></i>
-                  <span>Cetak Laporan Bulanan</span>
-                </div>
-                <i data-lucide="download"></i>
-              </button>
+              <div class="btn-action-outline-container mb-3">
+                <button class="btn-action-outline w-100" onclick="downloadReport()">
+                  <div class="btn-content">
+                    <i data-lucide="file-text"></i>
+                    <span>Generate Payroll Report</span>
+                  </div>
+                  <i data-lucide="download"></i>
+                </button>
+              </div>
 
-              <button class="btn-action-secondary w-100" onclick="window.location.href='pegawai.html'">
-                <div class="btn-content">
-                  <i data-lucide="user-plus"></i>
-                  <span>Tambah Pegawai Baru</span>
-                </div>
-                <i data-lucide="plus"></i>
-              </button>
+              <div class="btn-action-outline-container">
+                <button class="btn-action-outline w-100" onclick="window.location.href='pegawai.html'">
+                  <div class="btn-content">
+                    <i data-lucide="user-plus"></i>
+                    <span>Add New Employee</span>
+                  </div>
+                  <i data-lucide="plus"></i>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -249,19 +255,19 @@
             <div class="card-body">
               <div class="alert-icon-title">
                 <i data-lucide="info" class="text-blue"></i>
-                <h4 class="alert-title">Sistem Alert</h4>
+                <h4 class="alert-title">System Alert</h4>
               </div>
               <p class="alert-text">
-                Siklus absensi baru akan berakhir dalam <span class="font-bold">2 hari</span>.
-                Harap pastikan semua koreksi manual telah dikirimkan sebelum hari Jumat.
+                Payroll cycle ends in <span class="blue-text font-bold">2 days</span>. Please ensure all manual
+                corrections are submitted by EOD Friday.
               </p>
             </div>
           </div>
 
           <!-- Unit Statistics -->
           <div class="card unit-stats-card">
-            <div class="card-header-redesign">
-              <h3 class="card-title">STATISTIK UNIT</h3>
+            <div class="card-header-redesign border-none">
+              <h3 class="card-title text-muted text-xs font-bold uppercase tracking-wider">DEPARTMENT USAGE</h3>
             </div>
             <div class="card-body" id="unitStatsList">
               <div class="unit-stat-item">
@@ -765,21 +771,26 @@
                 <td>
                   <div class="user-info-cell">
                     <img src="https://ui-avatars.com/api/?name=${abs.nama_pegawai}&background=random" class="user-avatar-small" alt="">
-                    <span class="font-semibold">${abs.nama_pegawai}</span>
+                    <span class="font-semibold text-gray-800">${abs.nama_pegawai}</span>
                   </div>
                 </td>
                 <td><span class="text-muted">${abs.unit_kerja || '-'}</span></td>
                 <td><span class="font-medium">${abs.jam_masuk || '--:--'}</span></td>
-                <td><span class="${statusClass} font-bold">• ${abs.status}</span></td>
                 <td>
-                  <button class="text-primary font-semibold" onclick="viewDetailAbsensi('${abs.id}')">Detail</button>
+                  <div class="flex items-center">
+                    <span class="status-dot-active"></span>
+                    <span class="text-green-dark font-bold">Active</span>
+                  </div>
+                </td>
+                <td>
+                  <button class="blue-text font-bold" onclick="viewDetailAbsensi('${abs.id}')">View Details</button>
                 </td>
               `;
               tbody.appendChild(row);
             });
 
-            if (displayList.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Belum ada data absensi hari ini</td></tr>';
+            if (allAbsensi.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">No active shifts found</td></tr>';
             }
           }
 

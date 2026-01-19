@@ -3148,3 +3148,150 @@ body:has(.mobile-app-wrapper) {
 .map-link:hover {
     text-decoration: underline;
 }
+
+/* ============================================
+   ADMIN DASHBOARD HIGH-FIDELITY REDESIGN
+   ============================================ */
+
+/* Utility & Text */
+.blue-text {
+    color: #2563eb !important;
+}
+
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+.font-normal {
+    font-weight: 400 !important;
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em;
+}
+
+.border-none {
+    border: none !important;
+}
+
+/* Icon Backgrounds (High Fidelity) */
+.green-bg {
+    background-color: #ecfdf5 !important;
+}
+
+.text-green-dark {
+    color: #10b981 !important;
+}
+
+.orange-bg {
+    background-color: #fffaf0 !important;
+}
+
+.text-orange-dark {
+    color: #f59e0b !important;
+}
+
+.blue-bg {
+    background-color: #eff6ff !important;
+}
+
+.text-blue-dark {
+    color: #3b82f6 !important;
+}
+
+/* Progress Fill Blue */
+.progress-fill.blue {
+    background-color: #2563eb !important;
+}
+
+/* Status Dot (Green Pulse) */
+.status-dot-active {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #10b981;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    animation: status-pulse 2s infinite;
+}
+
+@keyframes status-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Action Buttons (Refined) */
+.btn-action-outline-container {
+    padding: 2px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+    transition: all 0.2s;
+}
+
+.btn-action-outline-container:hover {
+    background-color: var(--gray-50);
+    border-color: var(--gray-300);
+}
+
+.btn-action-outline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    background: transparent;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Redesign Overrides */
+.card-header-redesign {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.stats-grid-redesign {
+    gap: 1.5rem;
+}
+
+.stat-card-redesign {
+    padding: 1.75rem;
+}
+
+/* Sidebar Specifics */
+.sidebar-logo {
+    background: #2563eb !important;
+}
+
+.sidebar-header {
+    border-bottom: none !important;
+}
+
+.sidebar-nav .nav-item.active {
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+    border-radius: 8px;
+    margin: 0 12px;
+}
+
+.sidebar-nav .nav-item.active::before {
+    display: none;
+}
