@@ -831,9 +831,6 @@
           }
 
           // Calculate percentages
-          const hadirPersen = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
-          const statHadirPersen = document.getElementById('statHadirPersen');
-          if (statHadirPersen) statHadirPersen.textContent = hadirPersen;
 
           const statTanpaKet = document.getElementById('statTanpaKet');
           if (statTanpaKet) statTanpaKet.textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
