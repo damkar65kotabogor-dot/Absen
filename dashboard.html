@@ -672,16 +672,17 @@
       tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-500">Memuat data...</td></tr>';
 
       try {
-        // 1. Try to fetch with join
-        let absensi = await Data.getAbsensiWithPegawai({ limit: 10 });
+        let absensi = [];
 
-        // 2. If empty or no pegawai data, try fallback
-        if (!absensi || absensi.length === 0) {
-          // Try fallback: Get Absensi only
+        try {
+          // 1. Try to fetch with join
+          absensi = await Data.getAbsensiWithPegawai({ limit: 10 });
+        } catch (joinError) {
+          console.warn("Join fetch failed, attempting fallback...", joinError);
+          // 2. Fallback: Get Absensi only + Manual Join
           const absensiOnly = await Data.getAbsensi({ limit: 10 });
           if (absensiOnly && absensiOnly.length > 0) {
             const allPegawai = await Data.getPegawai();
-
             absensi = absensiOnly.map(a => {
               return {
                 ...a,
@@ -704,6 +705,8 @@
           let statusClass = 'bg-slate-100 text-slate-600';
           if (abs.status === 'tepat_waktu' || abs.status === 'hadir') statusClass = 'bg-emerald-100 text-emerald-700';
           if (abs.status === 'terlambat') statusClass = 'bg-amber-100 text-amber-700';
+          if (abs.status === 'izin' || abs.status === 'sakit') statusClass = 'bg-blue-100 text-blue-700';
+          if (abs.status === 'alpha') statusClass = 'bg-red-100 text-red-700';
 
           return `
               <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -720,7 +723,7 @@
                   ${abs.jam_masuk || '--:--'} WIB
                 </td>
                 <td class="px-6 py-4">
-                  <span class="px-2.5 py-1 rounded text-xs font-semibold ${statusClass}">
+                  <span class="px-2.5 py-1 rounded-sm text-xs font-semibold ${statusClass}">
                     ${abs.status}
                   </span>
                 </td>
@@ -738,7 +741,16 @@
 
       } catch (e) {
         console.error("Error loading table", e);
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">Gagal memuat data. Periksa koneksi internet.</td></tr>';
+        // Better error message for user
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4 text-red-500">
+                    <div class="flex flex-col items-center gap-1">
+                        <span>Gagal memuat data.</span>
+                        <span class="text-xs text-slate-400">Silakan cek koneksi internet anda.</span>
+                    </div>
+                </td>
+            </tr>`;
       }
     }
 

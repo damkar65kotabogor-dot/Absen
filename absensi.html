@@ -1,681 +1,345 @@
 <!DOCTYPE html>
-<html lang="id">
+<html class="light" lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Absensi - SIMPEG PPPK">
-    <title>Absensi - SIMPEG PPPK Paruh Waktu</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="img/logo.png" type="image/png">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Data Absensi - SIMPEG PPPK</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <!-- Lucide (Compatibility) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
 
-<body>
-    <div class="app-container">
-        <!-- Sidebar Overlay (Mobile) -->
-        <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
+<body
+    class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen flex overflow-hidden">
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <!-- Mobile Close Button -->
-            <button class="sidebar-close" onclick="App.closeMobileSidebar()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-            </button>
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                </div>
-                <div class="sidebar-brand">
-                    <h1>SIMPEG</h1>
-                    <span>PPPK Paruh Waktu</span>
-                </div>
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 transition-all duration-300 z-30 fixed lg:relative h-full -translate-x-full lg:translate-x-0">
+        <!-- Logo Area -->
+        <a href="dashboard.html"
+            class="h-16 flex items-center gap-3 px-6 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <div class="size-8 rounded-lg bg-primary flex items-center justify-center text-white">
+                <span class="material-symbols-outlined text-xl">badge</span>
             </div>
-            <nav class="sidebar-nav"></nav>
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">AD</div>
-                    <div class="user-info">
-                        <div class="user-name">Administrator</div>
-                        <div class="user-role">Admin</div>
+            <div>
+                <h1 class="text-base font-bold text-slate-900 dark:text-white leading-none">Absensi PPPK</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Admin Panel</p>
+            </div>
+        </a>
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-2">Menu Utama</p>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors"
+                href="dashboard.html">
+                <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                <span class="text-sm font-medium">Dashboard</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Kepegawaian</p>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors"
+                href="pegawai.html">
+                <span class="material-symbols-outlined text-[20px]">group</span>
+                <span class="text-sm font-medium">Data Pegawai</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Kehadiran</p>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary group transition-colors"
+                href="absensi.html">
+                <span class="material-symbols-outlined text-[20px]">schedule</span>
+                <span class="text-sm font-medium">Absensi</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors"
+                href="cuti.html">
+                <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                <span class="text-sm font-medium">Pengajuan Cuti</span>
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">Sistem</p>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors"
+                href="setting.html">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                <span class="text-sm font-medium">Pengaturan</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors"
+                href="profil.html">
+                <span class="material-symbols-outlined text-[20px]">account_circle</span>
+                <span class="text-sm font-medium">Profil Admin</span>
+            </a>
+        </div>
+        <!-- User Profile Footer -->
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center user-avatar"
+                    style="background-image: url('https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff');">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-slate-900 dark:text-white truncate user-name">Admin</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate user-role">Administrator</p>
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="Auth.logout()">
+                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden" id="adminDashboard">
+        <!-- Header -->
+        <header
+            class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-10">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Data Absensi</h2>
+            </div>
+            <!-- No Action button here, handled inside content if needed -->
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- Filters -->
+                <div
+                    class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
+                        <input type="text" id="searchInput" placeholder="Cari nama pegawai..."
+                            class="w-full pl-10 rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm focus:ring-primary focus:border-primary">
                     </div>
-                </div>
-                <button id="logoutBtn" class="btn btn-sm btn-outline mt-3 w-100">Logout</button>
-            </div>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="top-header">
-                <div class="header-left">
-                    <button class="toggle-sidebar" id="toggleSidebar">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="3" y1="12" x2="21" y2="12" />
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
+                    <input type="month" id="filterMonth"
+                        class="rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm focus:ring-primary focus:border-primary">
+
+                    <select id="filterStatus"
+                        class="rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm focus:ring-primary focus:border-primary">
+                        <option value="">Semua Status</option>
+                        <option value="tepat_waktu">Tepat Waktu</option>
+                        <option value="terlambat">Terlambat</option>
+                        <option value="izin">Izin</option>
+                        <option value="sakit">Sakit</option>
+                        <option value="alpha">Alpha</option>
+                    </select>
+
+                    <button onclick="loadAbsensi()"
+                        class="btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[20px]">refresh</span>
                     </button>
-                    <div class="page-title">
-                        <h2>Absensi</h2>
-                        <p id="currentDate">Selasa, 24 Desember 2024</p>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Pegawai Quick Action -->
-            <div id="quickAction" class="mb-5 d-none">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex gap-4 align-center flex-wrap">
-                            <div style="flex: 1;">
-                                <h3 class="mb-2">Absensi Hari Ini</h3>
-                                <p class="text-muted" id="attendanceInfo">Silakan lakukan check-in untuk memulai hari
-                                    kerja.</p>
-                            </div>
-                            <div class="d-flex gap-3">
-                                <button id="btnCheckIn" class="btn btn-primary btn-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                    Check-In
-                                </button>
-                                <button id="btnCheckOut" class="btn btn-danger btn-lg" disabled>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                        <polyline points="16 17 21 12 16 7" />
-                                        <line x1="21" y1="12" x2="9" y2="12" />
-                                    </svg>
-                                    Check-Out
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filters (Admin/Pimpinan) -->
-            <div id="filters" class="card mb-4">
-                <div class="card-body">
-                    <div class="d-flex gap-4 flex-wrap align-center">
-                        <div class="form-group m-0" style="min-width: 180px;">
-                            <select class="form-control" id="filterPegawai">
-                                <option value="">Semua</option>
-                            </select>
-                        </div>
-                        <div class="form-group m-0" style="min-width: 150px;">
-                            <input type="month" class="form-control" id="filterMonth">
-                        </div>
-                        <div class="form-group m-0" style="min-width: 150px;">
-                            <select class="form-control" id="filterStatus">
-                                <option value="">Semua Status</option>
-                                <option value="tepat_waktu">Tepat Waktu</option>
-                                <option value="terlambat">Terlambat</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats-grid mb-5" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-icon success">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="statTepatWaktu">0</div>
-                        <div class="stat-label">Tepat Waktu</div>
-                    </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon warning">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="statTerlambat">0</div>
-                        <div class="stat-label">Terlambat</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="statTotal">0</div>
-                        <div class="stat-label">Total Hari</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Data Table -->
-            <div class="card">
-                <div class="card-header d-flex justify-between align-center">
-                    <h3 class="card-title">Riwayat Absensi</h3>
-                    <div id="bulkActions" class="d-none">
-                        <button class="btn btn-sm btn-danger" onclick="bulkDeleteAbsensi()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="mr-1">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                </path>
-                            </svg>
-                            Hapus Sekaligus (<span id="selectedCount">0</span>)
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
+                <!-- Table -->
+                <div
+                    class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead
+                                class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-800/50">
                                 <tr>
-                                    <th id="thSelectAll" style="width: 40px;"><input type="checkbox" id="selectAll"
-                                            onclick="toggleSelectAll()"></th>
-                                    <th>Tanggal</th>
-                                    <th id="thPegawai">Pegawai</th>
-                                    <th>Jam Masuk</th>
-                                    <th>Jam Keluar</th>
-                                    <th>Status</th>
-                                    <th>Keterangan</th>
-                                    <th id="thAksi" style="width: 50px;">Aksi</th>
+                                    <th class="px-6 py-3 font-semibold">Tanggal</th>
+                                    <th class="px-6 py-3 font-semibold">Pegawai</th>
+                                    <th class="px-6 py-3 font-semibold">Jam Masuk</th>
+                                    <th class="px-6 py-3 font-semibold">Jam Keluar</th>
+                                    <th class="px-6 py-3 font-semibold">Status</th>
+                                    <th class="px-6 py-3 font-semibold">Keterangan</th>
+                                    <th class="px-6 py-3 font-semibold text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="absensiTable">
-                                <!-- Rendered by JS -->
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="absensiTable">
+                                <tr>
+                                    <td colspan="7" class="text-center py-8 text-slate-500">Memuat data absensi...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
-
-    <!-- Action Menu Popover -->
-    <div class="action-menu-popover" id="actionMenuPopover">
-        <a href="#" class="action-menu-item" onclick="editAbsensi()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Edit Data
-        </a>
-        <hr style="margin: 4px 0; border: 0; border-top: 1px solid var(--gray-100);">
-        <a href="#" class="action-menu-item text-danger" onclick="deleteAbsensi()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-            Hapus Data
-        </a>
-    </div>
-
-    <!-- Edit Absensi Modal -->
-    <div class="modal-overlay" id="editAbsensiModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Edit Absensi</h3>
-                <button class="modal-close" onclick="closeEditModal()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                </button>
-            </div>
-            <form id="editAbsensiForm">
-                <input type="hidden" id="editAbsensiId">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">Pegawai</label>
-                        <select class="form-control" id="editPegawai" required disabled>
-                            <!-- Populated by JS -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Tanggal</label>
-                        <input type="date" class="form-control" id="editTanggal" required>
-                    </div>
-                    <div class="row" style="display: flex; gap: 1rem;">
-                        <div class="form-group" style="flex: 1;">
-                            <label class="form-label">Jam Masuk</label>
-                            <input type="time" class="form-control" id="editJamMasuk" required>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label class="form-label">Jam Keluar</label>
-                            <input type="time" class="form-control" id="editJamKeluar">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-control" id="editStatus">
-                            <option value="tepat_waktu">Tepat Waktu</option>
-                            <option value="terlambat">Terlambat</option>
-                            <option value="izin">Izin</option>
-                            <option value="sakit">Sakit</option>
-                            <option value="cuti">Cuti</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Keterangan</label>
-                        <textarea class="form-control" id="editKeterangan" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                </div>
-            </form>
         </div>
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
+
     <script>
-        // Require auth
-        if (!Auth.requireAuth()) {
-            // Redirected
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
         }
 
-        const user = Auth.getCurrentUser() || {};
-        const isPegawai = user.role === 'pegawai';
-
-        // Set current date
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('id-ID', options);
-
-        // Helper to get local date string YYYY-MM-DD
-        function getLocalTodayDate() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        // Setup UI based on role
-        async function setupUI() {
-            if (isPegawai) {
-                document.getElementById('quickAction').classList.remove('d-none');
-                document.getElementById('filters').classList.add('d-none');
-                document.getElementById('thPegawai').style.display = 'none';
-                document.getElementById('thSelectAll').style.display = 'none';
-                document.getElementById('thAksi').style.display = 'none';
-                await checkTodayAttendance();
-            } else {
-                // Load pegawai filter
-                const pegawai = await Data.getPegawai();
-                document.getElementById('filterPegawai').innerHTML = '<option value="">Semua</option>' +
-                    pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
-            }
-        }
-
-        // Check today attendance for pegawai
-        async function checkTodayAttendance() {
-            if (isPegawai && !user.pegawaiId) {
-                const employees = await Data.getPegawai();
-                const p = employees.find(x => x.user_id == user.id);
-                if (p) {
-                    user.pegawaiId = p.id;
-                    localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-                }
-            }
-            if (!user.pegawaiId) return;
-
-            const today = getLocalTodayDate();
-            const attendance = await Data.getAbsensi({ pegawai_id: user.pegawaiId, tanggal: today });
-            const absensi = attendance[0];
-
-            const infoEl = document.getElementById('attendanceInfo');
-            const btnCheckIn = document.getElementById('btnCheckIn');
-            const btnCheckOut = document.getElementById('btnCheckOut');
-
-            if (absensi) {
-                if (absensi.jam_keluar) {
-                    infoEl.textContent = `Absensi selesai. Masuk: ${absensi.jam_masuk} | Keluar: ${absensi.jam_keluar}`;
-                    btnCheckIn.disabled = true;
-                    btnCheckOut.disabled = true;
-                } else {
-                    infoEl.textContent = `Sudah check-in pada ${absensi.jam_masuk}. Jangan lupa check-out!`;
-                    btnCheckIn.disabled = true;
-                    btnCheckOut.disabled = false;
-                }
-            } else {
-                infoEl.textContent = 'Silakan lakukan check-in untuk memulai hari kerja.';
-                btnCheckIn.disabled = false;
-                btnCheckOut.disabled = true;
-            }
-        }
-
-        // Load absensi data
         async function loadAbsensi() {
+            const tbody = document.getElementById('absensiTable');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const month = document.getElementById('filterMonth').value;
+            const status = document.getElementById('filterStatus').value;
+            const user = Auth.getCurrentUser();
+
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500">Memuat data...</td></tr>';
+
             try {
-                // Ensure data layer is ready
-                await Data.isReady();
+                let options = { limit: 100 }; // Increase limit for main list
 
-                const filterMonth = document.getElementById('filterMonth').value;
-                const filterPegawai = document.getElementById('filterPegawai').value;
-                const filterStatus = document.getElementById('filterStatus').value;
+                // Build query params if supported directly, or filter client side for better complex logic with fallback
 
-                const filterOptions = { limit: 500 };
-                if (isPegawai) filterOptions.pegawai_id = user.pegawaiId;
-
-                let absensi = await Data.getAbsensiWithPegawai(filterOptions);
-
-                // Filter by pegawai (for pegawai role)
-                if (isPegawai) {
-                    if (!user.pegawaiId) {
-                        const employees = await Data.getPegawai();
-                        const p = employees.find(x => x.user_id == user.id);
-                        if (p) {
-                            user.pegawaiId = p.id;
-                            localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-                        }
-                    }
-                    if (user.pegawaiId) {
-                        absensi = absensi.filter(a => a.pegawai_id === user.pegawaiId);
-                    }
+                let absensi = [];
+                try {
+                    // 1. Try Join
+                    absensi = await Data.getAbsensiWithPegawai(options);
+                } catch (err) {
+                    console.warn("Join failed, fallback triggered");
+                    // 2. Fallback
+                    const abs = await Data.getAbsensi(options);
+                    const peg = await Data.getPegawai();
+                    absensi = abs.map(a => ({ ...a, pegawai: peg.find(p => p.id === a.pegawai_id) || {} }));
                 }
 
-                // Apply filters
-                if (filterMonth) {
-                    absensi = absensi.filter(a => a.tanggal.startsWith(filterMonth));
+                // Client Side Filter & Sorting
+                if (search) {
+                    absensi = absensi.filter(a => a.pegawai?.nama?.toLowerCase().includes(search));
                 }
-                if (filterPegawai) {
-                    absensi = absensi.filter(a => a.pegawai_id == filterPegawai);
+                if (month) {
+                    absensi = absensi.filter(a => a.tanggal.startsWith(month));
                 }
-                if (filterStatus) {
-                    absensi = absensi.filter(a => a.status === filterStatus);
+                if (status) {
+                    absensi = absensi.filter(a => a.status === status);
                 }
 
-                // Sort by date desc
-                absensi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                // Sort Descending Date
+                absensi.sort((a, b) => new Date(b.tanggal + ' ' + (b.jam_masuk || '00:00')) - new Date(a.tanggal + ' ' + (a.jam_masuk || '00:00')));
 
-                // Update stats
-                const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
-                const terlambat = absensi.filter(a => a.status === 'terlambat').length;
-                document.getElementById('statTepatWaktu').textContent = tepatWaktu;
-                document.getElementById('statTerlambat').textContent = terlambat;
-                document.getElementById('statTotal').textContent = absensi.length;
+                if (absensi.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500">Tidak ada data absensi ditemukan</td></tr>';
+                    return;
+                }
 
-                // Render table
-                const html = absensi.length > 0 ? absensi.map(a => {
-                    const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
-                    const avatarDisplay = a.pegawai?.foto ?
-                        `<img src="${a.pegawai.foto}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` :
-                        `<div style="width:24px;height:24px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#64748b;">${initials}</div>`;
+                tbody.innerHTML = absensi.map(a => {
+                    const nama = a.pegawai?.nama || 'Tanpa Nama';
+                    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=random`;
+
+                    let statusClass = 'bg-slate-100 text-slate-600';
+                    if (a.status === 'tepat_waktu' || a.status === 'hadir') statusClass = 'bg-emerald-100 text-emerald-700';
+                    if (a.status === 'terlambat') statusClass = 'bg-amber-100 text-amber-700';
+                    if (a.status === 'izin' || a.status === 'sakit' || a.status === 'cuti') statusClass = 'bg-blue-100 text-blue-700';
+                    if (a.status === 'alpha') statusClass = 'bg-red-100 text-red-700';
 
                     return `
-                    <tr>
-                    ${!isPegawai ? `<td><input type="checkbox" class="row-checkbox" value="${a.id}" onclick="updateBulkActionVisibility()"></td>` : ''}
-                    <td>${App.formatDate(a.tanggal)}</td>
-                    ${!isPegawai ? `
-                        <td>
-                            <div class="d-flex align-center gap-2">
-                                ${avatarDisplay}
-                                <span>${a.pegawai?.nama || '-'}</span>
-                            </div>
-                        </td>` : ''}
-                    <td>${a.jam_masuk || '-'}</td>
-                    <td>${a.jam_keluar || '-'}</td>
-                    <td>${App.getStatusBadge(a.status)}</td>
-                    <td>${a.keterangan || '-'}</td>
-                    ${!isPegawai ? `
-                        <td>
-                            <button class="action-menu-btn" onclick="showActionMenu(event, ${a.id})">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="1" />
-                                    <circle cx="12" cy="5" r="1" />
-                                    <circle cx="12" cy="19" r="1" />
-                                </svg>
-                            </button>
-                        </td>` : ''}
-                    </tr>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td class="px-6 py-4 text-slate-600 font-medium">${App.formatDate(a.tanggal)}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${avatar}" class="size-8 rounded-full">
+                            <span class="font-medium text-slate-900 dark:text-white">${nama}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600">${a.jam_masuk || '--:--'}</td>
+                    <td class="px-6 py-4 text-slate-600">${a.jam_keluar || '--:--'}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-sm text-xs font-semibold ${statusClass}">${a.status}</span></td>
+                    <td class="px-6 py-4 text-slate-500 text-xs max-w-xs truncate">${a.keterangan || '-'}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteAbsensi(${a.id})" class="text-slate-400 hover:text-red-500">
+                             <span class="material-symbols-outlined text-[20px]">delete</span>
+                        </button>
+                    </td>
+                </tr>
                 `;
-                }).join('') : `<tr><td colspan="${isPegawai ? 5 : 8}" class="text-center text-muted">Tidak ada data absensi</td></tr>`;
+                }).join('');
 
-                document.getElementById('absensiTable').innerHTML = html;
-                updateBulkActionVisibility();
-            } catch (err) {
-                console.error('Error loading absensi:', err);
-                App.showToast('Gagal memuat data absensi', 'danger');
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">Gagal memuat data. Periksa koneksi internet.</td></tr>';
             }
         }
 
-        // ========= Selection & Bulk Action Logic =========
-        function toggleSelectAll() {
-            const selectAll = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.row-checkbox');
-            checkboxes.forEach(cb => cb.checked = selectAll.checked);
-            updateBulkActionVisibility();
-        }
-
-        function updateBulkActionVisibility() {
-            const checkboxes = document.querySelectorAll('.row-checkbox');
-            const checked = Array.from(checkboxes).filter(cb => cb.checked);
-            const bulkActions = document.getElementById('bulkActions');
-            const selectAll = document.getElementById('selectAll');
-
-            if (bulkActions) {
-                if (checked.length > 0) {
-                    bulkActions.classList.remove('d-none');
-                    document.getElementById('selectedCount').textContent = checked.length;
-                } else {
-                    bulkActions.classList.add('d-none');
-                }
-            }
-
-            if (selectAll) {
-                selectAll.checked = checkboxes.length > 0 && checked.length === checkboxes.length;
-            }
-        }
-
-        async function bulkDeleteAbsensi() {
-            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-            const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
-
-            if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} data absensi yang dipilih?`)) {
-                for (const id of ids) {
+        async function deleteAbsensi(id) {
+            if (confirm('Yakin ingin menghapus data ini?')) {
+                try {
                     await Data.delete('absensi', id);
-                }
-
-                App.showToast(`${ids.length} data absensi berhasil dihapus`, 'success');
-                await loadAbsensi();
+                    loadAbsensi();
+                } catch (e) { alert('Gagal menghapus'); }
             }
         }
 
-        // ========= Action Menu Functionality =========
-        let currentAbsensiId = null;
+        // Listeners
+        document.getElementById('searchInput').addEventListener('input', loadAbsensi);
+        document.getElementById('filterMonth').addEventListener('change', loadAbsensi);
+        document.getElementById('filterStatus').addEventListener('change', loadAbsensi);
 
-        function showActionMenu(event, id) {
-            event.preventDefault();
-            event.stopPropagation();
+        // Init
+        document.addEventListener('DOMContentLoaded', async () => {
+            await App.init();
 
-            currentAbsensiId = id;
-            const popover = document.getElementById('actionMenuPopover');
-            const btn = event.currentTarget;
-            const rect = btn.getBoundingClientRect();
-
-            const popoverWidth = 160;
-            let top = rect.bottom + 5;
-            let left = rect.left - popoverWidth + rect.width;
-
-            if (left < 10) left = 10;
-            if (top + 60 > window.innerHeight) top = rect.top - 60;
-
-            popover.style.top = `${top}px`;
-            popover.style.left = `${left}px`;
-            popover.classList.add('show');
-        }
-
-        async function editAbsensi() {
-            if (!currentAbsensiId) return;
-
-            const a = await Data.getById('absensi', currentAbsensiId);
-            if (!a) return;
-
-            // Populate Pegawai list if not already there (admin only usually)
-            const pegawai = await Data.getPegawai();
-            const select = document.getElementById('editPegawai');
-            if (select) {
-                select.innerHTML = pegawai.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
-            }
-
-            document.getElementById('editAbsensiId').value = a.id;
-            document.getElementById('editPegawai').value = a.pegawai_id;
-            document.getElementById('editTanggal').value = a.tanggal;
-            document.getElementById('editJamMasuk').value = a.jam_masuk || '';
-            document.getElementById('editJamKeluar').value = a.jam_keluar || '';
-            document.getElementById('editStatus').value = a.status;
-            document.getElementById('editKeterangan').value = a.keterangan || '';
-
-            // Hide popover and show modal
-            document.getElementById('actionMenuPopover').classList.remove('show');
-            document.getElementById('editAbsensiModal').classList.add('show');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editAbsensiModal').classList.remove('show');
-        }
-
-        document.getElementById('editAbsensiForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const id = document.getElementById('editAbsensiId').value;
-            const data = {
-                tanggal: document.getElementById('editTanggal').value,
-                jam_masuk: document.getElementById('editJamMasuk').value,
-                jam_keluar: document.getElementById('editJamKeluar').value || null,
-                status: document.getElementById('editStatus').value,
-                keterangan: document.getElementById('editKeterangan').value
-            };
-
-            await Data.update('absensi', id, data);
-            App.showToast('Data absensi berhasil diperbarui', 'success');
-            closeEditModal();
-            await loadAbsensi();
-        });
-
-        async function deleteAbsensi() {
-            if (!currentAbsensiId) return;
-            if (confirm('Apakah Anda yakin ingin menghapus data absensi ini?')) {
-                await Data.delete('absensi', currentAbsensiId);
-
-                App.showToast('Data absensi berhasil dihapus', 'success');
-                document.getElementById('actionMenuPopover').classList.remove('show');
-                await loadAbsensi();
-            }
-        }
-
-        // Close action menu when clicking outside
-        document.addEventListener('click', function (event) {
-            if (!event.target.closest('.action-menu-btn') && !event.target.closest('.action-menu-popover')) {
-                document.getElementById('actionMenuPopover')?.classList.remove('show');
-            }
-        });
-
-        // Handle check-in
-        document.getElementById('btnCheckIn')?.addEventListener('click', async function () {
-            if (!user.pegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'danger');
-                return;
-            }
-
-            const isAtLocation = await App.validateLocation();
-            if (!isAtLocation) return;
-
+            // Set default month
             const now = new Date();
-            const jamMasuk = now.toTimeString().slice(0, 5);
-            const today = getLocalTodayDate();
+            const monthStr = now.toISOString().slice(0, 7); // YYYY-MM
+            document.getElementById('filterMonth').value = monthStr;
 
-            await Data.create('absensi', {
-                pegawai_id: user.pegawaiId,
-                tanggal: today,
-                jam_masuk: jamMasuk,
-                jam_keluar: null,
-                status: jamMasuk <= '08:00' ? 'tepat_waktu' : 'terlambat',
-                keterangan: 'Check-in via Geolocation'
-            });
+            const user = Auth.getCurrentUser();
+            if (user) document.querySelector('.user-name').textContent = user.name || 'Admin';
 
-            App.showToast(`Check-in berhasil!`, 'success');
-            await checkTodayAttendance();
             await loadAbsensi();
         });
-
-        // Handle check-out
-        document.getElementById('btnCheckOut')?.addEventListener('click', async function () {
-            if (!user.pegawaiId) {
-                App.showToast('Data pegawai tidak ditemukan!', 'danger');
-                return;
-            }
-
-            const isAtLocation = await App.validateLocation();
-            if (!isAtLocation) return;
-
-            const today = getLocalTodayDate();
-            const attendance = await Data.getAbsensi({ pegawai_id: user.pegawaiId, tanggal: today });
-            const absensi = attendance[0];
-
-            if (absensi) {
-                const jamKeluar = new Date().toTimeString().slice(0, 5);
-                await Data.update('absensi', absensi.id, { jam_keluar: jamKeluar });
-                App.showToast(`Check-out berhasil!`, 'success');
-                await checkTodayAttendance();
-                await loadAbsensi();
-            }
-        });
-
-        // Filter listeners
-        document.getElementById('filterPegawai')?.addEventListener('change', loadAbsensi);
-        document.getElementById('filterMonth')?.addEventListener('change', loadAbsensi);
-        document.getElementById('filterStatus')?.addEventListener('change', loadAbsensi);
-
-        // Initialize
-        (async () => {
-            await setupUI();
-            await loadAbsensi();
-        })();
     </script>
 </body>
 
