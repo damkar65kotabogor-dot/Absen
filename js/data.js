@@ -201,7 +201,7 @@ const Data = {
         const { data, error } = await query;
         if (error) {
             console.error('Error fetching absensi:', error);
-            return [];
+            throw error;
         }
         return data || [];
     },
@@ -227,7 +227,7 @@ const Data = {
         if (error) {
             console.error('Error fetching pegawai with relations:', error);
             console.error('Error details:', JSON.stringify(error, null, 2));
-            return [];
+            throw error;
         }
         console.log('getPegawaiWithRelations returned:', data?.length || 0, 'records');
         return data || [];
@@ -294,7 +294,7 @@ const Data = {
         if (error) {
             console.error('Error fetching absensi with pegawai:', error);
             console.error('Error details:', JSON.stringify(error, null, 2));
-            return [];
+            throw error;
         }
         return data || [];
     },
