@@ -288,94 +288,140 @@
   </main>
 
   <!-- ==================== PEGAWAI DASHBOARD CONTENT ==================== -->
-  <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50 dark:bg-slate-900" id="pegawaiDashboard"
-    style="display: none;">
-    <!-- Header Mobile -->
-    <header
-      class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-10 sticky top-0">
-      <div class="flex items-center gap-4">
-        <button class="lg:hidden text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-        <div>
-          <h2 class="text-lg font-bold text-slate-800 dark:text-white leading-tight">Halo, <span
-              class="user-firstName">Pegawai</span></h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 currentDateFull">...</p>
+  <main class="w-full h-full bg-slate-50 relative pb-24 overflow-y-auto" id="pegawaiDashboard" style="display: none;">
+
+    <!-- Top Header -->
+    <div class="px-6 pt-8 pb-4 bg-white sticky top-0 z-10">
+      <div class="flex items-center justify-between mb-6">
+        <span class="material-symbols-outlined text-slate-800 text-[28px]">menu</span>
+        <h1 class="text-lg font-bold text-slate-800">PPPK Paruh Waktu</h1>
+        <div class="relative">
+          <span class="material-symbols-outlined text-slate-800 text-[28px]">notifications</span>
+          <span class="absolute top-0 right-0 size-2.5 bg-red-500 rounded-full border-2 border-white"></span>
         </div>
       </div>
-      <div class="size-8 rounded-full bg-slate-200 bg-cover bg-center user-avatar"></div>
-    </header>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+      <div class="mb-2">
+        <p class="text-slate-500 text-sm">Selamat Pagi,</p>
+        <h2 class="text-2xl font-bold text-slate-900 user-firstName">Nama Pegawai</h2>
+      </div>
+    </div>
 
-      <!-- Today's Status Card -->
-      <div
-        class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 text-center">
-        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Absensi Hari Ini</h3>
-
-        <div id="pegawaiStatusContainer" class="mb-6">
-          <div class="inline-flex items-center justify-center size-20 rounded-full bg-slate-100 text-slate-400 mb-2">
-            <span class="material-symbols-outlined text-[40px]">schedule</span>
-          </div>
-          <p class="text-lg font-medium text-slate-700 dark:text-slate-300">Belum Check-In</p>
-          <p class="text-xs text-slate-500">Silakan lakukan absensi kehadiran</p>
+    <div class="px-6 space-y-6">
+      <!-- Summary Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-slate-800">Ringkasan</h3>
+          <p class="text-xs text-slate-500">Aktivitas Hari Ini</p>
         </div>
+        <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
+          <span class="text-xs font-semibold text-slate-600 currentDateFull">...</span>
+        </div>
+      </div>
+
+      <!-- Blue Status Card -->
+      <div class="bg-primary rounded-[20px] p-6 text-white relative overflow-hidden shadow-xl shadow-blue-500/30">
+        <!-- Background Decoration -->
+        <div class="absolute -right-10 -bottom-10 size-40 bg-white/10 rounded-full"></div>
+        <div class="absolute -top-10 -left-10 size-32 bg-white/5 rounded-full"></div>
+
+        <p class="text-sm text-white/80 mb-1">Status Kehadiran</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-3xl font-bold mb-3" id="lblPegawaiStatus">Hadir</h2>
+            <div class="inline-flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+              <span class="material-symbols-outlined text-[16px]">schedule</span>
+              <span class="text-sm font-medium" id="lblPegawaiJam">Masuk: --:-- WIB</span>
+            </div>
+          </div>
+          <div class="size-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="material-symbols-outlined text-[28px]">check</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Grid -->
+      <div class="space-y-4">
+        <!-- Profil Saya -->
+        <a href="profil.html" class="block bg-white p-4 rounded-[20px] shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="size-12 rounded-full bg-blue-50 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[24px]">person</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800">Profil Saya</h4>
+              <p class="text-xs text-slate-500">Kelola data kepegawaian</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+        </a>
 
         <div class="grid grid-cols-2 gap-4">
-          <button id="btnPegawaiCheckIn"
-            class="flex flex-col items-center justify-center p-4 rounded-xl bg-primary text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 w-full"
-            onclick="handlePegawaiCheckIn()">
-            <span class="material-symbols-outlined text-[32px] mb-1">login</span>
-            <span class="font-bold">Check In</span>
-            <span class="text-[10px] opacity-80" id="lblCheckInTime">--:--</span>
-          </button>
-          <button id="btnPegawaiCheckOut" disabled
-            class="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-100 text-slate-400 w-full cursor-not-allowed"
-            onclick="handlePegawaiCheckOut()">
-            <span class="material-symbols-outlined text-[32px] mb-1">logout</span>
-            <span class="font-bold">Check Out</span>
-            <span class="text-[10px] opacity-80" id="lblCheckOutTime">--:--</span>
-          </button>
+          <!-- Rekapitulasi -->
+          <a href="absensi.html"
+            class="bg-white p-5 rounded-[20px] shadow-sm flex flex-col items-center justify-center text-center gap-3 h-36">
+            <div class="size-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+              <span class="material-symbols-outlined text-[24px]">assignment</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Rekapitulasi</h4>
+              <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider mt-0.5">KEHADIRAN</p>
+            </div>
+          </a>
+
+          <!-- Fleksibilitas -->
+          <a href="#"
+            class="bg-white p-5 rounded-[20px] shadow-sm flex flex-col items-center justify-center text-center gap-3 h-36">
+            <div class="size-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+              <span class="material-symbols-outlined text-[24px]">schedule</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Fleksibilitas</h4>
+              <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-0.5">KERJA</p>
+            </div>
+          </a>
         </div>
       </div>
-
-      <!-- Personal Stats -->
-      <div class="grid grid-cols-3 gap-2">
-        <div
-          class="bg-emerald-50 dark:bg-slate-800 p-3 rounded-xl border border-emerald-100 dark:border-slate-7000 text-center">
-          <p class="text-xs text-slate-500 mb-1">Hadir</p>
-          <p class="text-xl font-bold text-emerald-600" id="myStatHadir">0</p>
-        </div>
-        <div
-          class="bg-amber-50 dark:bg-slate-800 p-3 rounded-xl border border-amber-100 dark:border-slate-7000 text-center">
-          <p class="text-xs text-slate-500 mb-1">Terlambat</p>
-          <p class="text-xl font-bold text-amber-600" id="myStatTelat">0</p>
-        </div>
-        <div
-          class="bg-rose-50 dark:bg-slate-800 p-3 rounded-xl border border-rose-100 dark:border-slate-7000 text-center">
-          <p class="text-xs text-slate-500 mb-1">Alpha</p>
-          <p class="text-xl font-bold text-rose-600" id="myStatAlpha">0</p>
-        </div>
-      </div>
-
-      <!-- Recent History -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-          <h3 class="font-bold text-slate-800 dark:text-white text-sm">Aktivitas Terakhir</h3>
-          <a href="absensi.html" class="text-xs text-primary font-medium">Lihat Semua</a>
-        </div>
-        <div id="myRecentAbsensi" class="divide-y divide-slate-100 dark:divide-slate-700">
-          <!-- Populated via JS -->
-          <div class="p-4 text-center text-xs text-slate-400">Belum ada aktivitas</div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="fixed bottom-0 left-0 right-0 h-24 pointer-events-none flex items-end justify-center z-50">
+      <!-- Bar Container -->
+      <div class="pointer-events-auto flex items-center gap-4 px-6 pb-6 w-full max-w-lg">
+
+        <!-- Button Datang -->
+        <button id="btnPegawaiCheckIn" onclick="handlePegawaiCheckIn()"
+          class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 transition-all text-white h-12 flex-1 rounded-full flex flex-col items-center justify-center shadow-lg shadow-emerald-500/20 group">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">login</span>
+            <span class="font-semibold text-sm">Datang</span>
+          </div>
+        </button>
+
+        <!-- Center Home Button -->
+        <button
+          class="bg-[#1e2756] text-white size-16 rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-slate-50 relative -top-3 z-10 active:scale-95 transition-transform">
+          <span class="material-symbols-outlined text-[28px] mb-0.5">home</span>
+          <span class="text-[9px] font-medium">Beranda</span>
+        </button>
+
+        <!-- Button Pulang -->
+        <button id="btnPegawaiCheckOut" onclick="handlePegawaiCheckOut()"
+          class="bg-red-600 hover:bg-red-700 active:scale-95 transition-all text-white h-12 flex-1 rounded-full flex flex-col items-center justify-center shadow-lg shadow-red-600/20 group">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">logout</span>
+            <span class="font-semibold text-sm">Pulang</span>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
   </main>
 
   <!-- Modals (Manual Attendance for Admin) -->
   <div id="manualAttendanceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="closeManualModal()"></div>
     <div class="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-md p-6">
       <h3 class="text-lg font-bold mb-4">Absensi Manual</h3>
       <form id="manualAttendanceForm" class="space-y-4">
