@@ -35,22 +35,29 @@
 
       <nav class="sidebar-nav">
         <div class="nav-section">
-          <span class="nav-section-title">MENU UTAMA</span>
           <a href="dashboard.html" class="nav-item active">
             <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
           </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-section-title">KEPEGAWAIAN</span>
           <a href="pegawai.html" class="nav-item">
             <i data-lucide="users"></i>
             <span>Data Pegawai</span>
           </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-section-title">KEHADIRAN</span>
+          <a href="absensi.html" class="nav-item">
+            <i data-lucide="clock"></i>
+            <span>Absensi</span>
+          </a>
           <a href="cuti.html" class="nav-item">
             <i data-lucide="calendar-days"></i>
             <span>Pengajuan Cuti</span>
-          </a>
-          <a href="absensi.html" class="nav-item">
-            <i data-lucide="file-text"></i>
-            <span>Laporan Absen</span>
           </a>
         </div>
 
@@ -123,7 +130,7 @@
             <button class="btn-download" onclick="downloadReport()">
               <i data-lucide="download"></i> Unduh Laporan
             </button>
-            <button class="btn-add" onclick="window.location.href='absensi.html'">
+            <button class="btn-add" onclick="addManualAbsensi()">
               <i data-lucide="plus"></i> Absensi Manual
             </button>
           </div>
@@ -776,13 +783,21 @@
                 lokasiDisplay = 'Kantor Damkar';
               }
 
+              // Fix for Employee Data Access (Nested vs Flat)
+              const nama = abs.pegawai?.nama || abs.nama_pegawai || 'Tanpa Nama';
+              const nip = abs.pegawai?.nip || abs.nip || '-';
+              const foto = abs.pegawai?.foto || null;
+
+              // Use UI Avatars if no photo
+              const avatarSrc = foto ? foto : `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=random`;
+
               row.innerHTML = `
                 <td>
                   <div class="user-cell">
-                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(abs.nama_pegawai)}&background=random" alt="${abs.nama_pegawai}">
+                    <img src="${avatarSrc}" alt="${nama}">
                     <div class="user-info-text">
-                        <h4>${abs.nama_pegawai}</h4>
-                        <p>${abs.nip || '-'}</p>
+                        <h4>${nama}</h4>
+                        <p>${nip}</p>
                     </div>
                   </div>
                 </td>
