@@ -22,56 +22,52 @@
     <div class="sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <!-- Mobile Close Button -->
-      <button class="sidebar-close" onclick="App.closeMobileSidebar()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
-
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
+          <i data-lucide="building-2"></i>
         </div>
         <div class="sidebar-brand">
-          <h1>Absensi PPPK Paruh Waktu</h1>
-          <span></span>
+          <h1>Absensi PPPK</h1>
+          <span>Admin Dashboard</span>
         </div>
       </div>
 
       <nav class="sidebar-nav">
-        <a href="dashboard.html" class="nav-item active">
-          <i data-lucide="layout-dashboard"></i>
-          <span>Dashboard</span>
-        </a>
-        <a href="pegawai.html" class="nav-item">
-          <i data-lucide="users"></i>
-          <span>Employees</span>
-        </a>
-        <a href="absensi.html" class="nav-item">
-          <i data-lucide="file-text"></i>
-          <span>Reports</span>
-        </a>
-        <a href="setting.html" class="nav-item">
-          <i data-lucide="settings"></i>
-          <span>Settings</span>
-        </a>
+        <div class="nav-section">
+          <span class="nav-section-title">MENU UTAMA</span>
+          <a href="dashboard.html" class="nav-item active">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="pegawai.html" class="nav-item">
+            <i data-lucide="users"></i>
+            <span>Data Pegawai</span>
+          </a>
+          <a href="cuti.html" class="nav-item">
+            <i data-lucide="calendar-days"></i>
+            <span>Pengajuan Cuti</span>
+          </a>
+          <a href="absensi.html" class="nav-item">
+            <i data-lucide="file-text"></i>
+            <span>Laporan Absen</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-section-title">SISTEM</span>
+          <a href="setting.html" class="nav-item">
+            <i data-lucide="settings"></i>
+            <span>Pengaturan</span>
+          </a>
+          <a href="profil.html" class="nav-item">
+            <i data-lucide="user-circle"></i>
+            <span>Profil Admin</span>
+          </a>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
-        <a href="#" class="nav-item">
-          <i data-lucide="help-circle"></i>
-          <span>Help Center</span>
-        </a>
         <a href="#" class="nav-item text-danger" onclick="Auth.logout()">
           <i data-lucide="log-out"></i>
           <span>Logout</span>
@@ -80,217 +76,207 @@
     </aside>
 
     <!-- Main Content -->
-    <!-- Main Content -->
     <main class="main-content" id="adminDashboard" style="display: none;">
-      <header class="top-header">
+      <!-- Top Header -->
+      <header class="top-header" style="background: transparent; box-shadow: none; padding: 0.5rem 0;">
         <div class="header-left">
-          <button class="toggle-sidebar" id="toggleSidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+          <button class="toggle-sidebar" id="toggleSidebar"
+            onclick="document.getElementById('sidebar').classList.toggle('collapsed'); document.querySelector('.main-content').classList.toggle('sidebar-collapsed');">
+            <i data-lucide="menu"></i>
           </button>
           <div class="page-title">
-            <h2 id="pageTitle">Dashboard</h2>
-            <p id="currentDate">Memuat tanggal...</p>
+            <h1
+              style="font-size: 1.75rem; color: var(--gray-900); font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+              Dashboard
+            </h1>
           </div>
         </div>
         <div class="header-right">
           <div class="search-box" id="headerSearch">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" class="search-input" placeholder="Cari data pegawai...">
+            <i data-lucide="search"></i>
+            <input type="text" class="search-input" placeholder="Cari pegawai...">
           </div>
-          <button class="header-icon-btn notification-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            <span class="notification-badge">3</span>
+          <button class="header-btn">
+            <i data-lucide="bell"></i>
+            <span class="badge">3</span>
+          </button>
+          <button class="header-btn">
+            <i data-lucide="help-circle"></i>
           </button>
           <div class="header-user-profile">
-            <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" alt="Admin"
-              class="user-avatar-small">
+            <!-- <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" alt="Admin"
+              class="user-avatar" style="width: 36px; height: 36px;"> -->
           </div>
         </div>
       </header>
 
-      <div class="dashboard-content-wrapper mt-4">
-        <div class="dashboard-main-content">
-          <!-- Page Header Info -->
-          <div class="dashboard-header-intro mb-4">
-            <h1 class="dashboard-main-title">Dashboard Overview</h1>
-            <p class="dashboard-main-subtitle">Real-time attendance and payroll tracking</p>
+      <div class="dashboard-container-redesign">
+
+        <!-- Welcome / Actions Row -->
+        <div class="flex justify-between items-end mb-4"
+          style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div class="dashboard-header-intro" style="margin-bottom: 0;">
+            <h2 class="dashboard-main-title">Ringkasan Hari Ini</h2>
+            <p class="dashboard-main-subtitle" id="currentDateFull">Senin, 24 Oktober 2023</p>
           </div>
+          <div class="header-actions">
+            <button class="btn-download" onclick="downloadReport()">
+              <i data-lucide="download"></i> Unduh Laporan
+            </button>
+            <button class="btn-add" onclick="window.location.href='absensi.html'">
+              <i data-lucide="plus"></i> Absensi Manual
+            </button>
+          </div>
+        </div>
 
-          <!-- Stats Grid -->
-          <div class="stats-grid-redesign mb-4">
-            <div class="stat-card-redesign" onclick="filterTableByStatus('all')">
-              <div class="stat-card-inner">
-                <div class="stat-info">
-                  <span class="stat-label">ACTIVE EMPLOYEES</span>
-                  <div class="stat-value-group">
-                    <span class="stat-number" id="statTotalPegawai">0</span>
-                    <span class="stat-trend positive">+5% <span class="text-muted font-normal">vs last
-                        week</span></span>
-                  </div>
-                </div>
-                <div class="stat-icon-wrapper green-bg">
-                  <i data-lucide="users" class="text-green-dark"></i>
-                </div>
+        <!-- 4 Stats Grid -->
+        <div class="stats-grid-redesign">
+          <!-- Card 1 -->
+          <div class="stat-card-redesign">
+            <div class="stat-card-inner">
+              <div class="stat-content-redesign">
+                <span class="stat-label-redesign">Total Pegawai</span>
+                <span class="stat-value-redesign" id="statTotalPegawai">0</span>
+                <span class="stat-subtext-redesign green-text" id="statPegawaiChange">+12 <span
+                    style="font-weight: 400; color: var(--gray-500);">bulan ini</span></span>
               </div>
-            </div>
-
-            <div class="stat-card-redesign" onclick="filterTableByStatus('pending')">
-              <div class="stat-card-inner">
-                <div class="stat-info">
-                  <span class="stat-label">PENDING APPROVALS</span>
-                  <div class="stat-value-group">
-                    <span class="stat-number" id="statPendingCuti">0</span>
-                    <span class="stat-trend negative">-2% <span class="text-muted font-normal">urgent
-                        items</span></span>
-                  </div>
-                </div>
-                <div class="stat-icon-wrapper orange-bg">
-                  <i data-lucide="calendar-check" class="text-orange-dark"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="stat-card-redesign" onclick="filterTableByStatus('hadir')">
-              <div class="stat-card-inner">
-                <div class="stat-info">
-                  <span class="stat-label">WEEKLY PAYROLL EST.</span>
-                  <div class="stat-value-group">
-                    <span class="stat-number">$<span id="statHadir">12,450</span></span>
-                    <span class="stat-trend blue-text">+8% <span class="text-muted font-normal">projection</span></span>
-                  </div>
-                </div>
-                <div class="stat-icon-wrapper blue-bg">
-                  <i data-lucide="banknote" class="text-blue-dark"></i>
-                </div>
+              <div class="stat-icon-wrapper-redesign blue-bg">
+                <i data-lucide="users"></i>
               </div>
             </div>
           </div>
-
-          <!-- Active Shifts / Attendance Table -->
-          <div class="card attendance-monitoring-card">
-            <div class="card-header-redesign">
-              <div class="header-title-group">
-                <h3 class="card-title">Current Active Shifts</h3>
-                <span class="live-badge">LIVE UPDATES</span>
+          <!-- Card 2 -->
+          <div class="stat-card-redesign">
+            <div class="stat-card-inner">
+              <div class="stat-content-redesign">
+                <span class="stat-label-redesign">Hadir Tepat Waktu</span>
+                <span class="stat-value-redesign" id="statHadir">0</span>
+                <span class="stat-subtext-redesign green-text" id="statHadirPersen">88.7% <span
+                    style="font-weight: 400; color: var(--gray-500);">dari total pegawai</span></span>
+              </div>
+              <div class="stat-icon-wrapper-redesign green-bg">
+                <i data-lucide="check-circle-2"></i>
               </div>
             </div>
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table-redesign">
-                  <thead>
-                    <tr>
-                      <th>EMPLOYEE NAME</th>
-                      <th>DEPARTMENT</th>
-                      <th>CLOCK-IN TIME</th>
-                      <th>STATUS</th>
-                      <th>ACTION</th>
-                    </tr>
-                  </thead>
-                  <tbody id="recentAbsensi">
-                    <!-- Data rendered via JS -->
-                  </tbody>
-                </table>
+          </div>
+          <!-- Card 3 -->
+          <div class="stat-card-redesign">
+            <div class="stat-card-inner">
+              <div class="stat-content-redesign">
+                <span class="stat-label-redesign">Terlambat</span>
+                <span class="stat-value-redesign" id="statTerlambat">0</span>
+                <span class="stat-subtext-redesign orange-text" id="statTerlambatChange">+5 <span
+                    style="font-weight: 400; color: var(--gray-500);">dari kemarin</span></span>
               </div>
-              <button class="show-all-btn" onclick="window.location.href='absensi.html'">
-                Show all active shifts <i data-lucide="chevron-down" style="width: 16px;"></i>
-              </button>
+              <div class="stat-icon-wrapper-redesign orange-bg">
+                <i data-lucide="clock"></i>
+              </div>
+            </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="stat-card-redesign">
+            <div class="stat-card-inner">
+              <div class="stat-content-redesign">
+                <span class="stat-label-redesign">Absen / Izin</span>
+                <span class="stat-value-redesign" id="statAbsen">0</span>
+                <span class="stat-subtext-redesign" style="color: var(--gray-500);">12 Tanpa Keterangan</span>
+              </div>
+              <div class="stat-icon-wrapper-redesign red-bg">
+                <i data-lucide="x-circle"></i>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Sidebar Actions & Alerts -->
-        <div class="dashboard-side-content">
-          <!-- Quick Actions -->
-          <div class="card actions-card mb-4">
-            <div class="card-header-redesign border-none">
-              <h3 class="card-title"><i data-lucide="zap" class="text-blue icon-inline"></i> Quick Actions</h3>
-              <p class="card-description">Administrative shortcuts for rapid execution.</p>
-            </div>
-            <div class="card-body">
-              <button class="btn-action-primary w-100 mb-3" onclick="App.showToast('Fitur diproses...', 'info')">
-                <div class="btn-content">
-                  <i data-lucide="list-checks"></i>
-                  <span>Approve All Logs</span>
+        <!-- Charts & Calendar -->
+        <div class="chart-calendar-container">
+          <!-- Chart -->
+          <div class="card p-4">
+            <div class="card-header border-none" style="padding: 0; margin-bottom: 1rem; border: none;">
+              <div style="display: flex; justify-content: space-between; width: 100%;">
+                <div>
+                  <h3 class="card-title">Tren Kehadiran</h3>
+                  <p class="text-muted text-sm">Statistik mingguan (16 Okt-22 Okt)</p>
                 </div>
-                <i data-lucide="chevron-right"></i>
-              </button>
-
-              <div class="btn-action-outline-container mb-3">
-                <button class="btn-action-outline w-100" onclick="downloadReport()">
-                  <div class="btn-content">
-                    <i data-lucide="file-text"></i>
-                    <span>Generate Payroll Report</span>
-                  </div>
-                  <i data-lucide="download"></i>
-                </button>
+                <button class="btn btn-sm btn-outline">Minggu Ini <i data-lucide="chevron-down" class="ml-1"
+                    style="width: 14px;"></i></button>
               </div>
-
-              <div class="btn-action-outline-container">
-                <button class="btn-action-outline w-100" onclick="window.location.href='pegawai.html'">
-                  <div class="btn-content">
-                    <i data-lucide="user-plus"></i>
-                    <span>Add New Employee</span>
-                  </div>
-                  <i data-lucide="plus"></i>
-                </button>
-              </div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="attendanceChart"></canvas>
             </div>
           </div>
 
-          <!-- System Alert -->
-          <div class="card alert-card mb-4">
-            <div class="card-body">
-              <div class="alert-icon-title">
-                <i data-lucide="info" class="text-blue"></i>
-                <h4 class="alert-title">System Alert</h4>
+          <!-- Calendar -->
+          <div class="card p-4">
+            <div class="calendar-widget">
+              <div class="calendar-header">
+                <h3 id="calendarMonth">Oktober 2023</h3>
+                <div style="display: flex; gap: 4px;">
+                  <button class="calendar-nav-btn"><i data-lucide="chevron-left" style="width: 16px;"></i></button>
+                  <button class="calendar-nav-btn"><i data-lucide="chevron-right" style="width: 16px;"></i></button>
+                </div>
               </div>
-              <p class="alert-text">
-                Payroll cycle ends in <span class="blue-text font-bold">2 days</span>. Please ensure all manual
-                corrections are submitted by EOD Friday.
-              </p>
-            </div>
-          </div>
+              <div class="calendar-grid-header">
+                <div>Mn</div>
+                <div>Sn</div>
+                <div>Sl</div>
+                <div>Rb</div>
+                <div>Km</div>
+                <div>Jm</div>
+                <div>Sb</div>
+              </div>
+              <!-- Dummy Calendar Days for Visual -->
+              <div class="calendar-grid-days" id="miniCalendarGrid">
+                <!-- Populated via JS -->
+              </div>
 
-          <!-- Unit Statistics -->
-          <div class="card unit-stats-card">
-            <div class="card-header-redesign border-none">
-              <h3 class="card-title text-muted text-xs font-bold uppercase tracking-wider">DEPARTMENT USAGE</h3>
-            </div>
-            <div class="card-body" id="unitStatsList">
-              <div class="unit-stat-item">
-                <div class="unit-info">
-                  <span>Operasional</span>
-                  <span>85%</span>
-                </div>
-                <div class="progress-bar">
-                  <div class="progress-fill blue" style="width: 85%;"></div>
-                </div>
-              </div>
-              <div class="unit-stat-item mt-3">
-                <div class="unit-info">
-                  <span>Administrasi</span>
-                  <span>62%</span>
-                </div>
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width: 62%;"></div>
+              <div class="mt-4" style="padding-top: 1rem; border-top: 1px solid var(--gray-100);">
+                <div style="display: flex; gap: 1rem; font-size: 0.75rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 8px; height: 8px; background: var(--primary-600); border-radius: 50%;"></div>
+                    <span>Hari ini</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 8px; height: 8px; background: var(--danger-500); border-radius: 50%;"></div>
+                    <span>Libur Nasional (1)</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Attendance Table -->
+        <div class="card">
+          <div class="card-header border-none">
+            <h3 class="card-title">Riwayat Absensi Terkini</h3>
+            <div style="display: flex; gap: 1rem;">
+              <button class="btn btn-sm btn-outline">Lihat Semua</button>
+              <button class="btn btn-sm btn-outline"><i data-lucide="filter"
+                  style="width: 14px; margin-right: 4px;"></i> Filter</button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table-redesign">
+                <thead>
+                  <tr>
+                    <th>PEGAWAI</th>
+                    <th>WAKTU MASUK</th>
+                    <th>STATUS</th>
+                    <th>LOKASI</th>
+                    <th>AKSI</th>
+                  </tr>
+                </thead>
+                <tbody id="recentAbsensi">
+                  <!-- Rows loaded via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </div>
     </main>
 
@@ -681,136 +667,229 @@
           const stats = await Data.getStats();
           const totalPegawai = stats.totalPegawai;
 
-          // Update Greeting
-          const hour = new Date().getHours();
-          let greeting = 'Selamat Pagi,';
-          if (hour >= 11) greeting = 'Selamat Siang,';
-          if (hour >= 15) greeting = 'Selamat Sore,';
-          if (hour >= 19) greeting = 'Selamat Malam,';
-
-          if (document.getElementById('greetingName')) {
-            document.getElementById('greetingName').textContent = user.name || 'Pegawai';
-            const greetingTextEl = document.querySelector('.txt-greeting');
-            if (greetingTextEl) greetingTextEl.textContent = greeting;
+          // Update Top Date
+          const optionsFull = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+          const currentDateFullEl = document.getElementById('currentDateFull');
+          if (currentDateFullEl) {
+            currentDateFullEl.textContent = new Date().toLocaleDateString('id-ID', optionsFull);
           }
 
-          const optionsDate = { weekday: 'long', day: 'numeric', month: 'short' };
-          if (document.getElementById('currentDateShort')) {
-            document.getElementById('currentDateShort').textContent = new Date().toLocaleDateString('id-ID', optionsDate);
-          }
-
-          // Load recent absensi with new format (Limited to 100 to prevent timeout)
-          let allAbsensi = await Data.getAbsensiWithPegawai({ limit: 100 });
-
-          // Always focus on current user for this dashboard
-          if (!user.pegawaiId) {
-            const employees = await Data.getPegawai();
-            const p = employees.find(x => x.user_id == user.id);
-            if (p) {
-              user.pegawaiId = p.id;
-              localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-            }
-          }
-
-          // Check today's status for the Blue Card
-          const todayStr = getLocalTodayDate();
-          const todayAbsen = allAbsensi.find(a => a.pegawai_id === user.pegawaiId && a.tanggal === todayStr);
-
-          const statusText = document.getElementById('statusText');
-          const checkInTime = document.getElementById('checkInTime');
-          const notifBadge = document.getElementById('notifBadge');
-
-          // Update Notification
-          if (notifBadge && stats.cutiPending > 0) {
-            notifBadge.style.display = 'block';
-          }
-
-          if (todayAbsen) {
-            if (statusText) statusText.textContent = "Hadir";
-            if (checkInTime) checkInTime.textContent = `Masuk: ${todayAbsen.jam_masuk} WIB`;
-
-            // Check out logic
-            if (todayAbsen.jam_keluar) {
-              if (statusText) statusText.textContent = "Sudah Pulang";
-              if (checkInTime) checkInTime.textContent = `Keluar: ${todayAbsen.jam_keluar} WIB`;
-            }
-          } else {
-            if (statusText) statusText.textContent = "Belum Hadir";
-            if (checkInTime) checkInTime.textContent = "Belum melakukan absensi";
-          }
-
-          // Update stats with null checks
+          // --- Stats 4 Cards Logic ---
+          // 1. Total Pegawai
           const statTotal = document.getElementById('statTotalPegawai');
           if (statTotal) statTotal.textContent = totalPegawai;
 
+          // 2. Hadir Tepat Waktu (Proxy: 'hadirHariIni' assuming they are on time effectively for this demo)
+          // In real app, query specifically for status='tepat_waktu'
           const statHadir = document.getElementById('statHadir');
           if (statHadir) statHadir.textContent = stats.hadirHariIni;
 
-          const statPending = document.getElementById('statPendingCuti');
-          if (statPending) statPending.textContent = stats.cutiPending;
-
           const statHadirPersen = document.getElementById('statHadirPersen');
           if (statHadirPersen) {
-            const percent = totalPegawai > 0 ? Math.round((stats.hadirHariIni / totalPegawai) * 100) : 0;
-            statHadirPersen.textContent = percent;
+            const percent = totalPegawai > 0 ? ((stats.hadirHariIni / totalPegawai) * 100).toFixed(1) : 0;
+            statHadirPersen.innerHTML = `${percent}% <span style="font-weight: 400; color: var(--gray-500);">dari total pegawai</span>`;
           }
 
-          // Render Table Redesign
+          // 3. Terlambat
+          // Mock data or fetch if available. For now, let's look at recent absensi and count 'terlambat'
+          const allAbsensi = await Data.getAbsensiWithPegawai({ limit: 100 });
+          const todayStr = getLocalTodayDate();
+          const todayAbsen = allAbsensi.filter(a => a.tanggal === todayStr);
+
+          const terlambatCount = todayAbsen.filter(a => a.status === 'terlambat').length;
+          const statTerlambat = document.getElementById('statTerlambat');
+          if (statTerlambat) statTerlambat.textContent = terlambatCount;
+
+          // 4. Absen / Izin (Alpha or Izin/Sakit)
+          // For simplicty: Total Pegawai - Hadir (including terlambat)
+          const absenCount = totalPegawai - todayAbsen.length;
+          const statAbsen = document.getElementById('statAbsen');
+          if (statAbsen) statAbsen.textContent = Math.max(0, absenCount);
+
+
+          // --- Render Chart ---
+          renderAttendanceChart();
+
+          // --- Render Calendar ---
+          renderMiniCalendar();
+
+          // --- Render Table Redesign ---
           const tbody = document.getElementById('recentAbsensi');
           if (tbody) {
             tbody.innerHTML = '';
-
-            // Show only top 5 "active" or recent
+            // Show top 5 recent
             const displayList = allAbsensi.slice(0, 5);
 
             displayList.forEach(abs => {
               const row = document.createElement('tr');
-              const statusClass = abs.status === 'Hadir' ? 'stat-trend positive' : 'stat-trend';
+
+              // Status Badge Logic
+              let statusBadgeClass = 'status-badge-soft absent';
+              let statusText = abs.status || 'Alpha';
+
+              if (abs.status === 'tepat_waktu' || abs.status === 'hadir') {
+                statusBadgeClass = 'status-badge-soft present';
+                statusText = 'Hadir';
+              } else if (abs.status === 'terlambat') {
+                statusBadgeClass = 'status-badge-soft late';
+                statusText = 'Terlambat';
+              } else if (abs.status === 'izin' || abs.status === 'sakit') {
+                statusBadgeClass = 'status-badge-soft late'; // Use orange for permission too
+              }
+
+              // Location logic (mock or real)
+              let lokasiDisplay = abs.lokasi_masuk ? 'Lokasi Terdeteksi' : '-';
+              if (abs.lokasi_masuk && abs.lokasi_masuk.includes(',')) {
+                // Try to get a short name if possible, otherwise just static text
+                lokasiDisplay = 'Kantor Damkar';
+              }
 
               row.innerHTML = `
                 <td>
-                  <div class="user-info-cell">
-                    <img src="https://ui-avatars.com/api/?name=${abs.nama_pegawai}&background=random" class="user-avatar-small" alt="">
-                    <span class="font-semibold text-gray-800">${abs.nama_pegawai}</span>
+                  <div class="user-cell">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(abs.nama_pegawai)}&background=random" alt="${abs.nama_pegawai}">
+                    <div class="user-info-text">
+                        <h4>${abs.nama_pegawai}</h4>
+                        <p>${abs.nip || '-'}</p>
+                    </div>
                   </div>
                 </td>
-                <td><span class="text-muted">${abs.unit_kerja || '-'}</span></td>
-                <td><span class="font-medium">${abs.jam_masuk || '--:--'}</span></td>
+                <td><span class="font-medium">${abs.jam_masuk || '--:--'} WIB</span></td>
                 <td>
-                  <div class="flex items-center">
-                    <span class="status-dot-active"></span>
-                    <span class="text-green-dark font-bold">Active</span>
-                  </div>
+                  <span class="${statusBadgeClass}">
+                    ${statusText}
+                  </span>
                 </td>
                 <td>
-                  <button class="blue-text font-bold" onclick="viewDetailAbsensi('${abs.id}')">View Details</button>
+                   <div style="display: flex; flex-direction: column;">
+                      <span style="font-weight: 600; font-size: 0.8rem;">${lokasiDisplay}</span>
+                      <span style="font-size: 0.75rem; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                        ${abs.lokasi_masuk || '-'}
+                      </span>
+                   </div>
+                </td>
+                <td>
+                  <button class="btn-icon" style="color: var(--gray-400);" onclick="viewDetailAbsensi('${abs.id}')">
+                    <i data-lucide="more-vertical"></i>
+                  </button>
                 </td>
               `;
               tbody.appendChild(row);
             });
 
-            if (allAbsensi.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">No active shifts found</td></tr>';
+            if (displayList.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Belum ada data absensi hari ini.</td></tr>';
             }
           }
 
-          // Render Unit Statistics (Calculated from available data)
-          const unitStatsContainer = document.getElementById('unitStatsList');
-          if (unitStatsContainer) {
-            const units = {};
-            allAbsensi.forEach(a => {
-              const u = a.unit_kerja || 'Lainnya';
-              if (!units[u]) units[u] = { count: 0, total: 0 };
-              units[u].count++;
-            });
+          lucide.createIcons();
 
-            // For demo/UI consistency, showing at least two
-            const unitItems = Object.entries(units).slice(0, 3);
-            if (unitItems.length > 0) {
-              unitStatsContainer.innerHTML = '';
-              unitItems.forEach(([name, data]) => {
-                const percent = Math.min(100, Math.round(Math.random() * 40 + 60)); // Simulate for UI consistency with image
-                unitStatsContainer.innerHTML += `
+        } catch (error) {
+          console.error('Error loading dashboard:', error);
+          App.showToast('Gagal memuat data dashboard', 'error');
+        }
+      }
+
+      function renderAttendanceChart() {
+        const ctx = document.getElementById('attendanceChart');
+        if (!ctx) return;
+
+        if (attendanceChart) {
+          attendanceChart.destroy();
+        }
+
+        // Dummy Weekly Data or aggregated real data if available
+        // For visual match, using static dummy data
+        const labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+        const dataValues = [1200, 1220, 1190, 1240, 1000, 400, 200]; // drops on weekend
+
+        attendanceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Hadir',
+              data: dataValues,
+              backgroundColor: '#3b82f6',
+              borderRadius: 4,
+              barThickness: 24
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { display: false },
+                ticks: { display: false } // Hide y-axis numbers for clean look
+              },
+              x: {
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      function renderMiniCalendar() {
+        const grid = document.getElementById('miniCalendarGrid');
+        const monthLabel = document.getElementById('calendarMonth');
+        if (!grid || !monthLabel) return;
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+
+        // Month Label
+        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        monthLabel.textContent = `${monthNames[month]} ${year}`;
+
+        // Grid Generation
+        grid.innerHTML = '';
+
+        const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Adjust for Monday start? The image shows "Mn" (Minggu) first or "Sen"? 
+        // Image: Mn Sn Sl Rb Km Jm Sb. So Sunday start.
+
+        // Empty slots for previous month
+        for (let i = 0; i < firstDay; i++) {
+          const empty = document.createElement('div');
+          empty.className = 'calendar-day empty';
+          grid.appendChild(empty);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dayEl = document.createElement('div');
+          dayEl.className = 'calendar-day';
+          dayEl.textContent = d;
+
+          if (d === now.getDate()) {
+            dayEl.classList.add('active'); // Circle for today
+          }
+          // Add blue dot for today indicator if needed (image has specific indicators)
+
+          grid.appendChild(dayEl);
+        }
+      }
+      allAbsensi.forEach(a => {
+        const u = a.unit_kerja || 'Lainnya';
+        if (!units[u]) units[u] = { count: 0, total: 0 };
+        units[u].count++;
+      });
+
+      // For demo/UI consistency, showing at least two
+      const unitItems = Object.entries(units).slice(0, 3);
+      if (unitItems.length > 0) {
+        unitStatsContainer.innerHTML = '';
+        unitItems.forEach(([name, data]) => {
+          const percent = Math.min(100, Math.round(Math.random() * 40 + 60)); // Simulate for UI consistency with image
+          unitStatsContainer.innerHTML += `
                   <div class="unit-stat-item mt-3">
                     <div class="unit-info">
                       <span>${name}</span>
@@ -821,50 +900,50 @@
                     </div>
                   </div>
                 `;
-              });
-            }
+        });
+      }
           }
 
-          // Re-initialize Lucide Icons
-          if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+      // Re-initialize Lucide Icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Calculate percentages
+
+      const statTanpaKet = document.getElementById('statTanpaKet');
+      if (statTanpaKet) statTanpaKet.textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
+
+      // Load recent absensi with new format
+      // let allAbsensi = await Data.getAbsensiWithPegawai(); // This line is now redundant due to the inserted code
+
+      // Filter by pegawai if needed
+      if (user.role === 'pegawai') {
+        if (!user.pegawaiId) {
+          const employees = await Data.getPegawai();
+          const p = employees.find(x => x.user_id == user.id);
+          if (p) {
+            user.pegawaiId = p.id;
+            localStorage.setItem('simpeg_current_user', JSON.stringify(user));
           }
+        }
+        if (user.pegawaiId) {
+          allAbsensi = allAbsensi.filter(a => a.pegawai_id === user.pegawaiId);
+        }
+      }
 
-          // Calculate percentages
+      const absensi = allAbsensi
+        .sort((a, b) => new Date(b.tanggal + ' ' + b.jam_masuk) - new Date(a.tanggal + ' ' + a.jam_masuk))
+        .slice(0, 5);
 
-          const statTanpaKet = document.getElementById('statTanpaKet');
-          if (statTanpaKet) statTanpaKet.textContent = Math.max(0, stats.tidakHadir - stats.cutiPending);
-
-          // Load recent absensi with new format
-          // let allAbsensi = await Data.getAbsensiWithPegawai(); // This line is now redundant due to the inserted code
-
-          // Filter by pegawai if needed
-          if (user.role === 'pegawai') {
-            if (!user.pegawaiId) {
-              const employees = await Data.getPegawai();
-              const p = employees.find(x => x.user_id == user.id);
-              if (p) {
-                user.pegawaiId = p.id;
-                localStorage.setItem('simpeg_current_user', JSON.stringify(user));
-              }
-            }
-            if (user.pegawaiId) {
-              allAbsensi = allAbsensi.filter(a => a.pegawai_id === user.pegawaiId);
-            }
-          }
-
-          const absensi = allAbsensi
-            .sort((a, b) => new Date(b.tanggal + ' ' + b.jam_masuk) - new Date(a.tanggal + ' ' + a.jam_masuk))
-            .slice(0, 5);
-
-          const absensiHtml = absensi.length > 0 ? absensi.map(a => {
-            const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
-            const avatarDisplay = a.pegawai?.foto ?
-              `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
-              initials;
-            const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
-            const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
-            return `
+      const absensiHtml = absensi.length > 0 ? absensi.map(a => {
+        const initials = a.pegawai?.nama ? a.pegawai.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'NA';
+        const avatarDisplay = a.pegawai?.foto ?
+          `<img src="${a.pegawai.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
+          initials;
+        const statusClass = a.status === 'tepat_waktu' ? 'status-hadir' : 'status-terlambat';
+        const statusText = a.status === 'tepat_waktu' ? 'Hadir' : 'Terlambat';
+        return `
           <tr>
             <td><input type="checkbox" class="row-checkbox" value="${a.id}" onclick="updateBulkActionVisibility()"></td>
             <td>
@@ -900,46 +979,46 @@
             </td>
           </tr>
         `;
-          }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi</td></tr>';
 
-          const recentAbsensiEl = document.getElementById('recentAbsensi');
-          if (recentAbsensiEl) {
-            recentAbsensiEl.innerHTML = absensiHtml;
+      const recentAbsensiEl = document.getElementById('recentAbsensi');
+      if (recentAbsensiEl) {
+        recentAbsensiEl.innerHTML = absensiHtml;
+      }
+      updateBulkActionVisibility();
+
+      // Show different dashboard based on role
+      const adminDash = document.getElementById('adminDashboard');
+      const pegDash = document.getElementById('pegawaiDashboard');
+
+      if (user.role === 'pegawai') {
+        if (adminDash) adminDash.style.display = 'none';
+        if (pegDash) pegDash.style.display = 'block';
+
+        await checkTodayAttendance();
+      } else {
+        if (adminDash) adminDash.style.display = 'block';
+        if (pegDash) pegDash.style.display = 'none';
+
+        // Show search for admin/pimpinan
+        const headerSearch = document.getElementById('headerSearch');
+        if (headerSearch) headerSearch.style.display = '';
+
+        // Initialize components for admin
+        try {
+          if (typeof Chart !== 'undefined') {
+            await initChart();
           }
-          updateBulkActionVisibility();
-
-          // Show different dashboard based on role
-          const adminDash = document.getElementById('adminDashboard');
-          const pegDash = document.getElementById('pegawaiDashboard');
-
-          if (user.role === 'pegawai') {
-            if (adminDash) adminDash.style.display = 'none';
-            if (pegDash) pegDash.style.display = 'block';
-
-            await checkTodayAttendance();
-          } else {
-            if (adminDash) adminDash.style.display = 'block';
-            if (pegDash) pegDash.style.display = 'none';
-
-            // Show search for admin/pimpinan
-            const headerSearch = document.getElementById('headerSearch');
-            if (headerSearch) headerSearch.style.display = '';
-
-            // Initialize components for admin
-            try {
-              if (typeof Chart !== 'undefined') {
-                await initChart();
-              }
-              renderCalendar();
-            } catch (e) {
-              console.error('Error initializing admin components:', e);
-            }
-          }
+          renderCalendar();
+        } catch (e) {
+          console.error('Error initializing admin components:', e);
+        }
+      }
 
           // Sidebar toggle handled in app.js listener
         } catch (err) {
-          console.error('Error loading dashboard:', err);
-        }
+        console.error('Error loading dashboard:', err);
+      }
       }
 
       // Initialize attendance chart
