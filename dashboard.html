@@ -213,8 +213,10 @@
               <div class="calendar-header">
                 <h3 id="calendarMonth">Oktober 2023</h3>
                 <div style="display: flex; gap: 4px;">
-                  <button class="calendar-nav-btn"><i data-lucide="chevron-left" style="width: 16px;"></i></button>
-                  <button class="calendar-nav-btn"><i data-lucide="chevron-right" style="width: 16px;"></i></button>
+                  <button class="calendar-nav-btn" id="prevMonth"><i data-lucide="chevron-left"
+                      style="width: 16px;"></i></button>
+                  <button class="calendar-nav-btn" id="nextMonth"><i data-lucide="chevron-right"
+                      style="width: 16px;"></i></button>
                 </div>
               </div>
               <div class="calendar-grid-header">
@@ -559,7 +561,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" onclick="App.closeModal('manualAttendanceModal')">Batal</button>
-          <button class="btn btn-primary" onclick="saveManualAttendance()">Simpan</button>
+          <button class="btn btn-primary" onclick="submitManualAttendance()">Simpan</button>
         </div>
       </div>
     </div>
@@ -870,9 +872,9 @@
         const monthLabel = document.getElementById('calendarMonth');
         if (!grid || !monthLabel) return;
 
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
         const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
 
         // Month Label
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -884,8 +886,8 @@
         const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // Adjust for Monday start? The image shows "Mn" (Minggu) first or "Sen"? 
-        // Image: Mn Sn Sl Rb Km Jm Sb. So Sunday start.
+        // Adjust for Monday start (0=Monday in our grid?)
+        // Image has Mn (Minggu) first, so standard 0=Sunday is fine.
 
         // Empty slots for previous month
         for (let i = 0; i < firstDay; i++) {
@@ -899,181 +901,29 @@
           dayEl.className = 'calendar-day';
           dayEl.textContent = d;
 
-          if (d === now.getDate()) {
-            dayEl.classList.add('active'); // Circle for today
+          // Check if today
+          if (d === now.getDate() && month === now.getMonth() && year === now.getFullYear()) {
+            dayEl.classList.add('active');
           }
-          // Add blue dot for today indicator if needed (image has specific indicators)
 
           grid.appendChild(dayEl);
         }
       }
 
-
-      // Initialize attendance chart
-      async function initChart() {
-        const chartEl = document.getElementById('attendanceChart');
-        if (!chartEl) return;
-        const ctx = chartEl.getContext('2d');
-
-        // Get weekly data
-        const weekData = await getWeeklyAttendanceData();
-
-        if (attendanceChart) {
-          attendanceChart.destroy();
-        }
-
-        attendanceChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-            datasets: [{
-              label: 'Kehadiran',
-              data: weekData,
-              backgroundColor: '#3b82f6',
-              borderRadius: 6,
-              borderSkipped: false,
-              barThickness: 40,
-              maxBarThickness: 50
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: false
-              }
-            },
-            scales: {
-              x: {
-                grid: {
-                  display: false
-                },
-                ticks: {
-                  color: '#64748b',
-                  font: {
-                    size: 12
-                  }
-                }
-              },
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: '#e2e8f0'
-                },
-                ticks: {
-                  color: '#64748b',
-                  font: {
-                    size: 12
-                  },
-                  stepSize: 20
-                }
-              }
-            }
-          }
-        });
-
-        // Update date range text
-        const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() + 1);
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-        const formatDate = (d) => `${d.getDate()} ${d.toLocaleDateString('id-ID', { month: 'short' })}`;
-        const rangeText = document.getElementById('chartDateRange');
-        if (rangeText) {
-          rangeText.textContent = `Statistik mingguan (${formatDate(startOfWeek)}-${formatDate(endOfWeek)})`;
-        }
-      }
-
-      // Get weekly attendance data
-      async function getWeeklyAttendanceData() {
-        // Limit to 50 for status update check
-        const absensi = await Data.getAbsensi({ limit: 50 });
-        const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() + 1);
-
-        const weekData = [0, 0, 0, 0, 0, 0, 0];
-
-        absensi.forEach(a => {
-          const date = new Date(a.tanggal);
-          if (date >= startOfWeek) {
-            const dayIndex = (date.getDay() + 6) % 7; // Monday = 0
-            weekData[dayIndex]++;
-          }
-        });
-
-        // Simulate some data if empty
-        if (weekData.every(d => d === 0)) {
-          return [24, 22, 25, 23, 27, 5, 2];
-        }
-
-        return weekData;
-      }
-
-      // Render calendar
-      function renderCalendar() {
-        const calendarTitle = document.getElementById('calendarMonth');
-        if (!calendarTitle) return;
-
-        const year = currentCalendarDate.getFullYear();
-        const month = currentCalendarDate.getMonth();
-
-        // Update month title
-        const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        calendarTitle.textContent = `${monthNames[month]} ${year}`;
-
-        // Get first day of month and total days
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const totalDays = lastDay.getDate();
-
-        // Get day of week for first day (0 = Sunday, adjust for Monday start)
-        let startDay = firstDay.getDay();
-        startDay = startDay === 0 ? 6 : startDay - 1; // Monday = 0
-
-        // Generate calendar HTML
-        const today = new Date();
-        let html = '';
-
-        // Previous month days
-        const prevMonth = new Date(year, month, 0);
-        const prevMonthDays = prevMonth.getDate();
-        for (let i = startDay - 1; i >= 0; i--) {
-          html += `<span class="calendar-day other-month">${prevMonthDays - i}</span>`;
-        }
-
-        // Current month days
-        for (let d = 1; d <= totalDays; d++) {
-          const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-          const classes = ['calendar-day'];
-          if (isToday) classes.push('today');
-          html += `<span class="${classes.join(' ')}">${d}</span>`;
-        }
-
-        // Next month days
-        const remainingDays = 42 - (startDay + totalDays);
-        for (let d = 1; d <= remainingDays; d++) {
-          html += `<span class="calendar-day other-month">${d}</span>`;
-        }
-
-        const calDays = document.getElementById('calendarDays');
-        if (calDays) calDays.innerHTML = html;
-      }
-
-      // Calendar navigation
+      // Calendar navigation listeners
       document.getElementById('prevMonth')?.addEventListener('click', function () {
         currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-        renderCalendar();
+        renderMiniCalendar();
       });
 
       document.getElementById('nextMonth')?.addEventListener('click', function () {
         currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-        renderCalendar();
+        renderMiniCalendar();
       });
+
+      // Initialize Attendance Chart (Dummy Data for Visual Match)
+      // Function initChart removed as it was redundant.
+
 
       // Check today's attendance for pegawai
       async function checkTodayAttendance() {
@@ -1502,51 +1352,7 @@
         });
       }
 
-      // Save Manual Attendance (Edit/Create)
-      async function saveManualAttendance() {
-        const id = document.getElementById('editAbsensiId').value;
-        const pegawaiId = document.getElementById('manualPegawai').value;
-        const tanggal = document.getElementById('manualTanggal').value;
-        const jamMasuk = document.getElementById('manualJamMasuk').value;
-        const jamKeluar = document.getElementById('manualJamKeluar').value;
-        const status = document.getElementById('manualStatus').value;
-        const keterangan = document.getElementById('manualKeterangan').value;
 
-        if (!pegawaiId || !tanggal || !jamMasuk) {
-          App.showToast('Mohon lengkapi data yang wajib diisi', 'warning');
-          return;
-        }
-
-        const data = {
-          pegawai_id: pegawaiId,
-          tanggal,
-          jam_masuk: jamMasuk,
-          jam_keluar: jamKeluar || null,
-          status,
-          keterangan: keterangan || null
-        };
-
-        try {
-          if (id) {
-            await Data.update('absensi', id, data);
-            App.showToast('Data absensi berhasil diupdate', 'success');
-          } else {
-            await Data.create('absensi', data);
-            App.showToast('Data absensi berhasil ditambahkan', 'success');
-          }
-
-          App.closeModal('manualAttendanceModal');
-
-          if (typeof loadDashboard === 'function') {
-            await loadDashboard();
-          } else {
-            location.reload();
-          }
-        } catch (error) {
-          console.error('Error saving attendance:', error);
-          App.showToast('Gagal menyimpan data absensi', 'danger');
-        }
-      }
 
       // Filter Table by Status (Called by Stat Cards)
       async function filterTableByStatus(status) {
