@@ -667,6 +667,10 @@
       document.getElementById('manualPegawai').innerHTML = employees.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
       document.getElementById('manualAttendanceModal').classList.remove('hidden');
     }
+    // Initialize Dashboard logic
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDashboard();
+    });
   </script>
 </body>
 
