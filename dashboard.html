@@ -179,6 +179,82 @@
     </div>
   </aside>
 
+  <!-- Sidebar Pegawai (Blue Theme) -->
+  <aside id="sidebarPegawai"
+    class="w-64 bg-[#1e3a8a] text-white flex flex-col flex-shrink-0 transition-all duration-300 z-30 fixed lg:relative h-full -translate-x-full lg:translate-x-0 hidden">
+
+    <!-- Profile Header -->
+    <div class="p-6">
+      <div class="flex items-center gap-4 mb-2">
+        <div class="size-14 rounded-full border-2 border-white/50 p-0.5">
+          <div class="w-full h-full rounded-full bg-cover bg-center user-avatar"
+            style="background-image: url('https://ui-avatars.com/api/?name=User');"></div>
+        </div>
+      </div>
+      <h2 class="text-lg font-bold leading-tight user-name">Nama Pegawai</h2>
+      <p class="text-xs text-blue-200 mt-1 mb-3 user-nip">NIP. -</p>
+      <span class="inline-block bg-white/20 px-3 py-1 rounded-full text-[10px] font-medium tracking-wide">Pegawai
+        PPPK</span>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-6">
+
+      <!-- Menu Utama -->
+      <div>
+        <p class="text-[10px] font-bold text-blue-300/80 uppercase tracking-widest mb-3">MENU UTAMA</p>
+        <a href="dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white text-blue-900 shadow-lg shadow-blue-900/20 font-bold transition-transform active:scale-95">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+
+      <!-- Aktivitas Pegawai -->
+      <div>
+        <p class="text-[10px] font-bold text-blue-300/80 uppercase tracking-widest mb-3">AKTIVITAS PEGAWAI</p>
+        <div class="space-y-1">
+          <a href="absensi.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-blue-100 hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined">check_box</span>
+            <span class="font-medium">Absensi</span>
+          </a>
+          <a href="cuti.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-blue-100 hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined">umbrella</span>
+            <span class="font-medium">Pengajuan Cuti</span>
+          </a>
+          <a href="absensi.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-blue-100 hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined">history</span>
+            <span class="font-medium">Riwayat</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Pengaturan -->
+      <div>
+        <p class="text-[10px] font-bold text-blue-300/80 uppercase tracking-widest mb-3">PENGATURAN</p>
+        <a href="profil.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-blue-100 hover:bg-white/10 transition-colors">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-medium">Akun</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="p-6 border-t border-white/10">
+      <button onclick="Auth.logout()"
+        class="flex items-center gap-3 text-blue-200 hover:text-white transition-colors w-full">
+        <span class="material-symbols-outlined -scale-x-100">logout</span>
+        <span class="font-medium">Keluar Aplikasi</span>
+      </button>
+      <p class="text-center text-[10px] text-blue-400 mt-6">Versi 1.0.2</p>
+    </div>
+  </aside>
+
   <!-- ==================== ADMIN DASHBOARD CONTENT ==================== -->
   <main class="flex-1 flex flex-col h-full relative overflow-hidden" id="adminDashboard">
     <!-- Header -->
@@ -454,9 +530,20 @@
   <script>
     // --- SHARED UI LOGIC ---
     function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
+      const sidebar = document.getElementById('sidebar'); // Admin sidebar
+      const sidebarPegawai = document.getElementById('sidebarPegawai'); // Pegawai sidebar
       const overlay = document.getElementById('sidebarOverlay');
-      sidebar.classList.toggle('-translate-x-full');
+
+      // Determine which sidebar is active based on visibility class 'hidden' logic or just toggle the one that is NOT hidden by default logic? 
+      // Actually simpler: just find which one is currently "active" in DOM structure or check role?
+      // Better: Check if sidebarPegawai is NOT hidden class.
+
+      if (!sidebarPegawai.classList.contains('hidden')) {
+        sidebarPegawai.classList.toggle('-translate-x-full');
+      } else {
+        sidebar.classList.toggle('-translate-x-full');
+      }
+
       overlay.classList.toggle('hidden');
     }
 
@@ -643,17 +730,27 @@
           document.getElementById('adminDashboard').style.display = 'none';
           document.getElementById('pegawaiDashboard').style.display = 'block';
 
-          // Hide Admin Sidebar Items
-          document.getElementById('nav-pegawai').style.display = 'none';
-          document.getElementById('nav-setting').style.display = 'none';
-          document.getElementById('group-kepegawaian').style.display = 'none';
+          // Toggle Sidebars
+          document.getElementById('sidebar').classList.add('hidden'); // Hide Admin sidebar completely
+          document.getElementById('sidebarPegawai').classList.remove('hidden'); // Show Pegawai sidebar
+          document.getElementById('sidebarPegawai').classList.remove('-translate-x-full'); // Ensure visible on desktop
 
           // Load Pegawai Data
           await loadPegawaiDashboard(user);
+
+          // Populate additional sidebar info
+          const nip = user.nip || (user.pegawaiId ? (await Data.getById('pegawai', user.pegawaiId))?.nip : '-') || '-';
+          document.querySelectorAll('.user-nip').forEach(el => el.textContent = `NIP. ${nip}`);
+
         } else {
           // Show Admin View
           document.getElementById('adminDashboard').style.display = 'flex';
           document.getElementById('pegawaiDashboard').style.display = 'none';
+
+          // Toggle Sidebars
+          document.getElementById('sidebar').classList.remove('hidden');
+          document.getElementById('sidebarPegawai').classList.add('hidden');
+
           await loadAdminDashboard();
         }
 
