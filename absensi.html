@@ -215,6 +215,74 @@
         </div>
     </main>
 
+    <!-- Edit Modal -->
+    <div id="editAbsensiModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div class="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">Edit Absensi</h3>
+            <form id="editAbsensiForm" class="space-y-4" onsubmit="event.preventDefault(); saveEditAbsensi();">
+                <input type="hidden" id="editAbsensiId">
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama
+                        Pegawai</label>
+                    <input type="text" id="editNamaPegawai"
+                        class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm bg-slate-100"
+                        disabled>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
+                    <input type="date" id="editTanggal"
+                        class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Jam
+                            Masuk</label>
+                        <input type="time" id="editJamMasuk"
+                            class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Jam
+                            Keluar</label>
+                        <input type="time" id="editJamKeluar"
+                            class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status
+                        Kehadiran</label>
+                    <select id="editStatus"
+                        class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm">
+                        <option value="tepat_waktu">Tepat Waktu</option>
+                        <option value="terlambat">Terlambat</option>
+                        <option value="izin">Izin</option>
+                        <option value="sakit">Sakit</option>
+                        <option value="cuti">Cuti</option>
+                        <option value="alpha">Alpha</option>
+                        <option value="hadir">Hadir</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Keterangan</label>
+                    <textarea id="editKeterangan" rows="2"
+                        class="w-full rounded-lg border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-sm"></textarea>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-2">
+                    <button type="button" onclick="closeEditModal()"
+                        class="px-4 py-2 rounded-lg text-sm border border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">Batal</button>
+                    <button type="submit"
+                        class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">Simpan
+                        Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
@@ -298,9 +366,14 @@
                     <td class="px-6 py-4"><span class="px-2 py-1 rounded-sm text-xs font-semibold ${statusClass}">${a.status}</span></td>
                     <td class="px-6 py-4 text-slate-500 text-xs max-w-xs truncate">${a.keterangan || '-'}</td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="deleteAbsensi(${a.id})" class="text-slate-400 hover:text-red-500">
-                             <span class="material-symbols-outlined text-[20px]">delete</span>
-                        </button>
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="editAbsensi(${a.id})" class="text-slate-400 hover:text-blue-500" title="Edit">
+                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                            </button>
+                            <button onclick="deleteAbsensi(${a.id})" class="text-slate-400 hover:text-red-500" title="Hapus">
+                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 `;
@@ -318,6 +391,75 @@
                     await Data.delete('absensi', id);
                     loadAbsensi();
                 } catch (e) { alert('Gagal menghapus'); }
+            }
+        }
+
+        // --- EDIT FEATURE ---
+        async function editAbsensi(id) {
+            try {
+                const record = await Data.getById('absensi', id);
+                if (!record) return alert('Data tidak ditemukan');
+
+                // Get Pegawai Name
+                let pegawaiName = 'Pegawai';
+                if (record.pegawai_id) {
+                    const p = await Data.getById('pegawai', record.pegawai_id);
+                    if (p) pegawaiName = p.nama;
+                }
+
+                document.getElementById('editAbsensiId').value = record.id;
+                document.getElementById('editNamaPegawai').value = pegawaiName;
+                document.getElementById('editTanggal').value = record.tanggal;
+                document.getElementById('editJamMasuk').value = record.jam_masuk || '';
+                document.getElementById('editJamKeluar').value = record.jam_keluar || '';
+                document.getElementById('editStatus').value = record.status;
+                document.getElementById('editKeterangan').value = record.keterangan || '';
+
+                document.getElementById('editAbsensiModal').classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                alert('Gagal memuat data untuk edit');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editAbsensiModal').classList.add('hidden');
+        }
+
+        async function saveEditAbsensi() {
+            const id = document.getElementById('editAbsensiId').value;
+            if (!id) return;
+
+            const updates = {
+                tanggal: document.getElementById('editTanggal').value,
+                jam_masuk: document.getElementById('editJamMasuk').value || null,
+                jam_keluar: document.getElementById('editJamKeluar').value || null,
+                status: document.getElementById('editStatus').value,
+                keterangan: document.getElementById('editKeterangan').value
+            };
+
+            try {
+                const btn = document.querySelector('#editAbsensiForm button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.textContent = 'Menyimpan...';
+                btn.disabled = true;
+
+                await Data.update('absensi', id, updates);
+
+                closeEditModal();
+                loadAbsensi(); // Reload table
+                alert('Data berhasil diperbarui');
+
+                btn.textContent = originalText;
+                btn.disabled = false;
+            } catch (e) {
+                console.error(e);
+                alert('Gagal menyimpan perubahan');
+                const btn = document.querySelector('#editAbsensiForm button[type="submit"]');
+                if (btn) {
+                    btn.textContent = 'Simpan Perubahan';
+                    btn.disabled = false;
+                }
             }
         }
 
