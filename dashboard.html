@@ -667,6 +667,34 @@
       document.getElementById('manualPegawai').innerHTML = employees.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
       document.getElementById('manualAttendanceModal').classList.remove('hidden');
     }
+
+    async function submitManualAttendance() {
+      const pegawaiId = document.getElementById('manualPegawai').value;
+      const tanggal = document.getElementById('manualTanggal').value;
+      const jamMasuk = document.getElementById('manualJamMasuk').value;
+      const jamKeluar = document.getElementById('manualJamKeluar').value;
+      const status = document.getElementById('manualStatus').value;
+
+      if (!pegawaiId || !tanggal) return alert('Mohon lengkapi data');
+
+      const data = {
+        pegawai_id: pegawaiId,
+        tanggal: tanggal,
+        jam_masuk: jamMasuk || null,
+        jam_keluar: jamKeluar || null,
+        status: status
+      };
+
+      try {
+        await Data.create('absensi', data);
+        alert('Absensi berhasil ditambahkan');
+        closeManualModal();
+        loadAdminDashboard();
+      } catch (e) {
+        alert('Gagal menyimpan');
+        console.error(e);
+      }
+    }
     // Initialize Dashboard logic
     document.addEventListener('DOMContentLoaded', () => {
       loadDashboard();
