@@ -222,7 +222,7 @@
         <header
             class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-10">
             <div class="flex items-center gap-4">
-                <button class="lg:hidden text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
+                <button class="text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
                 <h2 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Data Absensi</h2>
@@ -371,17 +371,30 @@
             const sidebarPegawai = document.getElementById('sidebarPegawai');
             const overlay = document.getElementById('sidebarOverlay');
 
-            if (!sidebarPegawai.classList.contains('hidden')) {
-                sidebarPegawai.classList.toggle('-translate-x-full');
+            // Identify active sidebar
+            const activeSidebar = !sidebarPegawai.classList.contains('hidden') ? sidebarPegawai : sidebar;
+
+            if (window.innerWidth >= 1024) {
+                // Desktop: Toggle visibility (collapse mode)
+                // We use 'hidden' class to collapse on desktop since sides are fixed/relative logic
+                // But activeSidebar might have just been 'hidden' if it's the wrong role? No, activeSidebar is the one meant for this role.
+                // If it is currently showing, hide it.
+                if (activeSidebar.classList.contains('lg:block') || !activeSidebar.classList.contains('hidden')) {
+                    // Check if it's actually visible effectively
+                    // Easy way: just toggle a 'collapsed' state?
+                    // Let's just toggle 'hidden'. But wait, if I toggle 'hidden', how do I bring it back? 
+                    // The same button.
+                    activeSidebar.classList.toggle('hidden');
+                }
             } else {
-                sidebar.classList.toggle('-translate-x-full');
+                // Mobile: Toggle Translate
+                activeSidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
             }
-            overlay.classList.toggle('hidden');
         }
 
         async function loadAbsensi() {
             const tbody = document.getElementById('absensiTable');
-            const search = document.getElementById('searchInput').value.toLowerCase();
             const month = document.getElementById('filterMonth').value;
             const status = document.getElementById('filterStatus').value;
             const user = Auth.getCurrentUser();
