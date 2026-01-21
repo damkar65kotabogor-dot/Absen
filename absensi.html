@@ -395,6 +395,7 @@
 
         async function loadAbsensi() {
             const tbody = document.getElementById('absensiTable');
+            const search = document.getElementById('searchInput').value.toLowerCase();
             const month = document.getElementById('filterMonth').value;
             const status = document.getElementById('filterStatus').value;
             const user = Auth.getCurrentUser();

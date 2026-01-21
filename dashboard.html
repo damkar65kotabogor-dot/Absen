@@ -536,17 +536,14 @@
       const sidebarPegawai = document.getElementById('sidebarPegawai'); // Pegawai sidebar
       const overlay = document.getElementById('sidebarOverlay');
 
-      // Determine which sidebar is active based on visibility class 'hidden' logic or just toggle the one that is NOT hidden by default logic? 
-      // Actually simpler: just find which one is currently "active" in DOM structure or check role?
-      // Better: Check if sidebarPegawai is NOT hidden class.
+      const activeSidebar = !sidebarPegawai.classList.contains('hidden') ? sidebarPegawai : sidebar;
 
-      if (!sidebarPegawai.classList.contains('hidden')) {
-        sidebarPegawai.classList.toggle('-translate-x-full');
+      if (window.innerWidth >= 1024) {
+        activeSidebar.classList.toggle('hidden');
       } else {
-        sidebar.classList.toggle('-translate-x-full');
+        activeSidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
       }
-
-      overlay.classList.toggle('hidden');
     }
 
     // --- ADMIN LOGIC ---
@@ -609,23 +606,6 @@
         const currentMonth = today.slice(0, 7);
 
         // Stats Logic
-        const thisMonth = history.filter(h => h.tanggal.startsWith(currentMonth));
-        const statHadir = document.getElementById('myStatHadir'); // If these exist in new layout? No, used to be grid. 
-        // Wait, new layout does NOT have stats grid "Hadir/Telat/Alpha" visible? 
-        // The user image shows "Ringkasan Activities" with Calendar.
-        // And a grid "Rekapitulasi" etc.
-        // I should probably skip updating 'myStatHadir' etc if they don't exist, or leave them if I kept them hidden?
-        // I removed them in the replacement. So I should NOT try to update them.
-
-        // Recent Activity (Keep logic if element exists, or skip)
-        // I kept 'myRecentAbsensi' container in the new HTML? No, I replaced content entirely.
-        // New HTML has no list of recent activity shown in the code block I pushed?
-        // Let's check Step 303.
-        // It has `div class="px-6 space-y-6"` -> Summary Header -> Blue Status Card -> Menu Grid.
-        // NO Recent Activity Table in new mobile design.
-        // So REMOVE recent activity logic.
-
-        // Check Today's Status
         const todayAbsen = history.find(h => h.tanggal === today);
         const btnCheckIn = document.getElementById('btnPegawaiCheckIn');
         const btnCheckOut = document.getElementById('btnPegawaiCheckOut');
@@ -735,7 +715,7 @@
           // Toggle Sidebars
           document.getElementById('sidebar').classList.add('hidden'); // Hide Admin sidebar completely
           document.getElementById('sidebarPegawai').classList.remove('hidden'); // Show Pegawai sidebar
-          document.getElementById('sidebarPegawai').classList.remove('-translate-x-full'); // Ensure visible on desktop
+          // REMOVED FORCED SHOW causing mobile issues: document.getElementById('sidebarPegawai').classList.remove('-translate-x-full');
 
           // Load Pegawai Data
           await loadPegawaiDashboard(user);
