@@ -346,20 +346,75 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Table -->
+      <!-- Chart and Calendar Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart Card -->
         <div
-          class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-slate-200 dark:border-slate-800">
-            <h3 class="text-lg font-bold">Riwayat Absensi Terkini</h3>
+          class="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white">Tren Kehadiran</h3>
+              <p class="text-slate-500 dark:text-slate-400 text-sm">Statistik mingguan</p>
+            </div>
+            <div
+              class="bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">
+              Minggu Ini
+            </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-              <tbody id="recentAbsensi" class="divide-y divide-slate-100"></tbody>
-            </table>
+          <div class="h-[300px] relative">
+            <canvas id="attendanceChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Calendar Card -->
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white" id="calendarTitle">Oktober 2023</h3>
+            <div class="flex gap-2">
+              <button onclick="changeMonth(-1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
+                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+              </button>
+              <button onclick="changeMonth(1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
+                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-center mb-2">
+            <div class="text-[10px] font-bold text-slate-400">Mn</div>
+            <div class="text-[10px] font-bold text-slate-400">Sn</div>
+            <div class="text-[10px] font-bold text-slate-400">Sl</div>
+            <div class="text-[10px] font-bold text-slate-400">Rb</div>
+            <div class="text-[10px] font-bold text-slate-400">Km</div>
+            <div class="text-[10px] font-bold text-slate-400">Jm</div>
+            <div class="text-[10px] font-bold text-slate-400">Sb</div>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-7 gap-1">
+            <!-- Calendar days injected here -->
+          </div>
+          <div class="mt-6 space-y-2">
+            <div class="flex items-center gap-2 text-[11px] text-slate-500">
+              <span class="size-2 rounded-full bg-primary"></span>
+              <span>Hari ini</span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Table -->
+      <div
+        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800">
+          <h3 class="text-lg font-bold">Riwayat Absensi Terkini</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <tbody id="recentAbsensi" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
     </div>
   </main>
 
@@ -587,6 +642,97 @@
       } catch (e) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-red-500">Gagal memuat</td></tr>'; }
     }
 
+    let currentCalendarDate = new Date();
+
+    async function initChart() {
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+      const trend = await Data.getWeeklyTrend();
+
+      // Ensure Chart.js is loaded
+      if (typeof Chart === 'undefined') {
+        setTimeout(initChart, 500);
+        return;
+      }
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: trend.labels,
+          datasets: [{
+            label: 'Kehadiran',
+            data: trend.data,
+            backgroundColor: '#135bec',
+            borderRadius: 8,
+            barThickness: 32,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e293b',
+              padding: 12,
+              titleFont: { size: 14, weight: 'bold' },
+              bodyFont: { size: 13 },
+              displayColors: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, color: '#94a3b8' },
+              grid: { color: '#f1f5f9' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      const title = document.getElementById('calendarTitle');
+      const year = currentCalendarDate.getFullYear();
+      const month = currentCalendarDate.getMonth();
+
+      title.textContent = currentCalendarDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today = new Date();
+
+      grid.innerHTML = '';
+
+      // Empty cells for first week
+      // Adjusted for Monday start (Mn = 1, Sn = 2... Sb = 0 in JS Date)
+      // Let's use JS default (0=Sun, 1=Mon...) but layout shows Mn Sn Sl Rb Km Jm Sb
+      // Indonesian: Mn(Minggu), Sn(Senin), Sl(Selasa), Rb(Rabu), Km(Kamis), Jm(Jumat), Sb(Sabtu)
+      // So 0=Mn, 1=Sn...
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += '<div class="calendar-day empty"></div>';
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+        grid.innerHTML += `
+                <div class="calendar-day ${isToday ? 'active' : ''}">
+                    ${d}
+                </div>
+            `;
+      }
+    }
+
+    function changeMonth(delta) {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+      renderCalendar();
+    }
+
     // --- PEGAWAI LOGIC ---
     async function loadPegawaiDashboard(user) {
       // 1. Get Pegawai Data
@@ -734,6 +880,8 @@
           document.getElementById('sidebarPegawai').classList.add('hidden');
 
           await loadAdminDashboard();
+          initChart();
+          renderCalendar();
         }
 
       } catch (e) { console.error('Init Error', e); }

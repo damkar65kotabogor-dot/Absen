@@ -259,6 +259,36 @@ const Data = {
         };
     },
 
+    async getWeeklyTrend() {
+        const days = [];
+        const labels = [];
+        const today = new Date();
+        
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(today.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0];
+            days.push(dateStr);
+            labels.push(d.toLocaleDateString('id-ID', { weekday: 'short' }));
+        }
+
+        const { data: absensi, error } = await supabaseClient
+            .from('absensi')
+            .select('tanggal')
+            .in('tanggal', days);
+
+        if (error) {
+            console.error('Error fetching weekly trend:', error);
+            return { labels, data: days.map(() => 0) };
+        }
+
+        const counts = days.map(day => {
+            return absensi.filter(a => a.tanggal === day).length;
+        });
+
+        return { labels, data: counts };
+    },
+
     async getAbsensiWithPegawai(options = {}) {
         let query = supabaseClient
             .from('absensi')
