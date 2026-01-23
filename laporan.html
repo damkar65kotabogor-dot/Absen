@@ -179,10 +179,31 @@
       </div>
 
       <!-- Report Preview -->
-      <div class="card mt-5" id="reportPreview" style="display: none;">
-        <div class="card-header">
-          <h3 class="card-title" id="reportTitle">Hasil Laporan</h3>
-          <button class="btn btn-sm btn-outline" onclick="printReport()">
+      <div class="card-header d-flex justify-between items-center">
+        <h3 class="card-title" id="reportTitle">Hasil Laporan</h3>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline btn-excel" onclick="exportToExcel()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="M8 13h2" />
+              <path d="M8 17h2" />
+              <path d="M14 13h2" />
+              <path d="M14 17h2" />
+            </svg>
+            Excel
+          </button>
+          <button class="btn btn-sm btn-outline btn-pdf" onclick="exportToPDF()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="M9 15h3a2 2 0 0 0 0-4H9v4Z" />
+            </svg>
+            PDF
+          </button>
+          <button class="btn btn-sm btn-outline btn-print" onclick="printReport()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 6 2 18 2 18 9" />
@@ -192,11 +213,12 @@
             Cetak
           </button>
         </div>
-        <div class="card-body" id="reportContent">
-          <!-- Report content will be rendered here -->
-        </div>
       </div>
-    </main>
+      <div class="card-body" id="reportContent">
+        <!-- Report content will be rendered here -->
+      </div>
+  </div>
+  </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -204,6 +226,10 @@
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
+  <!-- Export Libraries -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     // Require admin or pimpinan
     if (!Auth.requireRole(['admin', 'pimpinan'])) {
@@ -482,23 +508,38 @@
         <head>
           <title>${title} - SIMPEG PPPK</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f5f5f5; }
-            h4 { margin-bottom: 10px; }
-            .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px; }
-            .badge-success { background: #d4edda; color: #155724; }
-            .badge-warning { background: #fff3cd; color: #856404; }
-            .badge-danger { background: #f8d7da; color: #721c24; }
-            .badge-primary { background: #cce5ff; color: #004085; }
-            @media print { body { padding: 0; } }
+            body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+            th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+            th { background-color: #f9f9f9; font-weight: bold; }
+            h2 { margin-bottom: 5px; color: #135bec; }
+            h3 { margin-bottom: 20px; font-weight: normal; color: #666; }
+            h4 { margin-top: 0; margin-bottom: 15px; }
+            .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; margin-right: 10px; font-weight: bold; }
+            .badge-success { background: #e6f4ea; color: #1e8e3e; }
+            .badge-warning { background: #fef7e0; color: #d93025; }
+            .badge-danger { background: #fce8e6; color: #d93025; }
+            .badge-primary { background: #e8f0fe; color: #1967d2; }
+            .mb-4 { margin-bottom: 30px; }
+            .d-flex { display: flex; }
+            .gap-4 { gap: 20px; }
+            .mt-3 { margin-top: 15px; }
+            hr { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
+            @media print { 
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
           </style>
         </head>
         <body>
-          <h2>SIMPEG PPPK</h2>
-          <h3>${title}</h3>
-          <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', {
+          <div style="text-align: center; margin-bottom: 40px;">
+            <h2 style="margin: 0;">PEMERINTAH KOTA BOGOR</h2>
+            <h3 style="margin: 5px 0 0 0;">DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN</h3>
+            <p style="font-size: 12px; color: #888; margin: 5px 0;">Jl. Raya Pajajaran No. 1, Kota Bogor</p>
+          </div>
+          <hr>
+          <h3 style="text-align: center; font-weight: bold; color: #333; margin-top: 20px;">${title.toUpperCase()}</h3>
+          <p style="font-size: 11px; text-align: right; color: #777;">Dicetak pada: ${new Date().toLocaleDateString('id-ID', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -506,13 +547,65 @@
         hour: '2-digit',
         minute: '2-digit'
       })}</p>
-      <hr>
           ${content}
+          <div style="margin-top: 60px; display: flex; justify-content: flex-end;">
+            <div style="text-align: center; width: 250px;">
+              <p>Bogor, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              <p style="margin-bottom: 80px;">Mengetahui, Kepala Dinas</p>
+              <p style="font-weight: bold; text-decoration: underline;">--------------------------</p>
+              <p>NIP. -</p>
+            </div>
+          </div>
         </body>
         </html>
       `);
       printWindow.document.close();
-      printWindow.print();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
+
+    // Export to Excel
+    function exportToExcel() {
+      const table = document.querySelector('#reportContent table');
+      if (!table) return alert('Tidak ada data untuk diekspor');
+
+      const title = document.getElementById('reportTitle').textContent;
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.table_to_sheet(table);
+
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      XLSX.writeFile(wb, `${title}_${new Date().getTime()}.xlsx`);
+    }
+
+    // Export to PDF
+    async function exportToPDF() {
+      const element = document.getElementById('reportContent');
+      if (!element) return alert('Tidak ada data untuk diekspor');
+
+      const title = document.getElementById('reportTitle').textContent;
+      const { jsPDF } = window.jspdf;
+
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          logging: false,
+          useCORS: true
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.text(title, 10, 10);
+        pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, pdfHeight);
+        pdf.save(`${title}_${new Date().getTime()}.pdf`);
+      } catch (error) {
+        console.error('PDF Export Error:', error);
+        alert('Gagal mengekspor PDF');
+      }
     }
 
     // Initialize
