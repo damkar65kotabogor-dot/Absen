@@ -179,46 +179,47 @@
       </div>
 
       <!-- Report Preview -->
-      <div class="card-header d-flex justify-between items-center">
-        <h3 class="card-title" id="reportTitle">Hasil Laporan</h3>
-        <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-outline btn-excel" onclick="exportToExcel()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-              <path d="M8 13h2" />
-              <path d="M8 17h2" />
-              <path d="M14 13h2" />
-              <path d="M14 17h2" />
-            </svg>
-            Excel
-          </button>
-          <button class="btn btn-sm btn-outline btn-pdf" onclick="exportToPDF()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-              <path d="M9 15h3a2 2 0 0 0 0-4H9v4Z" />
-            </svg>
-            PDF
-          </button>
-          <button class="btn btn-sm btn-outline btn-print" onclick="printReport()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 6 2 18 2 18 9" />
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-              <rect x="6" y="14" width="12" height="8" />
-            </svg>
-            Cetak
-          </button>
+      <div class="card mt-5" id="reportPreview" style="display: none;">
+        <div class="card-header d-flex justify-between items-center">
+          <h3 class="card-title" id="reportTitle">Hasil Laporan</h3>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline btn-excel" onclick="exportToExcel()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14 2 14 8 20 8" />
+                <path d="M8 13h2" />
+                <path d="M8 17h2" />
+                <path d="M14 13h2" />
+                <path d="M14 17h2" />
+              </svg>
+              Excel
+            </button>
+            <button class="btn btn-sm btn-outline btn-pdf" onclick="exportToPDF()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14 2 14 8 20 8" />
+                <path d="M9 15h3a2 2 0 0 0 0-4H9v4Z" />
+              </svg>
+              PDF
+            </button>
+            <button class="btn btn-sm btn-outline btn-print" onclick="printReport()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Cetak
+            </button>
+          </div>
+        </div>
+        <div class="card-body" id="reportContent">
+          <!-- Report content will be rendered here -->
         </div>
       </div>
-      <div class="card-body" id="reportContent">
-        <!-- Report content will be rendered here -->
-      </div>
-  </div>
-  </main>
+    </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

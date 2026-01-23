@@ -263,7 +263,7 @@ const Data = {
         const days = [];
         const labels = [];
         const today = new Date();
-        
+
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
             d.setDate(today.getDate() - i);
@@ -316,7 +316,9 @@ const Data = {
         }
 
         if (options.month) {
-            query = query.like('tanggal', `${options.month}%`);
+            const start = `${options.month}-01`;
+            const end = `${options.month}-31`; // Simplified, Supabase will handle date validation
+            query = query.gte('tanggal', start).lte('tanggal', end);
         }
 
         const { data, error } = await query;
