@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="img/logo.png" type="image/png">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
@@ -264,33 +266,38 @@
 
     // Generate Absensi Report
     async function generateAbsensiReport() {
-      const month = document.getElementById('absensiMonth').value;
-      const pegawaiId = document.getElementById('absensiPegawai').value;
+      try {
+        const month = document.getElementById('absensiMonth').value;
+        const pegawaiId = document.getElementById('absensiPegawai').value;
 
-      const opts = { limit: 1000 };
-      if (month) opts.month = month;
-      if (pegawaiId) opts.pegawai_id = pegawaiId;
+        if (!month) {
+          return App.showToast('Silakan pilih periode bulan', 'warning');
+        }
 
-      let absensi = await Data.getAbsensiWithPegawai(opts);
+        const opts = { limit: 1000 };
+        if (month) opts.month = month;
+        if (pegawaiId) opts.pegawai_id = pegawaiId;
 
-      // Apply filters
-      if (month) {
-        absensi = absensi.filter(a => a.tanggal.startsWith(month));
-      }
-      if (pegawaiId) {
-        absensi = absensi.filter(a => a.pegawai_id == pegawaiId);
-      }
+        let absensi = await Data.getAbsensiWithPegawai(opts);
 
-      // Sort by date
-      absensi.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        // Apply filters (Double check)
+        if (month) {
+          absensi = absensi.filter(a => a.tanggal.startsWith(month));
+        }
+        if (pegawaiId) {
+          absensi = absensi.filter(a => a.pegawai_id == pegawaiId);
+        }
 
-      // Calculate summary
-      const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
-      const terlambat = absensi.filter(a => a.status === 'terlambat').length;
+        // Sort by date
+        absensi.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-      const monthName = new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        // Calculate summary
+        const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
+        const terlambat = absensi.filter(a => a.status === 'terlambat').length;
 
-      const html = `
+        const monthName = new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+        const html = `
         <div class="mb-4">
           <h4>Laporan Absensi - ${monthName}</h4>
           <div class="d-flex gap-4 mt-3">
@@ -327,62 +334,71 @@
         </div>
       `;
 
-      showReport('Laporan Absensi', html);
+        showReport('Laporan Absensi', html);
+      } catch (error) {
+        console.error('Error generating absensi report:', error);
+        App.showToast('Gagal generate laporan: ' + error.message, 'danger');
+      }
     }
 
     // Generate Kepegawaian Report
     async function generateKepegawaianReport() {
-      const type = document.getElementById('kepegawaianType').value;
-      const unitId = document.getElementById('kepegawaianUnit').value;
+      try {
+        const type = document.getElementById('kepegawaianType').value;
+        const unitId = document.getElementById('kepegawaianUnit').value;
 
-      let pegawai = await Data.getPegawaiWithRelations();
+        let pegawai = await Data.getPegawaiWithRelations();
 
-      // Apply filter
-      if (type === 'unit' && unitId) {
-        pegawai = pegawai.filter(p => p.unit_kerja_id == unitId);
-      }
+        // Apply filter
+        if (type === 'unit' && unitId) {
+          pegawai = pegawai.filter(p => p.unit_kerja_id == unitId);
+        }
 
-      // Group by if needed
-      let html = '';
+        // Group by if needed
+        let html = '';
 
-      if (type === 'unit') {
-        const grouped = {};
-        pegawai.forEach(p => {
-          const key = p.unit_kerja?.nama || 'Tidak Ada Unit';
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(p);
-        });
+        if (type === 'unit') {
+          const grouped = {};
+          pegawai.forEach(p => {
+            const key = p.unit_kerja?.nama || 'Tidak Ada Unit';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(p);
+          });
 
-        html = Object.entries(grouped).map(([unit, list]) => `
+          html = Object.entries(grouped).map(([unit, list]) => `
           <div class="mb-4">
             <h4>${unit} (${list.length} pegawai)</h4>
             ${generatePegawaiTable(list)}
           </div>
         `).join('<hr class="my-4">');
-      } else if (type === 'jabatan') {
-        const grouped = {};
-        pegawai.forEach(p => {
-          const key = p.jabatan?.nama || 'Tidak Ada Jabatan';
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(p);
-        });
+        } else if (type === 'jabatan') {
+          const grouped = {};
+          pegawai.forEach(p => {
+            const key = p.jabatan?.nama || 'Tidak Ada Jabatan';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(p);
+          });
 
-        html = Object.entries(grouped).map(([jabatan, list]) => `
+          html = Object.entries(grouped).map(([jabatan, list]) => `
           <div class="mb-4">
             <h4>${jabatan} (${list.length} pegawai)</h4>
             ${generatePegawaiTable(list)}
           </div>
         `).join('<hr class="my-4">');
-      } else {
-        html = `
+        } else {
+          html = `
           <div class="mb-4">
             <h4>Daftar Semua Pegawai (${pegawai.length} pegawai)</h4>
             ${generatePegawaiTable(pegawai)}
           </div>
         `;
-      }
+        }
 
-      showReport('Laporan Kepegawaian', html);
+        showReport('Laporan Kepegawaian', html);
+      } catch (error) {
+        console.error('Error generating kepegawaian report:', error);
+        App.showToast('Gagal generate laporan: ' + error.message, 'danger');
+      }
     }
 
     // Helper to generate pegawai table
@@ -419,37 +435,38 @@
 
     // Generate Cuti Report
     async function generateCutiReport() {
-      const month = document.getElementById('cutiMonth').value;
-      const status = document.getElementById('cutiStatus').value;
+      try {
+        const month = document.getElementById('cutiMonth').value;
+        const status = document.getElementById('cutiStatus').value;
 
-      // Assuming Data.getCutiWithPegawai() is implemented or use generic
-      const cutiList = await Data.getAll('cuti'); // Fallback if no specific getter
-      // Need to link with pegawai
-      const employees = await Data.getPegawai();
-      let cuti = cutiList.map(c => ({
-        ...c,
-        pegawai: employees.find(e => e.id === c.pegawai_id)
-      }));
+        // Assuming Data.getCutiWithPegawai() is implemented or use generic
+        const cutiList = await Data.getAll('cuti'); // Fallback if no specific getter
+        // Need to link with pegawai
+        const employees = await Data.getPegawai();
+        let cuti = cutiList.map(c => ({
+          ...c,
+          pegawai: employees.find(e => e.id === c.pegawai_id)
+        }));
 
-      // Apply filters
-      if (month) {
-        cuti = cuti.filter(c => (c.tanggal_mulai && c.tanggal_mulai.startsWith(month)) || (c.tanggal_selesai && c.tanggal_selesai.startsWith(month)));
-      }
-      if (status) {
-        cuti = cuti.filter(c => c.status === status);
-      }
+        // Apply filters
+        if (month) {
+          cuti = cuti.filter(c => (c.tanggal_mulai && c.tanggal_mulai.startsWith(month)) || (c.tanggal_selesai && c.tanggal_selesai.startsWith(month)));
+        }
+        if (status) {
+          cuti = cuti.filter(c => c.status === status);
+        }
 
-      // Sort by date
-      cuti.sort((a, b) => new Date(a.tanggal_mulai) - new Date(b.tanggal_mulai));
+        // Sort by date
+        cuti.sort((a, b) => new Date(a.tanggal_mulai) - new Date(b.tanggal_mulai));
 
-      // Calculate summary
-      const pending = cuti.filter(c => c.status === 'pending').length;
-      const approved = cuti.filter(c => c.status === 'approved').length;
-      const rejected = cuti.filter(c => c.status === 'rejected').length;
+        // Calculate summary
+        const pending = cuti.filter(c => c.status === 'pending').length;
+        const approved = cuti.filter(c => c.status === 'approved').length;
+        const rejected = cuti.filter(c => c.status === 'rejected').length;
 
-      const monthName = month ? new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : 'Semua Periode';
+        const monthName = month ? new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : 'Semua Periode';
 
-      const html = `
+        const html = `
         <div class="mb-4">
           <h4>Laporan Cuti - ${monthName}</h4>
           <div class="d-flex gap-4 mt-3">
@@ -486,7 +503,11 @@
         </div>
       `;
 
-      showReport('Laporan Cuti', html);
+        showReport('Laporan Cuti', html);
+      } catch (error) {
+        console.error('Error generating cuti report:', error);
+        App.showToast('Gagal generate laporan: ' + error.message, 'danger');
+      }
     }
 
     // Show report
@@ -609,11 +630,9 @@
       }
     }
 
-    // Initialize
     (async () => {
       await loadDropdowns();
     })();
-  </script>
   </script>
 </body>
 

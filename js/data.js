@@ -316,8 +316,10 @@ const Data = {
         }
 
         if (options.month) {
+            const [year, month] = options.month.split('-').map(Number);
             const start = `${options.month}-01`;
-            const end = `${options.month}-31`; // Simplified, Supabase will handle date validation
+            const lastDay = new Date(year, month, 0).getDate();
+            const end = `${options.month}-${lastDay}`;
             query = query.gte('tanggal', start).lte('tanggal', end);
         }
 
