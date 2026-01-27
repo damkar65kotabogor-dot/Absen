@@ -174,13 +174,27 @@ const Data = {
 
     async delete(table, id) {
         try {
+            // For pegawai, we might want to delete the associated user record too
+            if (table === 'pegawai') {
+                const p = await this.getById('pegawai', id);
+                if (p && p.user_id) {
+                    // Start by deleting the pegawai (CASCADE will handle sub-data)
+                    const { error } = await supabaseClient.from('pegawai').delete().eq('id', id);
+                    if (error) throw error;
+
+                    // Then delete the user record (which is no longer referenced)
+                    await supabaseClient.from('users').delete().eq('id', p.user_id);
+                    return true;
+                }
+            }
+
             const { error } = await supabaseClient.from(table).delete().eq('id', id);
             if (error) throw error;
             return true;
         } catch (error) {
             console.error(`Error deleting from ${table}:`, error);
             if (typeof App !== 'undefined' && App.showToast) {
-                App.showToast(`Gagal menghapus data dari ${table}: ${error.message}`, 'danger');
+                App.showToast(`Gagal menghapus data dari ${table}: ${error.message || 'Constraint error'}`, 'danger');
             }
             return false;
         }
