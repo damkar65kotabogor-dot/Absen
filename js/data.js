@@ -192,8 +192,9 @@ const Data = {
     async getJabatan() { return this.getAll(this.KEYS.JABATAN); },
     async getUnitKerja() { return this.getAll(this.KEYS.UNIT_KERJA); },
     async getAbsensi(options = {}) {
-        let query = supabaseClient.from('absensi').select('*');
-        if (options.limit) query = query.order('tanggal', { ascending: false }).limit(options.limit);
+        let query = supabaseClient.from('absensi').select('*').order('tanggal', { ascending: false });
+        if (options.limit) query = query.limit(options.limit);
+        else query = query.limit(1000); // Increased default limit
         if (options.id) query = query.eq('id', options.id);
         if (options.pegawai_id) query = query.eq('pegawai_id', options.pegawai_id);
         if (options.tanggal) query = query.eq('tanggal', options.tanggal);
@@ -301,6 +302,8 @@ const Data = {
 
         if (options.limit) {
             query = query.limit(options.limit);
+        } else {
+            query = query.limit(2000); // High default for reports
         }
 
         if (options.status) {

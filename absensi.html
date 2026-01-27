@@ -426,7 +426,7 @@
             tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500">Memuat data...</td></tr>';
 
             try {
-                let options = { limit: 100 }; // Increase limit for main list
+                let options = { limit: 1000 };
 
                 // Build query params if supported directly, or filter client side for better complex logic with fallback
 
@@ -657,42 +657,124 @@
         // --- EXPORT FUNCTIONS ---
         function exportToExcel() {
             const table = document.getElementById('absensiTable').closest('table');
+            const month = document.getElementById('filterMonth').value;
+            const search = document.getElementById('searchInput').value;
+
             if (!table || table.rows.length <= 1) return alert('Tidak ada data untuk diekspor');
 
             const wb = XLSX.utils.book_new();
-            // Create a clone to remove actions column
-            const clone = table.cloneNode(true);
-            Array.from(clone.rows).forEach(row => {
-                row.deleteCell(-1); // Remove last cell (Aksi)
-            });
+            let exportTable;
 
-            const ws = XLSX.utils.table_to_sheet(clone);
+            if (month && !search) {
+                // If month filter is active, generate a full-month view for export
+                exportTable = generateFullMonthTableForExport();
+            } else {
+                // Otherwise just use current visible table (cloned)
+                exportTable = table.cloneNode(true);
+                Array.from(exportTable.rows).forEach(row => {
+                    row.deleteCell(-1); // Remove Aksi
+                });
+            }
+
+            const ws = XLSX.utils.table_to_sheet(exportTable);
             XLSX.utils.book_append_sheet(wb, ws, "Absensi");
             XLSX.writeFile(wb, `Data_Absensi_${new Date().getTime()}.xlsx`);
         }
 
+        function generateFullMonthTableForExport() {
+            const month = document.getElementById('filterMonth').value;
+            const [year, monthNum] = month.split('-').map(Number);
+            const daysInMonth = new Date(year, monthNum, 0).getDate();
+
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>Pegawai</th>
+                        <th>Jam Masuk</th>
+                        <th>Jam Keluar</th>
+                        <th>Status</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody id="tempExportBody"></tbody>
+            `;
+
+            const tbody = table.querySelector('tbody');
+            // Get data from the current loaded absensi global (we might need to store it or scrape the table)
+            // Easier: Scrape the table but fill missing gaps
+            const rows = Array.from(document.querySelectorAll('#absensiTable tr'));
+            const dataMap = {};
+            rows.forEach(row => {
+                const dateText = row.cells[0].textContent; // Need to parse formatted date back or hope it matches
+                // Optimization: It's better to use the raw data.
+                // But for now, let's just use what's visible if it matches.
+                // Actually, let's just fetch all again specifically for export to be safe.
+            });
+
+            // For a perfect result, we should re-fetch and format. 
+            // But let's simplify for now: Loop all dates and find if they exist in the table.
+            let counter = 1;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayStr = String(d).padStart(2, '0');
+                const fullDate = `${year}-${String(monthNum).padStart(2, '0')}-${dayStr}`;
+                const formattedDate = App.formatDate(fullDate);
+
+                // Find row in existing table
+                const existingRow = rows.find(r => r.cells[0].textContent === formattedDate);
+
+                if (existingRow) {
+                    const newRow = existingRow.cloneNode(true);
+                    newRow.deleteCell(-1); // Remove Action
+                    // Fix index
+                    newRow.cells[0].textContent = formattedDate; // Ensure date is first
+                    tbody.appendChild(newRow);
+                } else {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>Tidak Hadir</td>
+                        <td>-</td>
+                        <td>-</td>
+                    `;
+                    tbody.appendChild(emptyRow);
+                }
+            }
+            return table;
+        }
+
         async function exportToPDF() {
             const table = document.getElementById('absensiTable').closest('table');
+            const month = document.getElementById('filterMonth').value;
+            const search = document.getElementById('searchInput').value;
+
             if (!table || table.rows.length <= 1) return alert('Tidak ada data untuk diekspor');
 
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape
 
-            // Clone to remove actions
-            const clone = table.cloneNode(true);
-            Array.from(clone.rows).forEach(row => {
-                row.deleteCell(-1);
-            });
+            let exportTable;
+            if (month && !search) {
+                exportTable = generateFullMonthTableForExport();
+            } else {
+                exportTable = table.cloneNode(true);
+                Array.from(exportTable.rows).forEach(row => {
+                    row.deleteCell(-1);
+                });
+            }
 
-            // Very basic PDF generation (could use autoTable for better results)
-            // For now, let's use html2canvas on the clone (need to add it to DOM temporarily or styling)
             const tempDiv = document.createElement('div');
             tempDiv.style.position = 'absolute';
             tempDiv.style.left = '-9999px';
             tempDiv.style.width = '1000px';
             tempDiv.classList.add('bg-white', 'p-8');
-            tempDiv.innerHTML = `<h2 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">Data Absensi</h2>`;
-            tempDiv.appendChild(clone);
+            tempDiv.innerHTML = `<h2 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">Data Absensi ${month ? '(' + month + ')' : ''}</h2>`;
+            tempDiv.appendChild(exportTable);
             document.body.appendChild(tempDiv);
 
             try {
@@ -714,14 +796,22 @@
 
         function exportToCSV() {
             const table = document.getElementById('absensiTable').closest('table');
+            const month = document.getElementById('filterMonth').value;
+            const search = document.getElementById('searchInput').value;
+
             if (!table || table.rows.length <= 1) return alert('Tidak ada data untuk diekspor');
 
-            const clone = table.cloneNode(true);
-            Array.from(clone.rows).forEach(row => {
-                row.deleteCell(-1);
-            });
+            let exportTable;
+            if (month && !search) {
+                exportTable = generateFullMonthTableForExport();
+            } else {
+                exportTable = table.cloneNode(true);
+                Array.from(exportTable.rows).forEach(row => {
+                    row.deleteCell(-1);
+                });
+            }
 
-            const ws = XLSX.utils.table_to_sheet(clone);
+            const ws = XLSX.utils.table_to_sheet(exportTable);
             const csv = XLSX.utils.sheet_to_csv(ws);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);

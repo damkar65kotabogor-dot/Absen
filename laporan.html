@@ -292,22 +292,62 @@
           absensi = absensi.filter(a => a.pegawai_id == pegawaiId);
         }
 
-        // Sort by date
-        absensi.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        // Determine days in month
+        const [year, monthNum] = month.split('-').map(Number);
+        const daysInMonth = new Date(year, monthNum, 0).getDate();
+        const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
-        // Calculate summary
+        // Process data: Create a map of attendance by date or group by employee
+        let reportData = [];
+
+        if (pegawaiId) {
+          // Single employee: Show 1 to daysInMonth
+          const attendanceMap = {};
+          absensi.forEach(a => {
+            attendanceMap[a.tanggal] = a;
+          });
+
+          for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${month}-${String(d).padStart(2, '0')}`;
+            reportData.push(attendanceMap[dateStr] || {
+              tanggal: dateStr,
+              empty: true,
+              pegawai: absensi[0]?.pegawai || { nama: document.querySelector('#absensiPegawai option:checked').text }
+            });
+          }
+        } else {
+          // All employees: Just sort existing data or show all records?
+          // User wants "semua tanggal terdownload 1 sd 31". 
+          // If "Semua Pegawai", showing every day for every person is the standard way.
+          const employees = await Data.getPegawai();
+          employees.forEach(emp => {
+            const empAttendance = absensi.filter(a => a.pegawai_id === emp.id);
+            const attendanceMap = {};
+            empAttendance.forEach(a => attendanceMap[a.tanggal] = a);
+
+            for (let d = 1; d <= daysInMonth; d++) {
+              const dateStr = `${month}-${String(d).padStart(2, '0')}`;
+              reportData.push(attendanceMap[dateStr] || {
+                tanggal: dateStr,
+                empty: true,
+                pegawai: emp
+              });
+            }
+          });
+        }
+
+        // Calculate summary for display (only for actual records)
         const tepatWaktu = absensi.filter(a => a.status === 'tepat_waktu').length;
         const terlambat = absensi.filter(a => a.status === 'terlambat').length;
-
-        const monthName = new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
         const html = `
         <div class="mb-4">
           <h4>Laporan Absensi - ${monthName}</h4>
+          ${pegawaiId ? `<p>Pegawai: <strong>${document.querySelector('#absensiPegawai option:checked').text}</strong></p>` : ''}
           <div class="d-flex gap-4 mt-3">
             <div class="badge badge-success">Tepat Waktu: ${tepatWaktu}</div>
             <div class="badge badge-warning">Terlambat: ${terlambat}</div>
-            <div class="badge badge-primary">Total: ${absensi.length}</div>
+            <div class="badge badge-primary">Total Kehadiran: ${absensi.length}</div>
           </div>
         </div>
         <div class="table-container">
@@ -323,14 +363,14 @@
               </tr>
             </thead>
             <tbody>
-              ${absensi.length > 0 ? absensi.map((a, i) => `
-                <tr>
+              ${reportData.length > 0 ? reportData.map((a, i) => `
+                <tr ${a.empty ? 'style="color: #999;"' : ''}>
                   <td>${i + 1}</td>
                   <td>${App.formatDate(a.tanggal)}</td>
                   <td>${a.pegawai?.nama || '-'}</td>
                   <td>${a.jam_masuk || '-'}</td>
                   <td>${a.jam_keluar || '-'}</td>
-                  <td>${App.getStatusBadge(a.status)}</td>
+                  <td>${a.empty ? '<span class="text-muted italic">Tidak Absen</span>' : App.getStatusBadge(a.status)}</td>
                 </tr>
               `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
             </tbody>
