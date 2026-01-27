@@ -260,6 +260,24 @@
                         class="btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg flex items-center gap-1">
                         <span class="material-symbols-outlined text-[20px]">refresh</span>
                     </button>
+
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel()"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">table_view</span>
+                            <span class="hidden md:inline">Excel</span>
+                        </button>
+                        <button onclick="exportToPDF()"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                            <span class="hidden md:inline">PDF</span>
+                        </button>
+                        <button onclick="exportToCSV()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">csv</span>
+                            <span class="hidden md:inline">CSV</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Table -->
@@ -364,6 +382,11 @@
     <script src="js/data.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Export Libraries -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
         function toggleSidebar() {
@@ -630,6 +653,86 @@
 
             await loadAbsensi();
         });
+
+        // --- EXPORT FUNCTIONS ---
+        function exportToExcel() {
+            const table = document.getElementById('absensiTable').closest('table');
+            if (!table || table.rows.length <= 1) return alert('Tidak ada data untuk diekspor');
+
+            const wb = XLSX.utils.book_new();
+            // Create a clone to remove actions column
+            const clone = table.cloneNode(true);
+            Array.from(clone.rows).forEach(row => {
+                row.deleteCell(-1); // Remove last cell (Aksi)
+            });
+
+            const ws = XLSX.utils.table_to_sheet(clone);
+            XLSX.utils.book_append_sheet(wb, ws, "Absensi");
+            XLSX.writeFile(wb, `Data_Absensi_${new Date().getTime()}.xlsx`);
+        }
+
+        async function exportToPDF() {
+            const table = document.getElementById('absensiTable').closest('table');
+            if (!table || table.rows.length <= 1) return alert('Tidak ada data untuk diekspor');
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape
+
+            // Clone to remove actions
+            const clone = table.cloneNode(true);
+            Array.from(clone.rows).forEach(row => {
+                row.deleteCell(-1);
+            });
+
+            // Very basic PDF generation (could use autoTable for better results)
+            // For now, let's use html2canvas on the clone (need to add it to DOM temporarily or styling)
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.width = '1000px';
+            tempDiv.classList.add('bg-white', 'p-8');
+            tempDiv.innerHTML = `<h2 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">Data Absensi</h2>`;
+            tempDiv.appendChild(clone);
+            document.body.appendChild(tempDiv);
+
+            try {
+                const canvas = await html2canvas(tempDiv, { scale: 2 });
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`Data_Absensi_${new Date().getTime()}.pdf`);
+            } catch (error) {
+                console.error('PDF Export Error:', error);
+                alert('Gagal mengekspor PDF');
+            } finally {
+                document.body.removeChild(tempDiv);
+            }
+        }
+
+        function exportToCSV() {
+            const table = document.getElementById('absensiTable').closest('table');
+            if (!table || table.rows.length <= 1) return alert('Tidak ada data untuk diekspor');
+
+            const clone = table.cloneNode(true);
+            Array.from(clone.rows).forEach(row => {
+                row.deleteCell(-1);
+            });
+
+            const ws = XLSX.utils.table_to_sheet(clone);
+            const csv = XLSX.utils.sheet_to_csv(ws);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Data_Absensi_${new Date().getTime()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 </body>
 
