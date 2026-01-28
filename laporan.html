@@ -363,11 +363,13 @@
             const isCuti = cutiDates.has(dateStr);
 
             reportData.push({
-              ...(attendance || {
-                tanggal: dateStr,
-                empty: true,
-                pegawai: absensi[0]?.pegawai || { nama: document.querySelector('#absensiPegawai option:checked').text }
-              }),
+              tanggal: dateStr,
+              pegawai: absensi[0]?.pegawai || { nama: document.querySelector('#absensiPegawai option:checked').text },
+              jam_masuk: attendance?.jam_masuk || null,
+              jam_keluar: attendance?.jam_keluar || null,
+              status: attendance?.status || null,
+              keterangan: attendance?.keterangan || null,
+              empty: !attendance,
               cutiStatus: isCuti ? 'Cuti' : '-',
               terlambatPulang: attendance?.status === 'terlambat' ? 'Terlambat' : (attendance?.jam_keluar ? '-' : '-'),
               standardKerja: standardKerja,
@@ -402,11 +404,13 @@
               const isCuti = cutiDates.has(dateStr);
 
               reportData.push({
-                ...(attendance || {
-                  tanggal: dateStr,
-                  empty: true,
-                  pegawai: emp
-                }),
+                tanggal: dateStr,
+                pegawai: emp,
+                jam_masuk: attendance?.jam_masuk || null,
+                jam_keluar: attendance?.jam_keluar || null,
+                status: attendance?.status || null,
+                keterangan: attendance?.keterangan || null,
+                empty: !attendance,
                 cutiStatus: isCuti ? 'Cuti' : '-',
                 terlambatPulang: attendance?.status === 'terlambat' ? 'Terlambat' : (attendance?.jam_keluar ? '-' : '-'),
                 standardKerja: standardKerja,
