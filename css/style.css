@@ -3671,7 +3671,8 @@ body:has(.mobile-app-wrapper) {
     padding: 15px;
     margin-top: 20px;
     position: relative;
-    border-radius: 0; /* Boxy look like in image */
+    border-radius: 0;
+    /* Boxy look like in image */
     background: #f9f9f9;
 }
 
@@ -3704,9 +3705,20 @@ body:has(.mobile-app-wrapper) {
     color: #fff;
 }
 
-.portal-btn-blue { background-color: #337ab7; border-color: #2e6da4; }
-.portal-btn-red { background-color: #d9534f; border-color: #d43f3a; }
-.portal-btn-green { background-color: #5cb85c; border-color: #4cae4c; }
+.portal-btn-blue {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+
+.portal-btn-red {
+    background-color: #d9534f;
+    border-color: #d43f3a;
+}
+
+.portal-btn-green {
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
 
 .portal-select {
     padding: 6px 12px;
@@ -3740,6 +3752,94 @@ body:has(.mobile-app-wrapper) {
     color: #333;
     font-size: 13px;
     margin-top: 5px;
+    overflow-x: auto;
+}
+
+/* Nominatif Grid Custom Table */
+.nominatif-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+}
+
+.nominatif-grid-table th,
+.nominatif-grid-table td {
+    border: 1px solid #ccc;
+    padding: 2px;
+    text-align: center;
+}
+
+.nominatif-grid-table th {
+    background: #f2f2f2;
+    font-weight: bold;
+}
+
+.nominatif-grid-table .name-col {
+    text-align: left;
+    padding-left: 5px;
+    min-width: 150px;
+}
+
+.nominatif-grid-table .day-col {
+    width: 22px;
+    height: 18px;
+    padding: 0;
+    font-size: 9px;
+}
+
+.cell-present {
+    background-color: #008000 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* Green */
+.cell-late {
+    background-color: #ffa500 !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+
+/* Orange (Late) */
+.cell-absent {
+    background-color: #ff0000 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* Red (Absent) */
+.cell-lp {
+    background-color: #ffd700 !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+
+/* LP - Yellow (Lepas Piket) */
+.cell-li {
+    background-color: #ff8c00 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* Li - Orange (Libur) */
+.cell-cuti {
+    background-color: #008000 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* Cuti/DL - Green */
+.cell-holiday {
+    background-color: #ff4500 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/* Red for Sunday etc */
+.cell-empty {
+    background-color: #eee;
 }
 
 .portal-hidden {
@@ -3748,5 +3848,5 @@ body:has(.mobile-app-wrapper) {
 
 .portal-label {
     font-size: 14px;
-    font-weight: normal;
+    font-weight: bold;
 }

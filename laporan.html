@@ -867,21 +867,111 @@
 
         showReport('Laporan Rekapitulasi Kehadiran', html);
 
-        // Store the recap data for export
+        // Store for export
         window.currentRekapData = rekapData;
         window.currentRekapPeriod = monthName;
 
-        // Update Portal UI Nominatif section if exists
-        const nominatifBox = document.querySelector('.portal-nominatif');
-        if (nominatifBox) {
-          nominatifBox.innerHTML = '<p class="text-success" style="margin-top: 5px;">Data berhasil dimuat. Silakan cek hasil di bawah atau download file.</p>';
+        // If in Admin Portal UI, also update the Nominatif Grid internally
+        const nominatifContainer = document.querySelector('.portal-nominatif');
+        if (nominatifContainer) {
+          nominatifContainer.innerHTML = renderNominatifGrid(month, pegawai, filteredAbsensi, filteredCuti);
         }
 
-        App.showToast('Laporan berhasil dibuat', 'success');
+        App.showToast('Laporan berhasil dimuat', 'success');
       } catch (error) {
         console.error('Error generating rekapitulasi report:', error);
         App.showToast('Gagal generate laporan: ' + error.message, 'danger');
       }
+    }
+
+    // NEW: Function to render the 31-day daily grid matching Image 2
+    function renderNominatifGrid(monthStr, pegawaiList, absensiList, cutiList) {
+      const [year, monthNum] = monthStr.split('-').map(Number);
+      const daysInMonth = new Date(year, monthNum, 0).getDate();
+
+      let entries = pegawaiList.map((emp, index) => {
+        const empAbsensi = absensiList.filter(a => a.pegawai_id === emp.id);
+        const empCuti = cutiList.filter(c => c.pegawai_id === emp.id && c.status === 'approved');
+
+        let masukRows = [];
+        let pulangRows = [];
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateStr = `${monthStr}-${String(d).padStart(2, '0')}`;
+          const currentDay = new Date(year, monthNum - 1, d);
+          const isWeekend = currentDay.getDay() === 0; // Sunday
+
+          const abs = empAbsensi.find(a => a.tanggal === dateStr);
+          const cuti = empCuti.find(c => {
+            const start = c.tanggal_mulai;
+            const end = c.tanggal_selesai || c.tanggal_mulai;
+            return dateStr >= start && dateStr <= end;
+          });
+
+          // Logic for codes
+          let code = '';
+          let cellClass = 'cell-empty';
+          let mValue = '';
+          let pValue = '';
+
+          if (abs) {
+            mValue = abs.jam_masuk?.substring(0, 5) || '-';
+            pValue = abs.jam_keluar?.substring(0, 5) || '-';
+            cellClass = abs.status === 'terlambat' ? 'cell-late' : 'cell-present';
+          } else if (cuti) {
+            const jenis = cuti.jenis_cuti?.toLowerCase() || '';
+            if (jenis.includes('piket')) { code = 'LP'; cellClass = 'cell-lp'; }
+            else if (jenis.includes('libur')) { code = 'Li'; cellClass = 'cell-li'; }
+            else if (jenis.includes('sakit')) { code = 'S'; cellClass = 'cell-cuti'; }
+            else if (jenis.includes('dinas')) { code = 'DL'; cellClass = 'cell-cuti'; }
+            else { code = 'C'; cellClass = 'cell-cuti'; }
+            mValue = pValue = code;
+          } else if (isWeekend) {
+            cellClass = 'cell-holiday';
+            mValue = pValue = 'Li';
+          } else {
+            cellClass = 'cell-absent';
+          }
+
+          masukRows.push(`<td class="day-col ${cellClass}">${mValue}</td>`);
+          pulangRows.push(`<td class="day-col ${cellClass}">${pValue}</td>`);
+        }
+
+        return `
+          <tr>
+            <td rowspan="2" style="text-align: center;">${index + 1}</td>
+            <td rowspan="2" class="name-col">
+              <strong>${emp.nama}</strong><br>
+              <span style="font-size: 8px;">${emp.nip || '-'}</span>
+            </td>
+            <td style="text-align: center; background: #eee;">Masuk</td>
+            ${masukRows.join('')}
+          </tr>
+          <tr>
+            <td style="text-align: center; background: #eee;">Pulang</td>
+            ${pulangRows.join('')}
+          </tr>
+        `;
+      });
+
+      return `
+        <table class="nominatif-grid-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width: 30px;">No</th>
+              <th rowspan="2" class="name-col">Nama / NIP</th>
+              <th rowspan="2" style="width: 50px;">Hari</th>
+              <th colspan="${daysInMonth}">Presensi Tanggal</th>
+            </tr>
+            <tr>
+              ${Array.from({ length: daysInMonth }, (_, i) => `<th class="day-col">${i + 1}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${entries.join('')}
+          </tbody>
+        </table>
+      `;
     }
 
     // Show report
