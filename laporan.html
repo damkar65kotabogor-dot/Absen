@@ -395,14 +395,13 @@
         if (month) opts.month = month;
         if (pegawaiId) opts.pegawai_id = pegawaiId;
 
-        let absensi = await Data.getAbsensiWithPegawai(opts);
+        if (!pegawaiId) {
+          // USER REQUEST: When "Semua Pegawai", show summary like Image 2
+          // We'll sync the month first if they differ
+          const rekapMonthInput = document.getElementById('rekapMonth');
+          if (rekapMonthInput) rekapMonthInput.value = month;
 
-        // Apply filters
-        if (month) {
-          absensi = absensi.filter(a => a.tanggal.startsWith(month));
-        }
-        if (pegawaiId) {
-          absensi = absensi.filter(a => a.pegawai_id == pegawaiId);
+          return generateRekapitulasiReport();
         }
 
         // Get cuti data for the month
@@ -749,9 +748,11 @@
         let month;
         const rekapMonthInput = document.getElementById('rekapMonth');
 
-        if (rekapMonthInput) {
+        if (rekapMonthInput && rekapMonthInput.value) {
           month = rekapMonthInput.value;
-        } else {
+        } else if (document.getElementById('absensiMonth') && document.getElementById('absensiMonth').value) {
+          month = document.getElementById('absensiMonth').value;
+        } else if (document.getElementById('rekapPortalMonth')) {
           // Admin Portal UI uses two dropdowns
           const pMonth = document.getElementById('rekapPortalMonth').value;
           const pYear = document.getElementById('rekapPortalYear').value;
@@ -788,9 +789,13 @@
 
           // Count attendance by status
           const hadir = empAbsensi.filter(a => a.jam_masuk).length;
-          const terlambat = empAbsensi.filter(a => a.status === 'terlambat').length;
 
-          // Count leave types
+          // Calculate total late minutes if possible, or just count
+          const terlambatCount = empAbsensi.filter(a => a.status === 'terlambat').length;
+          // Placeholder for minutes calculation if ever needed:
+          // const terlambatMins = empAbsensi.reduce((acc, curr) => acc + (curr.late_minutes || 0), 0);
+
+          // Count leave types specifically
           let cutiCount = 0;
           let sakitCount = 0;
           empCuti.forEach(c => {
@@ -802,23 +807,7 @@
             }
           });
 
-          // Calculate first and last attendance for Kalkula Hadir
-          const sortedAbsensi = [...empAbsensi].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
-          const firstAttendance = sortedAbsensi[0];
-          const lastAttendance = sortedAbsensi[sortedAbsensi.length - 1];
-
-          let kalkulaHadir = '';
-          if (firstAttendance && lastAttendance) {
-            if (firstAttendance.id === lastAttendance.id) {
-              kalkulaHadir = `${firstAttendance.tanggal.substring(8, 10)}-${firstAttendance.jam_masuk?.substring(0, 5) || ''}`;
-            } else {
-              kalkulaHadir = `${firstAttendance.tanggal.substring(8, 10)}-${firstAttendance.jam_masuk?.substring(0, 5) || ''} s/d ${lastAttendance.tanggal.substring(8, 10)}-${lastAttendance.jam_keluar?.substring(0, 5) || ''}`;
-            }
-          }
-
-          // Calculate totals
-          const totalTMK = parseFloat((terlambat / (hadir || 1)).toFixed(2));
-          const standardKerja = 23; // Standard working days
+          const standardKerja = 23; // Standard working days from Image 2
           const hariKerja = hadir + cutiCount + sakitCount;
 
           return {
@@ -826,13 +815,15 @@
             nama: emp.nama,
             nip: emp.nip,
             hadir: hadir,
-            terlambat: terlambat,
-            cuti: cutiCount + sakitCount, // Combined since sakit column is not in image
-            hariKerja: hadir + cutiCount + sakitCount
+            cuti: cutiCount,
+            sakit: sakitCount,
+            terlambat: terlambatCount, // Using count as label indicates "Terlambat/Plg Cpt (menit)"
+            stdKerja: standardKerja,
+            hariKerja: hariKerja
           };
         });
 
-        // Generate HTML with simplified header matching Excel image
+        // Generate HTML with columns matching Image 2 (simplified)
         const html = `
         <div class="rekap-header" style="margin-bottom: 20px; font-family: Arial, sans-serif;">
           <div style="font-weight: bold; font-size: 14px;">Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor</div>
@@ -840,31 +831,35 @@
           <div style="font-weight: bold; font-size: 14px;">Periode ${monthName}</div>
         </div>
         <div class="table-container" style="overflow-x: auto;">
-          <table class="table rekap-table" style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+          <table class="table rekap-table" style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; border: 2px solid #000;">
             <thead>
-              <tr style="border-bottom: 1px solid #000;">
-                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">no</th>
-                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">nama</th>
-                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">hadir</th>
-                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">terlambat</th>
-                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">cuti</th>
-                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">Hari Kerja</th>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">No</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center; min-width: 200px;">Nama</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">Hadir</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">Cuti</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">Sakit</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">Terlambat/Plg Cpt (menit)</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">Std. Kerja</th>
+                <th style="padding: 8px 4px; border: 1px solid #000; text-align: center;">Hari Kerja</th>
               </tr>
             </thead>
             <tbody>
-              ${rekapData.map(row => `
+              ${rekapData.length > 0 ? rekapData.map(d => `
                 <tr>
-                  <td style="padding: 5px; border: 1px solid #ccc;">${row.no}</td>
-                  <td style="padding: 5px; border: 1px solid #ccc;">
-                    ${row.nama}<br>
-                    <span style="font-size: 11px;">${row.nip}</span>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.no}</td>
+                  <td style="padding: 6px 8px; border: 1px solid #000;">
+                    <div style="font-weight: bold; text-transform: uppercase;">${d.nama}</div>
+                    <div style="font-size: 9px; color: #444;">${d.nip || '-'}</div>
                   </td>
-                  <td style="padding: 5px; border: 1px solid #ccc;">${row.hadir}</td>
-                  <td style="padding: 5px; border: 1px solid #ccc;">${row.terlambat}</td>
-                  <td style="padding: 5px; border: 1px solid #ccc;">${row.cuti}</td>
-                  <td style="padding: 5px; border: 1px solid #ccc;">${row.hariKerja}</td>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.hadir}</td>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.cuti}</td>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.sakit}</td>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.terlambat}</td>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.stdKerja}</td>
+                  <td style="padding: 6px 4px; border: 1px solid #000; text-align: center;">${d.hariKerja}</td>
                 </tr>
-              `).join('')}
+              `).join('') : '<tr><td colspan="8" style="padding: 20px; text-align: center; border: 1px solid #000;">Tidak ada data pegawai</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -982,7 +977,7 @@
           [`Periode ${window.currentRekapPeriod}`],
           [''],
           // Main headers
-          ['no', 'nama', 'hadir', 'terlambat', 'cuti', 'Hari Kerja']
+          ['No', 'Nama', 'Hadir', 'Cuti', 'Sakit', 'Terlambat/Plg Cpt (menit)', 'Std. Kerja', 'Hari Kerja']
         ];
 
         // Add data rows - matching simplified structure
@@ -990,8 +985,10 @@
           row.no,
           `${row.nama}\n${row.nip}`,
           row.hadir,
-          row.terlambat,
           row.cuti,
+          row.sakit,
+          row.terlambat,
+          row.stdKerja,
           row.hariKerja
         ]);
 
@@ -1000,12 +997,14 @@
 
         // Set column widths
         ws['!cols'] = [
-          { wch: 5 },  // no
-          { wch: 35 }, // nama
-          { wch: 10 }, // hadir
-          { wch: 10 }, // terlambat
-          { wch: 10 }, // cuti
-          { wch: 12 }  // Hari Kerja
+          { wch: 5 },  // No
+          { wch: 35 }, // Nama
+          { wch: 8 },  // Hadir
+          { wch: 8 },  // Cuti
+          { wch: 8 },  // Sakit
+          { wch: 25 }, // Terlambat
+          { wch: 10 }, // Std. Kerja
+          { wch: 10 }  // Hari Kerja
         ];
 
         // Add some basic styling for cell wrapping on nama column if possible (AOA to sheet doesn't always handle newlines well without alignment)
