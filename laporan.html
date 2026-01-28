@@ -172,29 +172,8 @@
             </button>
           </div>
         </div>
-        <!-- Laporan Rekapitulasi Kehadiran -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Laporan Rekapitulasi Kehadiran</h3>
-          </div>
-          <div class="card-body">
-            <div class="form-group">
-              <label class="form-label">Periode</label>
-              <input type="month" class="form-control" id="rekapMonth">
-            </div>
-            <button class="btn btn-primary w-100" onclick="generateRekapitulasiReport()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
-              </svg>
-              Generate Laporan Rekapitulasi
-            </button>
-          </div>
-        </div>
+        <!-- Laporan Rekapitulasi Kehadiran (Dynamic based on Role) -->
+        <div id="rekapContainer" style="grid-column: 1 / -1;"></div>
       </div>
 
       <!-- Report Preview -->
@@ -272,7 +251,117 @@
 
     document.getElementById('absensiMonth').value = currentMonth;
     document.getElementById('cutiMonth').value = currentMonth;
-    document.getElementById('rekapMonth').value = currentMonth;
+
+    // Render dynamic rekap UI based on role
+    function renderRekapUI() {
+      const container = document.getElementById('rekapContainer');
+      const isAdmin = Auth.hasRole('admin');
+
+      if (isAdmin) {
+        container.innerHTML = `
+          <div class="portal-admin-section mt-4">
+            <h2 class="portal-title-main">Rekapitulasi Waktu Kehadiran</h2>
+            <h3 class="portal-title-sub">Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor</h3>
+            
+            <div class="portal-control-box">
+              <span class="portal-label">:::</span>
+              <select id="rekapPortalMonth" class="portal-select" style="width: 150px;">
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select id="rekapPortalYear" class="portal-select" style="width: 120px;"></select>
+              
+              <button class="portal-btn portal-btn-blue" onclick="generateRekapitulasiReport()">
+                <i data-lucide="search" style="width: 16px;"></i> Tampilkan Data
+              </button>
+              <button class="portal-btn portal-btn-blue" onclick="exportToPDF()">
+                <i data-lucide="download" style="width: 16px;"></i> Download PDF
+              </button>
+            </div>
+
+            <div class="portal-fieldset">
+              <legend>Download Laporan Presensi (BKP SDM Generated)</legend>
+              <div class="portal-radio-group">
+                <label class="portal-radio-item">
+                  <input type="radio" name="reportType" value="status" checked> Rekapitulasi Kehadiran Per Status
+                </label>
+                <label class="portal-radio-item">
+                  <input type="radio" name="reportType" value="daily"> Detail Laporan Per Hari
+                </label>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="portal-btn portal-btn-red" onclick="exportToPDF()">
+                  <i data-lucide="file-text" style="width: 16px;"></i> Download PDF
+                </button>
+                <button class="portal-btn portal-btn-green" onclick="exportToExcel()">
+                  <i data-lucide="file-spreadsheet" style="width: 16px;"></i> Download XLS
+                </button>
+              </div>
+            </div>
+
+            <div class="portal-fieldset">
+              <legend>Daftar Nominatif</legend>
+              <div class="portal-nominatif">Data belum ditampilkan</div>
+            </div>
+          </div>
+        `;
+
+        // Populate Years
+        const yearSelect = document.getElementById('rekapPortalYear');
+        const currentYear = now.getFullYear();
+        for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+          const opt = document.createElement('option');
+          opt.value = y;
+          opt.text = y;
+          if (y === currentYear) opt.selected = true;
+          yearSelect.appendChild(opt);
+        }
+
+        // Match current month
+        document.getElementById('rekapPortalMonth').value = String(now.getMonth() + 1).padStart(2, '0');
+
+        // Re-init lucide icons
+        lucide.createIcons();
+      } else {
+        container.innerHTML = `
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Laporan Rekapitulasi Kehadiran</h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Periode</label>
+                <input type="month" class="form-control" id="rekapMonth">
+              </div>
+              <button class="btn btn-primary w-100" onclick="generateRekapitulasiReport()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+                Generate Laporan Rekapitulasi
+              </button>
+            </div>
+          </div>
+        `;
+        document.getElementById('rekapMonth').value = currentMonth;
+      }
+    }
+
+    renderRekapUI();
 
     // Load dropdowns
     async function loadDropdowns() {
@@ -657,9 +746,19 @@
     // Generate Rekapitulasi Kehadiran Report
     async function generateRekapitulasiReport() {
       try {
-        const month = document.getElementById('rekapMonth').value;
+        let month;
+        const rekapMonthInput = document.getElementById('rekapMonth');
 
-        if (!month) {
+        if (rekapMonthInput) {
+          month = rekapMonthInput.value;
+        } else {
+          // Admin Portal UI uses two dropdowns
+          const pMonth = document.getElementById('rekapPortalMonth').value;
+          const pYear = document.getElementById('rekapPortalYear').value;
+          month = `${pYear}-${pMonth}`;
+        }
+
+        if (!month || month === 'undefined-undefined') {
           return App.showToast('Silakan pilih periode bulan', 'warning');
         }
 
@@ -776,6 +875,12 @@
         // Store the recap data for export
         window.currentRekapData = rekapData;
         window.currentRekapPeriod = monthName;
+
+        // Update Portal UI Nominatif section if exists
+        const nominatifBox = document.querySelector('.portal-nominatif');
+        if (nominatifBox) {
+          nominatifBox.innerHTML = '<p class="text-success" style="margin-top: 5px;">Data berhasil dimuat. Silakan cek hasil di bawah atau download file.</p>';
+        }
 
         App.showToast('Laporan berhasil dibuat', 'success');
       } catch (error) {

@@ -3628,3 +3628,125 @@ body:has(.mobile-app-wrapper) {
 .sidebar-nav .nav-item.active::before {
     display: none;
 }
+
+/* ============ Official Portal Theme (Admin) ============ */
+.portal-admin-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.portal-title-main {
+    font-size: 20px;
+    font-weight: normal;
+    margin-bottom: 5px;
+    color: #333;
+    text-align: left;
+}
+
+.portal-title-sub {
+    font-size: 18px;
+    font-weight: normal;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: left;
+}
+
+.portal-control-box {
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.portal-fieldset {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-top: 20px;
+    position: relative;
+    border-radius: 0; /* Boxy look like in image */
+    background: #f9f9f9;
+}
+
+.portal-fieldset legend {
+    width: auto;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0;
+    border: none;
+    float: none;
+}
+
+.portal-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid transparent;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.portal-btn:hover {
+    opacity: 0.9;
+    color: #fff;
+}
+
+.portal-btn-blue { background-color: #337ab7; border-color: #2e6da4; }
+.portal-btn-red { background-color: #d9534f; border-color: #d43f3a; }
+.portal-btn-green { background-color: #5cb85c; border-color: #4cae4c; }
+
+.portal-select {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    height: 34px;
+    background-color: #fff;
+}
+
+.portal-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.portal-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.portal-radio-item input[type="radio"] {
+    margin: 0;
+}
+
+.portal-nominatif {
+    color: #333;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.portal-hidden {
+    display: none !important;
+}
+
+.portal-label {
+    font-size: 14px;
+    font-weight: normal;
+}
