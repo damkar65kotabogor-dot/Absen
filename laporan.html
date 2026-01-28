@@ -728,93 +728,44 @@
             no: index + 1,
             nama: emp.nama,
             nip: emp.nip,
-            esi: emp.golongan?.substring(0, 4) || 'IIIA',
-            gol: emp.golongan?.includes('/') ? emp.golongan.split('/')[1] : (emp.golongan?.substring(3) || 'IVa'),
-            kalkulaHadir: kalkulaHadir,
-            hadir: standardKerja,
-            simpeg: hadir,
-            dinasLuar: 0,
-            cuti: cutiCount,
-            sakit: sakitCount,
-            lepasPisket: 0,
-            libur: 0,
-            tube: 0,
-            mpp: 0,
-            cltn: 0,
-            tanpaKet: Math.max(0, standardKerja - hadir - cutiCount - sakitCount),
+            hadir: hadir,
             terlambat: terlambat,
-            jmlTMK: totalTMK.toFixed(2),
-            stdKerja: standardKerja,
-            hariKerja: hariKerja
+            cuti: cutiCount + sakitCount, // Combined since sakit column is not in image
+            hariKerja: hadir + cutiCount + sakitCount
           };
         });
 
-        // Generate HTML with official header
+        // Generate HTML with simplified header matching Excel image
         const html = `
-        <div class="rekap-header" style="text-align: center; margin-bottom: 30px;">
-          <h3 style="margin: 0; font-weight: bold; font-size: 16px;">PEMERINTAH KOTA BOGOR</h3>
-          <h4 style="margin: 5px 0; font-weight: bold; font-size: 14px; color: #1967d2;">DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN KOTA BOGOR</h4>
-          <h4 style="margin: 15px 0 5px; font-weight: bold; font-size: 14px;">LAPORAN REKAPITULASI KEHADIRAN</h4>
-          <p style="margin: 0; font-size: 12px; color: #666;">Berdasarkan nama pegawai dan status kehadiran</p>
-          <div style="width: 100%; height: 2px; background: #333; margin: 15px 0;"></div>
-          <p style="margin: 10px 0; font-weight: bold;">Periode: ${monthName}</p>
+        <div class="rekap-header" style="margin-bottom: 20px; font-family: Arial, sans-serif;">
+          <div style="font-weight: bold; font-size: 14px;">Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor</div>
+          <div style="font-weight: bold; font-size: 14px;">Laporan Rekapitulasi Kehadiran</div>
+          <div style="font-weight: bold; font-size: 14px;">Periode ${monthName}</div>
         </div>
         <div class="table-container" style="overflow-x: auto;">
-          <table class="table rekap-table" style="width: 100%; font-size: 11px; border-collapse: collapse;">
+          <table class="table rekap-table" style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
             <thead>
-              <tr style="background-color: #f0f0f0;">
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">No</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Nama</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Esi</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Gol</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Kalkula Hadir</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Hadir</th>
-                <th colspan="13" style="border: 1px solid #ccc; padding: 8px; text-align: center; background-color: #e8f0fe;">Keterangan</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Jml TMK</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Std.Kerja</th>
-                <th rowspan="2" style="border: 1px solid #ccc; padding: 8px; text-align: center; vertical-align: middle;">Hari Kerja</th>
-              </tr>
-              <tr style="background-color: #f0f0f0;">
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">SIMPEG</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Dinas Luar</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Cuti</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Sakit</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Lepas Pisket</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Libur</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Tube</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">MPP</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">CLTN</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Tanpa Ket</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Terlambat/Plg Cpt awal</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Lepas Pisket</th>
-                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 10px;">Cpt awal</th>
+              <tr style="border-bottom: 1px solid #000;">
+                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">no</th>
+                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">nama</th>
+                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">hadir</th>
+                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">terlambat</th>
+                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">cuti</th>
+                <th style="padding: 5px; text-align: left; border: 1px solid #ccc;">Hari Kerja</th>
               </tr>
             </thead>
             <tbody>
               ${rekapData.map(row => `
                 <tr>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.no}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px;">${row.nama}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.esi}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.gol}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center; font-size: 10px;">${row.kalkulaHadir}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.hadir}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.simpeg}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.dinasLuar}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.cuti}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.sakit}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.lepasPisket}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.libur}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.tube}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.mpp}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.cltn}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.tanpaKet}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.terlambat}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">0</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">0</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.jmlTMK}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.stdKerja}</td>
-                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${row.hariKerja}</td>
+                  <td style="padding: 5px; border: 1px solid #ccc;">${row.no}</td>
+                  <td style="padding: 5px; border: 1px solid #ccc;">
+                    ${row.nama}<br>
+                    <span style="font-size: 11px;">${row.nip}</span>
+                  </td>
+                  <td style="padding: 5px; border: 1px solid #ccc;">${row.hadir}</td>
+                  <td style="padding: 5px; border: 1px solid #ccc;">${row.terlambat}</td>
+                  <td style="padding: 5px; border: 1px solid #ccc;">${row.cuti}</td>
+                  <td style="padding: 5px; border: 1px solid #ccc;">${row.hariKerja}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -921,25 +872,24 @@
       if (window.currentRekapData && window.currentRekapPeriod) {
         const wb = XLSX.utils.book_new();
 
-        // Create header rows
+        // Create header rows matching the requested image header
         const headerRows = [
-          ['PEMERINTAH KOTA BOGOR'],
-          ['DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN KOTA BOGOR'],
-          ['LAPORAN REKAPITULASI KEHADIRAN'],
-          ['Berdasarkan nama pegawai dan status kehadiran'],
-          [''],
-          [`Periode: ${window.currentRekapPeriod}`],
+          ['Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor'],
+          ['Laporan Rekapitulasi Kehadiran'],
+          [`Periode ${window.currentRekapPeriod}`],
           [''],
           // Main headers
-          ['No', 'Nama', 'Esi', 'Gol', 'Kalkula Hadir', 'Hadir', 'SIMPEG', 'Dinas Luar', 'Cuti', 'Sakit', 'Lepas Pisket', 'Libur', 'Tube', 'MPP', 'CLTN', 'Tanpa Ket', 'Terlambat/Plg Cpt awal', 'Lepas Pisket', 'Cpt awal', 'Jml TMK', 'Std.Kerja', 'Hari Kerja']
+          ['no', 'nama', 'hadir', 'terlambat', 'cuti', 'Hari Kerja']
         ];
 
-        // Add data rows
+        // Add data rows - matching simplified structure
         const dataRows = window.currentRekapData.map(row => [
-          row.no, row.nama, row.esi, row.gol, row.kalkulaHadir, row.hadir,
-          row.simpeg, row.dinasLuar, row.cuti, row.sakit, row.lepasPisket,
-          row.libur, row.tube, row.mpp, row.cltn, row.tanpaKet, row.terlambat,
-          0, 0, row.jmlTMK, row.stdKerja, row.hariKerja
+          row.no,
+          `${row.nama}\n${row.nip}`,
+          row.hadir,
+          row.terlambat,
+          row.cuti,
+          row.hariKerja
         ]);
 
         const allRows = [...headerRows, ...dataRows];
@@ -947,12 +897,20 @@
 
         // Set column widths
         ws['!cols'] = [
-          { wch: 5 }, { wch: 30 }, { wch: 8 }, { wch: 8 }, { wch: 20 },
-          { wch: 8 }, { wch: 10 }, { wch: 12 }, { wch: 8 }, { wch: 8 },
-          { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 },
-          { wch: 12 }, { wch: 18 }, { wch: 12 }, { wch: 10 }, { wch: 10 },
-          { wch: 12 }, { wch: 12 }
+          { wch: 5 },  // no
+          { wch: 35 }, // nama
+          { wch: 10 }, // hadir
+          { wch: 10 }, // terlambat
+          { wch: 10 }, // cuti
+          { wch: 12 }  // Hari Kerja
         ];
+
+        // Add some basic styling for cell wrapping on nama column if possible (AOA to sheet doesn't always handle newlines well without alignment)
+        // Note: Basic XLSX library has limited styling without the Pro version, but we can try to set the property
+        dataRows.forEach((_, i) => {
+          const cellPos = XLSX.utils.encode_cell({ c: 1, r: i + 5 });
+          if (ws[cellPos]) ws[cellPos].s = { alignment: { wrapText: true, vertical: 'top' } };
+        });
 
         XLSX.utils.book_append_sheet(wb, ws, "Rekapitulasi");
         XLSX.writeFile(wb, `Laporan_Rekapitulasi_Kehadiran_${window.currentRekapPeriod.replace(/\s/g, '_')}.xlsx`);
