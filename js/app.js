@@ -165,6 +165,7 @@ const App = {
                 {
                     title: 'Kepegawaian',
                     items: [
+                        { href: 'dashboard.html', icon: 'layout-dashboard', label: 'Dashboard' },
                         { href: 'pegawai.html', icon: 'users', label: 'Data Pegawai' }
                     ]
                 },
@@ -172,7 +173,8 @@ const App = {
                     title: 'Kehadiran',
                     items: [
                         { href: 'absensi.html', icon: 'clock', label: 'Absensi' },
-                        { href: 'cuti.html', icon: 'calendar-off', label: 'Pengajuan Cuti' }
+                        { href: 'cuti.html', icon: 'calendar-off', label: 'Pengajuan Cuti' },
+                        { href: 'laporan.html', icon: 'file-text', label: 'Laporan' }
                     ]
                 }
             ],
@@ -187,11 +189,18 @@ const App = {
                     title: 'Kehadiran',
                     items: [
                         { href: 'absensi.html', icon: 'clock', label: 'Absensi' },
-                        { href: 'cuti.html', icon: 'calendar-off', label: 'Pengajuan Cuti' }
+                        { href: 'cuti.html', icon: 'calendar-off', label: 'Pengajuan Cuti' },
+                        { href: 'laporan.html', icon: 'file-text', label: 'Laporan' }
                     ]
                 }
             ],
             pimpinan: [
+                {
+                    title: 'Menu Utama',
+                    items: [
+                        { href: 'dashboard.html', icon: 'layout-dashboard', label: 'Dashboard' }
+                    ]
+                },
                 {
                     title: 'Kepegawaian',
                     items: [
@@ -202,7 +211,8 @@ const App = {
                     title: 'Kehadiran',
                     items: [
                         { href: 'absensi.html', icon: 'clock', label: 'Absensi' },
-                        { href: 'cuti.html', icon: 'calendar-off', label: 'Persetujuan Cuti' }
+                        { href: 'cuti.html', icon: 'calendar-off', label: 'Persetujuan Cuti' },
+                        { href: 'laporan.html', icon: 'file-text', label: 'Laporan' }
                     ]
                 }
             ]
