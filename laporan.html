@@ -310,13 +310,22 @@
 
         let absensi = await Data.getAbsensiWithPegawai(opts);
 
-        // Apply filters (Double check)
+        // Apply filters
         if (month) {
           absensi = absensi.filter(a => a.tanggal.startsWith(month));
         }
         if (pegawaiId) {
           absensi = absensi.filter(a => a.pegawai_id == pegawaiId);
         }
+
+        // Get cuti data for the month
+        const cutiList = await Data.getAll('cuti');
+        const filteredCuti = cutiList.filter(c => {
+          if (!c.tanggal_mulai) return false;
+          const startMonth = c.tanggal_mulai.substring(0, 7);
+          const endMonth = c.tanggal_selesai ? c.tanggal_selesai.substring(0, 7) : startMonth;
+          return (startMonth === month || endMonth === month || (startMonth < month && endMonth > month)) && c.status === 'approved';
+        });
 
         // Determine days in month
         const [year, monthNum] = month.split('-').map(Number);
@@ -325,6 +334,7 @@
 
         // Process data: Create a map of attendance by date or group by employee
         let reportData = [];
+        const standardKerja = 23; // Standard working days
 
         if (pegawaiId) {
           // Single employee: Show 1 to daysInMonth
@@ -333,30 +343,74 @@
             attendanceMap[a.tanggal] = a;
           });
 
+          const empCuti = filteredCuti.filter(c => c.pegawai_id == pegawaiId);
+          const cutiDates = new Set();
+          empCuti.forEach(c => {
+            let currentDate = new Date(c.tanggal_mulai);
+            const endDate = new Date(c.tanggal_selesai || c.tanggal_mulai);
+            while (currentDate <= endDate) {
+              const dateStr = currentDate.toISOString().split('T')[0];
+              if (dateStr.startsWith(month)) {
+                cutiDates.add(dateStr);
+              }
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+          });
+
           for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${month}-${String(d).padStart(2, '0')}`;
-            reportData.push(attendanceMap[dateStr] || {
-              tanggal: dateStr,
-              empty: true,
-              pegawai: absensi[0]?.pegawai || { nama: document.querySelector('#absensiPegawai option:checked').text }
+            const attendance = attendanceMap[dateStr];
+            const isCuti = cutiDates.has(dateStr);
+
+            reportData.push({
+              ...(attendance || {
+                tanggal: dateStr,
+                empty: true,
+                pegawai: absensi[0]?.pegawai || { nama: document.querySelector('#absensiPegawai option:checked').text }
+              }),
+              cutiStatus: isCuti ? 'Cuti' : '-',
+              terlambatPulang: attendance?.status === 'terlambat' ? 'Terlambat' : (attendance?.jam_keluar ? '-' : '-'),
+              standardKerja: standardKerja,
+              hariKerja: attendance?.jam_masuk || isCuti ? 1 : 0
             });
           }
         } else {
-          // All employees: Just sort existing data or show all records?
-          // User wants "semua tanggal terdownload 1 sd 31". 
-          // If "Semua Pegawai", showing every day for every person is the standard way.
+          // All employees: Show all days for all employees
           const employees = await Data.getPegawai();
           employees.forEach(emp => {
             const empAttendance = absensi.filter(a => a.pegawai_id === emp.id);
             const attendanceMap = {};
             empAttendance.forEach(a => attendanceMap[a.tanggal] = a);
 
+            const empCuti = filteredCuti.filter(c => c.pegawai_id === emp.id);
+            const cutiDates = new Set();
+            empCuti.forEach(c => {
+              let currentDate = new Date(c.tanggal_mulai);
+              const endDate = new Date(c.tanggal_selesai || c.tanggal_mulai);
+              while (currentDate <= endDate) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                if (dateStr.startsWith(month)) {
+                  cutiDates.add(dateStr);
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+              }
+            });
+
             for (let d = 1; d <= daysInMonth; d++) {
               const dateStr = `${month}-${String(d).padStart(2, '0')}`;
-              reportData.push(attendanceMap[dateStr] || {
-                tanggal: dateStr,
-                empty: true,
-                pegawai: emp
+              const attendance = attendanceMap[dateStr];
+              const isCuti = cutiDates.has(dateStr);
+
+              reportData.push({
+                ...(attendance || {
+                  tanggal: dateStr,
+                  empty: true,
+                  pegawai: emp
+                }),
+                cutiStatus: isCuti ? 'Cuti' : '-',
+                terlambatPulang: attendance?.status === 'terlambat' ? 'Terlambat' : (attendance?.jam_keluar ? '-' : '-'),
+                standardKerja: standardKerja,
+                hariKerja: attendance?.jam_masuk || isCuti ? 1 : 0
               });
             }
           });
@@ -367,8 +421,15 @@
         const terlambat = absensi.filter(a => a.status === 'terlambat').length;
 
         const html = `
+        <div class="rekap-header" style="text-align: center; margin-bottom: 30px;">
+          <h3 style="margin: 0; font-weight: bold; font-size: 16px;">PEMERINTAH KOTA BOGOR</h3>
+          <h4 style="margin: 5px 0; font-weight: bold; font-size: 14px; color: #1967d2;">DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN KOTA BOGOR</h4>
+          <h4 style="margin: 15px 0 5px; font-weight: bold; font-size: 14px;">LAPORAN DATA ABSENSI</h4>
+          <p style="margin: 0; font-size: 12px; color: #666;">Berdasarkan tanggal dan status kehadiran</p>
+          <div style="width: 100%; height: 2px; background: #333; margin: 15px 0;"></div>
+          <p style="margin: 10px 0; font-weight: bold;">Periode: ${monthName}</p>
+        </div>
         <div class="mb-4">
-          <h4>Laporan Absensi - ${monthName}</h4>
           ${pegawaiId ? `<p>Pegawai: <strong>${document.querySelector('#absensiPegawai option:checked').text}</strong></p>` : ''}
           <div class="d-flex gap-4 mt-3">
             <div class="badge badge-success">Tepat Waktu: ${tepatWaktu}</div>
@@ -376,35 +437,46 @@
             <div class="badge badge-primary">Total Kehadiran: ${absensi.length}</div>
           </div>
         </div>
-        <div class="table-container">
-          <table class="table">
+        <div class="table-container" style="overflow-x: auto;">
+          <table class="table" style="width: 100%; font-size: 12px; border-collapse: collapse;">
             <thead>
-              <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Pegawai</th>
-                <th>Jam Masuk</th>
-                <th>Jam Keluar</th>
-                <th>Status</th>
+              <tr style="background-color: #f0f0f0;">
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">No</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Tanggal</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Pegawai</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Jam Masuk</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Jam Keluar</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Status</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Keterangan</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Cuti</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Terlambat/Pulang</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Standar Kerja</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">Hari Kerja</th>
               </tr>
             </thead>
             <tbody>
               ${reportData.length > 0 ? reportData.map((a, i) => `
                 <tr ${a.empty ? 'style="color: #999;"' : ''}>
-                  <td>${i + 1}</td>
-                  <td>${App.formatDate(a.tanggal)}</td>
-                  <td>${a.pegawai?.nama || '-'}</td>
-                  <td>${a.jam_masuk || '-'}</td>
-                  <td>${a.jam_keluar || '-'}</td>
-                  <td>${a.empty ? '<span class="text-muted italic">Tidak Absen</span>' : App.getStatusBadge(a.status)}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${i + 1}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${App.formatDate(a.tanggal)}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px;">${a.pegawai?.nama || '-'}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.jam_masuk || '-'}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.jam_keluar || '-'}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.empty && !a.cutiStatus.includes('Cuti') ? '<span class="text-muted italic">Tidak Hadir</span>' : (a.status ? App.getStatusBadge(a.status).replace('badge', 'badge-sm') : '-')}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.keterangan || '-'}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.cutiStatus}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.terlambatPulang}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.standardKerja}</td>
+                  <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">${a.hariKerja}</td>
                 </tr>
-              `).join('') : '<tr><td colspan="6" class="text-center text-muted">Tidak ada data</td></tr>'}
+              `).join('') : '<tr><td colspan="11" style="border: 1px solid #ccc; padding: 10px; text-align: center; color: #999;">Tidak ada data</td></tr>'}
             </tbody>
           </table>
         </div>
       `;
 
         showReport('Laporan Absensi', html);
+        App.showToast('Laporan berhasil dibuat', 'success');
       } catch (error) {
         console.error('Error generating absensi report:', error);
         App.showToast('Gagal generate laporan: ' + error.message, 'danger');
