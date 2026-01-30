@@ -261,7 +261,7 @@
         container.innerHTML = `
           <div class="portal-admin-section mt-4">
             <h2 class="portal-title-main">Rekapitulasi Waktu Kehadiran</h2>
-            <h3 class="portal-title-sub">Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor</h3>
+            <h3 class="portal-title-sub">Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor <small style="font-size: 8px; color: #ccc;">(v1.1)</small></h3>
             
             <div class="portal-control-box">
               <span class="portal-label">:::</span>
@@ -1065,9 +1065,9 @@
       XLSX.writeFile(wb, `${title}_${new Date().getTime()}.xlsx`);
     }
 
-    // New: Handle download from Portal UI radio selection
     function handlePortalDownload(format) {
       const reportType = document.querySelector('input[name="reportType"]:checked').value;
+      console.log('handlePortalDownload calling:', reportType, format);
 
       if (reportType === 'daily') {
         // Option "Detail Laporan Per Hari" -> Downloads the Grid
@@ -1080,8 +1080,8 @@
       }
     }
 
-    // New: Export Nominatif Grid to PDF (Landscape)
     async function exportNominatifToPDF() {
+      console.log('exportNominatifToPDF starting...');
       const element = document.querySelector('.nominatif-grid-table');
       if (!element || element.textContent.includes('Data belum ditampilkan')) {
         return App.showToast('Silakan tampilkan data terlebih dahulu', 'warning');
@@ -1119,8 +1119,8 @@
       }
     }
 
-    // New: Export Nominatif Grid to Excel
     function exportNominatifToExcel() {
+      console.log('exportNominatifToExcel starting...');
       const table = document.querySelector('.nominatif-grid-table');
       if (!table || table.textContent.includes('Data belum ditampilkan')) {
         return App.showToast('Silakan tampilkan data terlebih dahulu', 'warning');
