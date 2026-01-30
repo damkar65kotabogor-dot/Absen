@@ -284,7 +284,7 @@
               <button class="portal-btn portal-btn-blue" onclick="generateRekapitulasiReport()">
                 <i data-lucide="search" style="width: 16px;"></i> Tampilkan Data
               </button>
-              <button class="portal-btn portal-btn-blue" onclick="exportToPDF()">
+              <button class="portal-btn portal-btn-blue" onclick="exportNominatifToPDF()">
                 <i data-lucide="download" style="width: 16px;"></i> Download PDF
               </button>
             </div>
@@ -300,10 +300,10 @@
                 </label>
               </div>
               <div class="d-flex gap-2">
-                <button class="portal-btn portal-btn-red" onclick="exportToPDF()">
+                <button class="portal-btn portal-btn-red" onclick="handlePortalDownload('pdf')">
                   <i data-lucide="file-text" style="width: 16px;"></i> Download PDF
                 </button>
-                <button class="portal-btn portal-btn-green" onclick="exportToExcel()">
+                <button class="portal-btn portal-btn-green" onclick="handlePortalDownload('excel')">
                   <i data-lucide="file-spreadsheet" style="width: 16px;"></i> Download XLS
                 </button>
               </div>
@@ -1055,68 +1055,91 @@
     // Export to Excel
     function exportToExcel() {
       const title = document.getElementById('reportTitle').textContent;
+      const table = document.querySelector('#reportContent table');
+      if (!table) return alert('Tidak ada data untuk diekspor');
 
-      // Check if this is a rekapitulasi report
-      if (window.currentRekapData && window.currentRekapPeriod) {
-        const wb = XLSX.utils.book_new();
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.table_to_sheet(table);
 
-        // Create header rows matching the requested image header
-        const headerRows = [
-          ['Dinas Pemadam Kebakaran dan Penyelamatan Kota Bogor'],
-          ['Laporan Rekapitulasi Kehadiran'],
-          [`Periode ${window.currentRekapPeriod}`],
-          [''],
-          // Main headers
-          ['No', 'Nama', 'Hadir', 'Cuti', 'Sakit', 'Terlambat/Plg Cpt (menit)', 'Std. Kerja', 'Hari Kerja']
-        ];
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      XLSX.writeFile(wb, `${title}_${new Date().getTime()}.xlsx`);
+    }
 
-        // Add data rows - matching simplified structure
-        const dataRows = window.currentRekapData.map(row => [
-          row.no,
-          `${row.nama}\n${row.nip}`,
-          row.hadir,
-          row.cuti,
-          row.sakit,
-          row.terlambat,
-          row.stdKerja,
-          row.hariKerja
-        ]);
+    // New: Handle download from Portal UI radio selection
+    function handlePortalDownload(format) {
+      const reportType = document.querySelector('input[name="reportType"]:checked').value;
 
-        const allRows = [...headerRows, ...dataRows];
-        const ws = XLSX.utils.aoa_to_sheet(allRows);
+      if (reportType === 'daily') {
+        // Option "Detail Laporan Per Hari" -> Downloads the Grid
+        if (format === 'pdf') exportNominatifToPDF();
+        else exportNominatifToExcel();
+      } else {
+        // Option "Rekapitulasi Kehadiran Per Status" -> Downloads the Summary Table
+        if (format === 'pdf') exportToPDF();
+        else exportToExcel();
+      }
+    }
 
-        // Set column widths
-        ws['!cols'] = [
-          { wch: 5 },  // No
-          { wch: 35 }, // Nama
-          { wch: 8 },  // Hadir
-          { wch: 8 },  // Cuti
-          { wch: 8 },  // Sakit
-          { wch: 25 }, // Terlambat
-          { wch: 10 }, // Std. Kerja
-          { wch: 10 }  // Hari Kerja
-        ];
+    // New: Export Nominatif Grid to PDF (Landscape)
+    async function exportNominatifToPDF() {
+      const element = document.querySelector('.nominatif-grid-table');
+      if (!element || element.textContent.includes('Data belum ditampilkan')) {
+        return App.showToast('Silakan tampilkan data terlebih dahulu', 'warning');
+      }
 
-        // Add some basic styling for cell wrapping on nama column if possible (AOA to sheet doesn't always handle newlines well without alignment)
-        // Note: Basic XLSX library has limited styling without the Pro version, but we can try to set the property
-        dataRows.forEach((_, i) => {
-          const cellPos = XLSX.utils.encode_cell({ c: 1, r: i + 5 });
-          if (ws[cellPos]) ws[cellPos].s = { alignment: { wrapText: true, vertical: 'top' } };
+      const { jsPDF } = window.jspdf;
+      App.showToast('Sedang memproses PDF...', 'info');
+
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          backgroundColor: '#ffffff'
         });
 
-        XLSX.utils.book_append_sheet(wb, ws, "Rekapitulasi");
-        XLSX.writeFile(wb, `Laporan_Rekapitulasi_Kehadiran_${window.currentRekapPeriod.replace(/\s/g, '_')}.xlsx`);
-      } else {
-        // Fallback to table export for other reports
-        const table = document.querySelector('#reportContent table');
-        if (!table) return alert('Tidak ada data untuk diekspor');
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('l', 'mm', 'a4'); // Always landscape for grid
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.table_to_sheet(table);
+        // Add header text to PDF
+        pdf.setFontSize(12);
+        pdf.text("Daftar Nominatif Presensi Harian", 10, 10);
+        pdf.setFontSize(10);
+        pdf.text(`Periode: ${window.currentRekapPeriod || '-'}`, 10, 16);
 
-        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-        XLSX.writeFile(wb, `${title}_${new Date().getTime()}.xlsx`);
+        pdf.addImage(imgData, 'PNG', 5, 20, pdfWidth - 10, pdfHeight - 10);
+
+        pdf.save(`Daftar_Nominatif_${(window.currentRekapPeriod || '').replace(/\s/g, '_')}.pdf`);
+        App.showToast('PDF berhasil didownload', 'success');
+      } catch (error) {
+        console.error('PDF Export Error:', error);
+        App.showToast('Gagal mengekspor PDF', 'danger');
       }
+    }
+
+    // New: Export Nominatif Grid to Excel
+    function exportNominatifToExcel() {
+      const table = document.querySelector('.nominatif-grid-table');
+      if (!table || table.textContent.includes('Data belum ditampilkan')) {
+        return App.showToast('Silakan tampilkan data terlebih dahulu', 'warning');
+      }
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.table_to_sheet(table);
+
+      // Set column widths for better readability
+      const daysCount = (ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']).e.c : 34) - 3;
+      ws['!cols'] = [
+        { wch: 5 },  // No
+        { wch: 30 }, // Nama/NIP
+        { wch: 8 },  // Hari
+        ...Array(daysCount).fill({ wch: 6 }) // Days
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, "Daftar Nominatif");
+      XLSX.writeFile(wb, `Daftar_Nominatif_${(window.currentRekapPeriod || '').replace(/\s/g, '_')}.xlsx`);
     }
 
     // Export to CSV
